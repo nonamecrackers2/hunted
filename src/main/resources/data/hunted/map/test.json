@@ -1,0 +1,94 @@
+{
+	"start_positions": [
+		{
+			"type": "hunted:hunter",
+			"pos": [-22, -60, -22]
+		}
+	],
+	"default_start_pos": [-17, -60, -22],
+	"buttons": [
+		[-17, -60, -15],
+		[-19, -60, -13],
+		[-21, -60, -15],
+		[-15, -60, -12],
+		[-15, -60, -10],
+		[-15, -60, -8],
+		[-15, -60, -6],
+		[-15, -60, -4],
+		[-15, -60, -2],
+		[-15, -60, 0],
+		[-15, -60, 2],
+		[-15, -60, 4],
+		[-15, -60, 6],
+		[-15, -60, 8],
+		[-15, -60, 10]
+	],
+	"rewards": [
+		"hunted:key_invigoration",
+		"hunted:key_sabotage",
+		"hunted:key_origin",
+		"hunted:key_mist",
+		"hunted:curse_pestilence",
+		"hunted:curse_origin",
+		"hunted:curse_immobility",
+		"hunted:curse_languidity",
+		"hunted:neutral",
+		"hunted:neutral",
+		"hunted:neutral",
+		"hunted:neutral",
+		"hunted:neutral",
+		"hunted:neutral",
+		"hunted:neutral"
+	],
+	"boundary": {
+		"min": [-32, -62, -31],
+		"max": [-4, -46, -4]
+	},
+	"prey_exit": {
+		"min": [8, -60, 12],
+		"max": [6, -58, 10]
+	},
+	"events": [
+		"#hunted:test"
+	],
+	"keyholes": [
+		[9, -59, 8],
+		[7, -57, 8],
+		[5, -59, 8],
+		[5, -60, 8]
+	],
+	"overlay": {
+		"type": "hunted:collected_rewards",
+		"settings": {
+			"rewards": {
+				"hunted:key_invigoration": {
+					"color": "aqua",
+					"bold": false
+				},
+				"hunted:key_sabotage": {
+					"color": "red",
+					"bold": false
+				},
+				"hunted:key_origin": {
+					"color": "green",
+					"bold": false
+				},
+				"hunted:key_mist": {
+					"color": "yellow",
+					"bold": false
+				}
+			}
+		}
+	},
+	"revival_positions": [
+		[13, -59, 0],
+		[8, -59, 3],
+		[8, -59, -3]
+	],
+	"button_pressing_delay": 0,
+	"ambience": {
+		"background": "hunted:mansion_ambience",
+		"foreground": "hunted:creak",
+		"flickering_lights": true
+	}
+}

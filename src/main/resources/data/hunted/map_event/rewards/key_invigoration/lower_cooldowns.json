@@ -1,0 +1,31 @@
+{
+	"trigger": {
+		"type": "hunted:rewarded",
+		"settings": {
+			"target": {
+				"type": "self"
+			},
+			"rewards": [
+				{
+					"type": "hunted:key_invigoration"
+				}
+			]
+		}
+	},
+	"events": [
+		{
+			"type": "hunted:modify_ability_cooldowns",
+			"settings": {
+				"target": {
+					"type": "class_type",
+					"class_type": "hunted:prey"
+				},
+				"abilities": [],
+				"all_abilities": true,
+				"modify_time": true,
+				"cooldown": 200,
+				"operation": "subtract"
+			}
+		}
+	]
+}

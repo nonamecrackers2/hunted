@@ -1,0 +1,29 @@
+{
+	"types": [
+		{
+			"type": "hunted:bind",
+			"settings": {
+				"masked": "hunted:target_teleport",
+				"settings": {},
+				"bind_tag_path": "hunted:necromancer/bind"
+			}
+		}
+	],
+	"item": "minecraft:enchanted_book",
+	"use_sound": {
+		"type": "minecraft:entity.illusioner.mirror_move",
+		"pitch": 1.0,
+		"volume": 1.0
+	},
+	"trigger": "hunted:keybind",
+	"name": {
+		"translate": "hunted.ability.warp.name",
+		"color": "light_purple",
+		"italic": false
+	},
+	"lore": {
+		"translate": "hunted.ability.warp.description"
+	},
+	"cooldown": 1200,
+	"disabled": true
+}

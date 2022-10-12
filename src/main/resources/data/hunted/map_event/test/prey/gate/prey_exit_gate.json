@@ -1,0 +1,37 @@
+{
+	"trigger": {
+		"type": "hunted:keyhole_used",
+		"settings": {
+			"keyholes": [
+				[9, -59, 8],
+				[7, -57, 8],
+				[5, -59, 8],
+				[5, -60, 8]
+			],
+			"rewards": [
+				{
+					"type": "hunted:key_invigoration"
+				},
+				{
+					"type": "hunted:key_sabotage"
+				},
+				{
+					"type": "hunted:key_origin"
+				},
+				{
+					"type": "hunted:key_mist"
+				}
+			]
+		}
+	},
+	"events": [
+		{
+			"type": "hunted:gate",
+			"settings": {
+				"gate_block": "minecraft:iron_bars",
+				"gate_min": [8, -58, 9],
+				"gate_max": [6, -60, 9]
+			}
+		}
+	]
+}

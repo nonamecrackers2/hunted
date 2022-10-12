@@ -1,0 +1,46 @@
+{
+	"trigger": {
+		"type": "hunted:rewarded",
+		"settings": {
+			"target": {
+				"type": "class_type",
+				"class_type": "hunted:hunter"
+			},
+			"rewards": [
+				{
+					"type": "hunted:key_origin"
+				}
+			]
+		}
+	},
+	"events": [
+		{
+			"type": "hunted:map_teleport",
+			"settings": {
+				"position": "start"
+			}
+		},
+		{
+			"type": "hunted:playsound",
+			"settings": {
+				"sound": {
+					"type": "minecraft:entity.enderman.teleport",
+					"volume": 1.0,
+					"pitch": 0.0
+				}
+			}
+		},
+		{
+			"type": "hunted:text_display",
+			"settings": {
+				"target": {
+					"type": "class_type",
+					"class_type": "hunted:prey"
+				},
+				"text": {
+					"translate": "hunted.reward.key_origin.message.prey"
+				}
+			}
+		}
+	]
+}

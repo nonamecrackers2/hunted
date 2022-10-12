@@ -1,0 +1,31 @@
+{
+	"types": [
+		{
+			"type": "hunted:apply_effect",
+			"settings": {
+				"effects": [
+					{
+						"effect": "minecraft:invisibility",
+						"duration": 140,
+						"hide_particles": true
+					}
+				]	
+			}
+		}
+	],
+	"item": "minecraft:dragon_breath",
+	"use_sound": {
+		"type": "minecraft:entity.illusioner.prepare_blindness",
+		"pitch": 1.0,
+		"volume": 1.0
+	},
+	"trigger": "hunted:keybind",
+	"name": {
+		"translate": "hunted.ability.blend.name",
+		"italic": false
+	},
+	"lore": {
+		"translate": "hunted.ability.blend.description"
+	},
+	"cooldown": 1000
+}

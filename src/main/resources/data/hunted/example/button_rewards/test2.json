@@ -1,0 +1,29 @@
+{
+	"message": {
+		"text": "Congratulations you've got the ",
+		"color": "gold",
+		"extra": [
+			{
+				"text": "GOLD INGOT",
+				"color": "yellow",
+				"bold": "true"
+			},
+			{
+				"text": "!",
+				"color": "gold"
+			}
+		]
+	},
+	"sound": "minecraft:entity.player.levelup",
+	"pitch": 2.0,
+	"items": [
+		"minecraft:gold_ingot"
+	],
+	"effects": [
+		{
+			"effect": "minecraft:glowing",
+			"duration": 120,
+			"amplifier": 2
+		}
+	]
+}

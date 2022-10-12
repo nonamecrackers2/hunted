@@ -1,0 +1,29 @@
+{
+	"trigger": "hunted:game_begin",
+	"events": [
+		{
+			"type": "hunted:text_display",
+			"settings": {
+				"target": {
+					"type": "class_type",
+					"class_type": "hunted:hunter"
+				},
+				"text": {
+					"text": "You have ",
+					"color": "gold",
+					"extra": [
+						{
+							"text": "30 SECONDS",
+							"color": "red",
+							"bold": "true"
+						},
+						{
+							"text": " before you are let out!",
+							"color": "gold"
+						}
+					]
+				}
+			}
+		}
+	]
+}

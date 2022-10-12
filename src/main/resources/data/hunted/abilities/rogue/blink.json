@@ -1,0 +1,26 @@
+{
+	"types": [
+		{
+			"type": "hunted:blink_teleport",
+			"settings": {
+				"interval": 200
+			}
+		}
+	],
+	"item": "minecraft:clock",
+	"use_sound": {
+		"type": "minecraft:entity.enderman.teleport",
+		"pitch": 1.0,
+		"volume": 1.0
+	},
+	"trigger": "hunted:keybind",
+	"name": {
+		"translate": "hunted.ability.blink.name",
+		"color": "yellow",
+		"italic": false
+	},
+	"lore": {
+		"translate": "hunted.ability.blink.description"
+	},
+	"cooldown": 600
+}

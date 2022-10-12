@@ -1,0 +1,26 @@
+{
+	"global_message": {
+		"translate": "hunted.reward.curse_origin.message.hunter"
+	},
+	"global_message_target": {
+		"type": "class_type",
+		"class_type": "hunted:hunter"
+	},
+	"message": {
+		"translate": "hunted.reward.curse_origin.message",
+		"extra": [
+			{
+				"translate": "hunted.reward.curse_origin",
+				"bold": true,
+				"color": "dark_red"
+			}
+		]
+	},
+	"sound": "minecraft:entity.ghast.scream",
+	"pitch": 0.0,
+	"items": [],
+	"effects": [],
+	"events": [
+		"#hunted:rewards/curse_origin"
+	]
+}

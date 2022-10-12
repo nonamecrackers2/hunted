@@ -1,0 +1,9 @@
+{
+	"type": "hunted:prey",
+	"abilities": [
+		"#hunted:infiltrator",
+		"hunted:speed"
+	],
+	"outfit": [],
+	"death_sequence": "hunted:generic"
+}

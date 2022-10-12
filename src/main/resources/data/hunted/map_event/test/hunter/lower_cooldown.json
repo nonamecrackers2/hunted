@@ -1,0 +1,57 @@
+{
+	"trigger": {
+		"type": "hunted:rewarded",
+		"settings": {
+			"target": {
+				"type": "class_type",
+				"class_type": "hunted:hunter"
+			},
+			"rewards": [
+				{
+					"type": "hunted:key_invigoration"
+				},
+				{
+					"type": "hunted:key_sabotage"
+				},
+				{
+					"type": "hunted:key_origin"
+				},
+				{
+					"type": "hunted:key_mist"
+				}
+			],
+			"all_collected": true
+		}
+	},
+	"events": [
+		{
+			"type": "hunted:modify_ability_cooldowns",
+			"settings": {
+				"abilities": [
+					"hunted:hunter/hunter_dagger"
+				],
+				"cooldown": 80
+			}
+		},
+		{
+			"type": "hunted:text_display",
+			"settings": {
+				"text": {
+					"text": "You're hunter's dagger ",
+					"color": "red",
+					"extra": [
+						{
+							"text": "COOLDOWN ",
+							"color": "red",
+							"bold": true
+						},
+						{
+							"text": "has been reduced!",
+							"color": "red"
+						}
+					]
+				}
+			}	
+		}
+	]
+}

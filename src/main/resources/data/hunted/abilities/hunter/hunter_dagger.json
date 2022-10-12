@@ -1,0 +1,33 @@
+{
+	"types": [
+		{
+			"type": "hunted:eliminate",
+			"settings": {
+				"target": {
+					"type": "target"
+				}
+			}
+		}
+	],
+	"item": "minecraft:netherite_sword",
+	"use_sound": {
+		"type": "minecraft:entity.player.attack.crit",
+		"pitch": 1.0,
+		"volume": 1.0
+	},
+	"trigger": {
+		"type": "hunted:melee",
+		"settings": {
+			"require_target": true
+		}
+	},
+	"name": {
+		"translate": "hunted.ability.hunter_dagger.name",
+		"color": "red",
+		"italic": false
+	},
+	"lore": {
+		"translate": "hunted.ability.hunter_dagger.description"
+	},
+	"cooldown": 240
+}

@@ -1,0 +1,76 @@
+{
+	"heartbeat": {
+    	"category": "player",
+    	"subtitle": "hunted.subtitle.heartbeat",
+    	"sounds": [
+    		"hunted:heartbeat"
+    	]
+	},
+	"jumpscare": {
+    	"category": "player",
+    	"subtitle": "hunted.subtitle.jumpscare",
+    	"sounds": [
+    		"hunted:jumpscare"
+    	]
+	},
+	"mansion_ambience": {
+    	"category": "ambient",
+    	"sounds": [
+    		"hunted:mansion_ambience"
+    	]
+	},
+	"creak": {
+    	"category": "ambient",
+    	"subtitle": "hunted.subtitle.creak",
+    	"sounds": [
+    		{
+    			"name": "hunted:creak-01",
+    			"volume": 2.0
+    		},
+    		{
+    			"name": "hunted:creak-02",
+    			"volume": 2.0
+    		},
+    		{
+    			"name": "hunted:creak-03",
+    			"volume": 2.0
+    		},
+    		{
+    			"name": "hunted:creak-04",
+    			"volume": 2.0
+    		},
+    		{
+    			"name": "hunted:creak-05",
+    			"volume": 2.0
+    		},
+    		{
+    			"name": "hunted:creak-06",
+    			"volume": 2.0
+    		},
+    		{
+    			"name": "hunted:creak-07",
+    			"volume": 2.0
+    		},
+    		{
+    			"name": "hunted:creak-08",
+    			"volume": 2.0
+    		},
+    		{
+    			"name": "hunted:creak-09",
+    			"volume": 2.0
+    		},
+    		{
+    			"name": "hunted:creak-10",
+    			"volume": 2.0
+    		},
+    		{
+    			"name": "hunted:creak-11",
+    			"volume": 2.0
+    		},
+    		{
+    			"name": "hunted:creak-12",
+    			"volume": 2.0
+    		}
+    	]
+	}
+}

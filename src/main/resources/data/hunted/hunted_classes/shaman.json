@@ -1,0 +1,9 @@
+{
+	"type": "hunted:prey",
+	"abilities": [
+		"#hunted:shaman",
+		"hunted:speed"
+	],
+	"outfit": [],
+	"death_sequence": "hunted:revive"
+}

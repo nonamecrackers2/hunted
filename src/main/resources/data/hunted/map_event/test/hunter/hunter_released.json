@@ -1,0 +1,34 @@
+{
+	"trigger": {
+		"type": "hunted:timer",
+		"settings": {
+			"seconds": 30
+		}
+	},
+	"events": [
+		{
+			"type": "hunted:text_display",
+			"settings": {
+				"target": {
+					"type": "class_type",
+					"class_type": "hunted:hunter"
+				},
+				"text": {
+					"translate": "hunted.hunter.released.hunter"
+				}
+			}
+		},
+		{
+			"type": "hunted:text_display",
+			"settings": {
+				"target": {
+					"type": "class_type",
+					"class_type": "hunted:prey"
+				},
+				"text": {
+					"translate": "hunted.hunter.released.prey"
+				}
+			}
+		}
+	]
+}

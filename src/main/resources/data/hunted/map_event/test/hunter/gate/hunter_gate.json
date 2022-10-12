@@ -1,0 +1,19 @@
+{
+	"trigger": {
+		"type": "hunted:timer",
+		"settings": {
+			"seconds": 30
+		}
+	},
+	"events": [
+		{
+			"type": "hunted:gate",
+			"settings": {
+				"gate_block": "minecraft:iron_bars",
+				"gate_min": [-22, -60, -19],
+				"gate_max": [-22, -59, -19],
+				"open_type": "instant"
+			}
+		}
+	]
+}

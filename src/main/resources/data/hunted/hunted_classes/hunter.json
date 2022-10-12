@@ -1,0 +1,17 @@
+{
+	"type": "hunted:hunter",
+	"abilities": [
+		"#hunted:hunter"
+	],
+	"outfit": [{
+			"slot": "head",
+			"item": "minecraft:wither_skeleton_skull"
+		},
+		{
+			"slot": "feet",
+			"item": "minecraft:netherite_boots"
+		}
+	],
+	"loop_sound": "hunted:heartbeat",
+	"supports_mask": true
+}

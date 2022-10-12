@@ -1,0 +1,42 @@
+{
+	"global_message": {
+		"translate": "hunted.reward.curse_languidity.message.hunter"
+	},
+	"global_message_target": {
+		"type": "class_type",
+		"class_type": "hunted:hunter"
+	},
+	"message": {
+		"translate": "hunted.reward.curse_languidity.message",
+		"extra": [
+			{
+				"translate": "hunted.reward.curse_languidity",
+				"bold": true,
+				"color": "dark_red"
+			}
+		]
+	},
+	"sound": "minecraft:entity.ghast.scream",
+	"pitch": 0.0,
+	"items": [],
+	"effects": [
+		{
+			"effect": "minecraft:slowness",
+			"amplifier": 1,
+			"duration": 200,
+			"hide_particles": true
+		},
+		{
+			"effect": "minecraft:glowing",
+			"duration": 60,
+			"hide_particles": true
+		}
+	],
+	"effect_target": {
+		"type": "class_type",
+		"class_type": "hunted:prey"
+	},
+	"events": [
+		"#hunted:rewards/curse_languidity"
+	]
+}

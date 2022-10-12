@@ -1,0 +1,31 @@
+{
+	"type": "hunted:revive",
+	"settings": {
+		"after": "hunted:generic",
+		"revival_times": 1,
+		"revive_delay": 100,
+		"title": {
+			"translation": "hunted.game.eliminated.title",
+			"style": {
+				"color": "red",
+				"bold": true
+			}
+		},
+		"subtitle": {
+			"translation": "hunted.game.eliminated_revive.subtitle",
+			"style": {
+				"color": "light_purple"
+			}
+		},
+		"sound": {
+			"type": "minecraft:entity.ghast.death",
+			"pitch": 0.0,
+			"volume": 100.0 
+		},
+		"revive_sound": {
+			"type": "item.totem.use",
+			"pitch": 1.0,
+			"volume": 1.0
+		}
+	}
+}

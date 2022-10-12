@@ -1,0 +1,16 @@
+{
+	"required": true,
+	"package": "nonamecrackers2.hunted.mixin",
+	"compatibilityLevel": "JAVA_17",
+	"refmap": "hunted.refmap.json",
+	"mixins": [
+		"MixinPlayer",
+		"MixinItem"
+	],
+	"client": [
+		"MixinLocalPlayer",
+		"MixinAbstractContainerScreen",
+		"MixinGameRenderer"
+	],
+	"minVersion": "0.8"
+}

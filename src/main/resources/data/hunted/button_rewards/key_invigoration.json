@@ -1,0 +1,41 @@
+{
+	"global_message": {
+		"translate": "hunted.reward.key_invigoration.message.global",
+		"color": "gold",
+		"extra": [
+			{
+				"translate": "hunted.reward.key_invigoration",
+				"color": "aqua",
+				"bold": true
+			}
+		]
+	},
+	"message": {
+		"translate": "hunted.reward.key_invigoration.message"
+	},
+	"sound": "minecraft:entity.player.levelup",
+	"pitch": 2.0,
+	"items": [
+		{
+			"item": "minecraft:diamond_hoe",
+			"name": {
+				"translate": "hunted.reward.key_invigoration",
+				"color": "aqua",
+				"italic": false
+			}
+		}
+	],
+	"effects": [
+		{
+			"effect": "minecraft:speed",
+			"duration": 200
+		}
+	],
+	"effect_target": {
+		"type": "class_type",
+		"class_type": "hunted:prey"
+	},
+	"events": [
+		"#hunted:rewards/key_invigoration"
+	]
+}

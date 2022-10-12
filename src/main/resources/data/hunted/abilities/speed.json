@@ -1,0 +1,38 @@
+{
+	"types": [
+		{
+			"type": "hunted:apply_effect",
+			"settings": {
+				"type": "sequential_immediate",
+				"effects": [
+					{
+						"effect": "minecraft:speed",
+						"duration": 200,
+						"hide_particles": true
+					},
+					{
+						"effect": "minecraft:slowness",
+						"duration": 100,
+						"amplifier": 2,
+						"hide_particles": true
+					}
+				]
+			}
+		}
+	],
+	"item": "minecraft:sugar",
+	"use_sound": {
+		"type": "minecraft:block.beacon.activate",
+		"pitch": 1.0,
+		"volume": 1.0
+	},
+	"trigger": "hunted:keybind",
+	"name": {
+		"translate": "hunted.ability.speed.name",
+		"italic": false
+	},
+	"lore": {
+		"translate": "hunted.ability.speed.description"
+	},
+	"cooldown": 600
+}

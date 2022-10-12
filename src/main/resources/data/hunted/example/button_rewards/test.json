@@ -1,0 +1,29 @@
+{
+	"message": {
+		"text": "Congratulations you've got the ",
+		"color": "gold",
+		"extra": [
+			{
+				"text": "NETHERITE INGOT",
+				"color": "red",
+				"bold": "true"
+			},
+			{
+				"text": "!",
+				"color": "gold"
+			}
+		]
+	},
+	"sound": "minecraft:entity.player.levelup",
+	"pitch": 2.0,
+	"items": [
+		"minecraft:netherite_ingot"
+	],
+	"effects": [
+		{
+			"effect": "minecraft:speed",
+			"duration": 120,
+			"amplifier": 2
+		}
+	]
+}

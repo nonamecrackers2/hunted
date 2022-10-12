@@ -1,0 +1,38 @@
+{
+	"types": [
+		{
+			"type": "hunted:bind",
+			"settings": {
+				"masked": "hunted:toggle_abilities",
+				"settings": {
+					"abilities": [
+						"hunted:necromancer/bind",
+						"hunted:necromancer/warp"
+					]
+				},
+				"result_criteria": "pass",
+				"class_type": "hunted:prey",
+				"bind_sound": {
+					"type": "minecraft:entity.illusioner.prepare_mirror",
+					"pitch": 1.0,
+					"volume": 1.0
+				},
+				"bind_message": {
+					"translate": "hunted.ability.bind.bind",
+					"italic": false
+				}
+			}
+		}
+	],
+	"item": "minecraft:enchanted_book",
+	"trigger": "hunted:keybind",
+	"name": {
+		"translate": "hunted.ability.bind.name",
+		"color": "light_purple",
+		"italic": false
+	},
+	"lore": {
+		"translate": "hunted.ability.bind.description"
+	},
+	"cooldown": 1200
+}

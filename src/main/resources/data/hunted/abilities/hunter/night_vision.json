@@ -1,0 +1,23 @@
+{
+	"types": [
+		{
+			"type": "hunted:apply_effect",
+			"settings": {
+				"target": {
+					"type": "class",
+					"class": "hunted:hunter"
+				},
+				"effects": [
+					{
+						"effect": "minecraft:night_vision",
+						"duration": 1440000,
+						"hide_particles": true
+					}
+				]
+			}
+		}
+	],
+	"item": "minecraft:air",
+	"trigger": "hunted:player_begin",
+	"cooldown": 0
+}

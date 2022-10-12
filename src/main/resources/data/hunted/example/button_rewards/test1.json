@@ -1,0 +1,29 @@
+{
+	"message": {
+		"text": "Congratulations you've got the ",
+		"color": "gold",
+		"extra": [
+			{
+				"text": "DIAMIOND",
+				"color": "aqua",
+				"bold": "true"
+			},
+			{
+				"text": "!",
+				"color": "gold"
+			}
+		]
+	},
+	"sound": "minecraft:entity.player.levelup",
+	"pitch": 2.0,
+	"items": [
+		"minecraft:diamond"
+	],
+	"effects": [
+		{
+			"effect": "minecraft:jump_boost",
+			"duration": 120,
+			"amplifier": 2
+		}
+	]
+}

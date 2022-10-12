@@ -1,0 +1,51 @@
+{
+	"types": [
+		{
+			"type": "hunted:apply_effect",
+			"settings": {
+				"target": {
+					"type": "class_type",
+					"class_type": "hunted:prey"
+				},
+				"effects": [
+					{
+						"effect": "minecraft:glowing",
+						"duration": 60,
+						"hide_particles": true
+					}
+				]
+			}
+		},
+		{
+			"type": "hunted:text_display",
+			"settings": {
+				"target": {
+					"type": "class_type",
+					"class_type": "hunted:prey"
+				},
+				"text": {
+					"translate": "hunted.inflicted.glowing"
+				}
+			}
+		}
+	],
+	"item": "minecraft:nether_star",
+	"use_sound": {
+		"type": "minecraft:entity.evoker.prepare_summon",
+		"pitch": 1.0,
+		"volume": 1.0
+	},
+	"trigger": "hunted:keybind",
+	"name": {
+		"translate": "hunted.ability.sense.name",
+		"color": "red",
+		"italic": false
+	},
+	"lore": {
+		"translate": "hunted.ability.sense.description"
+	},
+	"text": {
+		"translate": "hunted.prey.inflicting.glowing"
+	},
+	"cooldown": 800
+}

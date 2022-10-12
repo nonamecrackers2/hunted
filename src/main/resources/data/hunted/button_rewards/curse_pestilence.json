@@ -1,0 +1,52 @@
+{
+	"global_message": {
+		"translate": "hunted.reward.curse.message.hunter"
+	},
+	"global_message_target": {
+		"type": "class_type",
+		"class_type": "hunted:hunter"
+	},
+	"message": {
+		"translate": "hunted.reward.curse_pestilence.message",
+		"extra": [
+			{
+				"translate": "hunted.reward.curse_pestilence",
+				"bold": true,
+				"color": "dark_red"
+			}
+		]
+	},
+	"sound": "minecraft:entity.ghast.scream",
+	"pitch": 0.0,
+	"items": [],
+	"effects": [
+		{
+			"effect": "minecraft:blindness",
+			"duration": 100,
+			"hide_particles": true
+		},
+		{
+			"effect": "minecraft:slowness",
+			"duration": 140,
+			"amplifier": 1,
+			"hide_particles": true
+		},
+		{
+			"effect": "minecraft:nausea",
+			"duration": 200,
+			"hide_particles": true
+		},
+		{
+			"effect": "minecraft:glowing",
+			"duration": 100,
+			"hide_particles": true
+		}
+	],
+	"effect_target": {
+		"type": "self",
+		"and": {
+			"type": "random",
+			"class_type": "hunted:prey"
+		}
+	}
+}

@@ -1,0 +1,26 @@
+modLoader="javafml"
+loaderVersion="[41,)"
+license="All rights reserved"
+[[mods]]
+modId="hunted"
+version="0.2.2"
+displayName="Hunted"
+authors="nonamecrackers2"
+credits="TheFrostySoul, TCBlizz707, Funglscrun"
+description='''
+Official mod for Hunted
+'''
+
+[[dependencies.hunted]]
+    modId="forge"
+    mandatory=true
+    versionRange="[41,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.hunted]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.19,1.20)"
+    ordering="NONE"
+    side="BOTH"

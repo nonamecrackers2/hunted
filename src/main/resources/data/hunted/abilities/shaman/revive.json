@@ -1,0 +1,30 @@
+{
+	"types": [
+		{
+			"type": "hunted:toggle_abilities",
+			"settings": {
+				"abilities": [
+					"hunted:shaman/revive"
+				]
+			}
+		}
+	],
+	"item": "minecraft:honeycomb",
+	"trigger": {
+		"type": "hunted:revived",
+		"settings": {
+			"target": {
+				"type": "self"
+			}
+		}
+	},
+	"name": {
+		"translate": "hunted.ability.revive.name",
+		"color": "gold",
+		"italic": false
+	},
+	"lore": {
+		"translate": "hunted.ability.revive.description"
+	},
+	"cooldown": 0
+}

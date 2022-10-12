@@ -1,0 +1,23 @@
+{
+	"type": "hunted:generic",
+	"settings": {
+		"title": {
+			"translation": "hunted.game.eliminated.title",
+			"style": {
+				"color": "red",
+				"bold": true
+			}
+		},
+		"subtitle": {
+			"translation": "hunted.game.eliminated.subtitle",
+			"style": {
+				"color": "gold"
+			}
+		},
+		"sound": {
+			"type": "minecraft:entity.ghast.death",
+			"pitch": 0.0,
+			"volume": 100.0 
+		}
+	}
+}

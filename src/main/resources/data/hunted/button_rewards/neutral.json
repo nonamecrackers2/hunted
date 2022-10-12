@@ -1,0 +1,93 @@
+{
+	"message": [
+		{
+			"translate": "hunted.reward.neutral.prefix",
+			"bold": true,
+			"color": "blue",
+			"extra": [
+				{
+					"translate": "hunted.reward.neutral",
+					"bold": false,
+					"color": "aqua"
+				}
+			]
+		},
+		{
+			"translate": "hunted.reward.neutral.prefix",
+			"bold": true,
+			"color": "blue",
+			"extra": [
+				{
+					"translate": "hunted.reward.neutral1",
+					"bold": false,
+					"color": "aqua"
+				}
+			]
+		},
+		{
+			"translate": "hunted.reward.neutral.prefix",
+			"bold": true,
+			"color": "blue",
+			"extra": [
+				{
+					"translate": "hunted.reward.neutral2",
+					"bold": false,
+					"color": "aqua"
+				}
+			]
+		},
+		{
+			"translate": "hunted.reward.neutral.prefix",
+			"bold": true,
+			"color": "blue",
+			"extra": [
+				{
+					"translate": "hunted.reward.neutral3",
+					"bold": false,
+					"color": "aqua"
+				}
+			]
+		},
+		{
+			"translate": "hunted.reward.neutral.prefix",
+			"bold": true,
+			"color": "blue",
+			"extra": [
+				{
+					"translate": "hunted.reward.neutral4",
+					"bold": false,
+					"color": "aqua"
+				}
+			]
+		},
+		{
+			"translate": "hunted.reward.neutral.prefix",
+			"bold": true,
+			"color": "blue",
+			"extra": [
+				{
+					"translate": "hunted.reward.neutral5",
+					"bold": false,
+					"color": "aqua"
+				}
+			]
+		},
+		{
+			"translate": "hunted.reward.neutral.prefix",
+			"bold": true,
+			"color": "blue",
+			"extra": [
+				{
+					"translate": "hunted.reward.neutral6",
+					"bold": false,
+					"color": "aqua"
+				}
+			]
+		}
+	],
+	"random_message": true,
+	"sound": "minecraft:ambient.cave",
+	"pitch": 2.0,
+	"items": [],
+	"effects": []
+}

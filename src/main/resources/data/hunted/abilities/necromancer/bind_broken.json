@@ -1,0 +1,39 @@
+{
+	"types": [
+		{
+			"type": "hunted:apply_effect",
+			"settings": {
+				"effects": [
+					{
+						"effect": "minecraft:slowness",
+						"duration": 1200000,
+						"amplifier": 1,
+						"hide_particles": true
+					}
+				]
+			}
+		},
+		{
+			"type": "hunted:toggle_abilities",
+			"settings": {
+				"abilities": [
+					"hunted:necromancer/warp"
+				]
+			}
+		}
+	],
+	"item": "minecraft:air",
+	"trigger": {
+		"type": "hunted:eliminated",
+		"settings": {
+			"target": {
+				"type": "binded" 
+			}
+		}
+	},
+	"text": {
+		"translate": "hunted.ability.bind_broken.chat",
+		"color": "red"
+	},
+	"cooldown": 0
+}
