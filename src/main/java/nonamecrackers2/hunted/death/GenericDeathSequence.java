@@ -13,7 +13,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraftforge.network.PacketDistributor;
 import nonamecrackers2.hunted.game.HuntedGame;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
-import nonamecrackers2.hunted.huntedclass.type.PreyClassType;
 import nonamecrackers2.hunted.init.HuntedPacketHandlers;
 import nonamecrackers2.hunted.init.HuntedSoundEvents;
 import nonamecrackers2.hunted.packet.DoJumpscarePacket;

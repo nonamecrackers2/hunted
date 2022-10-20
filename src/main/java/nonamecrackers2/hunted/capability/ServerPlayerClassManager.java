@@ -1,8 +1,5 @@
 package nonamecrackers2.hunted.capability;
 
-import javax.annotation.Nullable;
-
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.PacketDistributor;

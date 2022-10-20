@@ -18,6 +18,7 @@ import nonamecrackers2.hunted.init.HuntedPacketHandlers;
 import nonamecrackers2.hunted.map.HuntedMapDataManager;
 import nonamecrackers2.hunted.map.event.MapEventDataManager;
 import nonamecrackers2.hunted.packet.AbilityDataManagerPacket;
+import nonamecrackers2.hunted.packet.ButtonRewardDataManagerPacket;
 import nonamecrackers2.hunted.packet.HuntedClassManagerPacket;
 import nonamecrackers2.hunted.packet.HuntedMapManagerPacket;
 import nonamecrackers2.hunted.packet.SimpleDataManagerPacket;
@@ -42,6 +43,7 @@ public class HuntedDataEvents
 	{
 		sync(event.getPlayer(), AbilityDataManager.INSTANCE, AbilityDataManagerPacket::new);
 		sync(event.getPlayer(), HuntedClassDataManager.INSTANCE, HuntedClassManagerPacket::new);
+		sync(event.getPlayer(), ButtonRewardsDataManager.INSTANCE, ButtonRewardDataManagerPacket::new);
 		sync(event.getPlayer(), HuntedMapDataManager.INSTANCE, HuntedMapManagerPacket::new);
 	}
 	

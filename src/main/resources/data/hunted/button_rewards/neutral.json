@@ -1,84 +1,84 @@
 {
 	"message": [
 		{
-			"translate": "hunted.reward.neutral.prefix",
+			"translate": "hunted.reward.neutral.message.prefix",
 			"bold": true,
 			"color": "blue",
 			"extra": [
 				{
-					"translate": "hunted.reward.neutral",
+					"translate": "hunted.reward.neutral.message",
 					"bold": false,
 					"color": "aqua"
 				}
 			]
 		},
 		{
-			"translate": "hunted.reward.neutral.prefix",
+			"translate": "hunted.reward.neutral.message.prefix",
 			"bold": true,
 			"color": "blue",
 			"extra": [
 				{
-					"translate": "hunted.reward.neutral1",
+					"translate": "hunted.reward.neutral.message1",
 					"bold": false,
 					"color": "aqua"
 				}
 			]
 		},
 		{
-			"translate": "hunted.reward.neutral.prefix",
+			"translate": "hunted.reward.neutral.message.prefix",
 			"bold": true,
 			"color": "blue",
 			"extra": [
 				{
-					"translate": "hunted.reward.neutral2",
+					"translate": "hunted.reward.neutral.message2",
 					"bold": false,
 					"color": "aqua"
 				}
 			]
 		},
 		{
-			"translate": "hunted.reward.neutral.prefix",
+			"translate": "hunted.reward.neutral.message.prefix",
 			"bold": true,
 			"color": "blue",
 			"extra": [
 				{
-					"translate": "hunted.reward.neutral3",
+					"translate": "hunted.reward.neutral.message3",
 					"bold": false,
 					"color": "aqua"
 				}
 			]
 		},
 		{
-			"translate": "hunted.reward.neutral.prefix",
+			"translate": "hunted.reward.neutral.message.prefix",
 			"bold": true,
 			"color": "blue",
 			"extra": [
 				{
-					"translate": "hunted.reward.neutral4",
+					"translate": "hunted.reward.neutral.message4",
 					"bold": false,
 					"color": "aqua"
 				}
 			]
 		},
 		{
-			"translate": "hunted.reward.neutral.prefix",
+			"translate": "hunted.reward.neutral.message.prefix",
 			"bold": true,
 			"color": "blue",
 			"extra": [
 				{
-					"translate": "hunted.reward.neutral5",
+					"translate": "hunted.reward.neutral.message5",
 					"bold": false,
 					"color": "aqua"
 				}
 			]
 		},
 		{
-			"translate": "hunted.reward.neutral.prefix",
+			"translate": "hunted.reward.neutral.message.prefix",
 			"bold": true,
 			"color": "blue",
 			"extra": [
 				{
-					"translate": "hunted.reward.neutral6",
+					"translate": "hunted.reward.neutral.message6",
 					"bold": false,
 					"color": "aqua"
 				}

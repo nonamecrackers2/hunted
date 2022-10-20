@@ -5,6 +5,7 @@ import java.util.Optional;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -23,5 +24,22 @@ public record MobEffectHolder(MobEffect effect, int duration, int amplifier, boo
 	public MobEffectInstance createInstance()
 	{
 		return new MobEffectInstance(this.effect, this.duration, this.amplifier, false, !this.hideParticles);
+	}
+	
+	public void toPacket(FriendlyByteBuf buffer)
+	{
+		buffer.writeRegistryId(ForgeRegistries.MOB_EFFECTS, this.effect);
+		buffer.writeVarInt(this.duration);
+		buffer.writeVarInt(this.amplifier);
+		buffer.writeBoolean(this.hideParticles);
+	}
+	
+	public static MobEffectHolder fromPacket(FriendlyByteBuf buffer)
+	{
+		MobEffect effect = buffer.readRegistryId();
+		int duration = buffer.readVarInt();
+		int amplifier = buffer.readVarInt();
+		boolean hideParticles = buffer.readBoolean();
+		return new MobEffectHolder(effect, duration, amplifier, hideParticles);
 	}
 }

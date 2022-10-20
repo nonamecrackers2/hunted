@@ -41,26 +41,28 @@ public class HuntedClass
 	private final boolean mutable;
 	private final Optional<SoundEvent> loopSound;
 	private final boolean supportsMask;
+	private final @Nullable ResourceLocation icon;
 	
 	private List<Ability> abilities;
 	private final Map<EquipmentSlot, Item> outfit;
 	private final @Nullable DeathSequence.ConfiguredDeathSequence<?> death;
 	
-	private HuntedClass(ResourceLocation id, HuntedClassType type, boolean mutable, Optional<SoundEvent> loopSound, boolean supportsMask, List<Ability> abilities, Map<EquipmentSlot, Item> outfit, DeathSequence.ConfiguredDeathSequence<?> death)
+	private HuntedClass(ResourceLocation id, HuntedClassType type, boolean mutable, Optional<SoundEvent> loopSound, boolean supportsMask, @Nullable ResourceLocation icon, List<Ability> abilities, Map<EquipmentSlot, Item> outfit, DeathSequence.ConfiguredDeathSequence<?> death)
 	{
 		this.id = id;
 		this.type = type;
 		this.mutable = mutable;
 		this.loopSound = loopSound;
 		this.supportsMask = supportsMask;
+		this.icon = icon;
 		this.abilities = abilities;
 		this.outfit = outfit;
 		this.death = death;
 	}
 		
-	public HuntedClass(ResourceLocation id, HuntedClassType type, Optional<SoundEvent> loopSound, boolean supportsMask, List<Ability> abilities, Map<EquipmentSlot, Item> outfit, DeathSequence.ConfiguredDeathSequence<?> death)
+	public HuntedClass(ResourceLocation id, HuntedClassType type, Optional<SoundEvent> loopSound, boolean supportsMask, @Nullable ResourceLocation icon, List<Ability> abilities, Map<EquipmentSlot, Item> outfit, DeathSequence.ConfiguredDeathSequence<?> death)
 	{
-		this(id, type, false, loopSound, supportsMask, abilities, outfit, death);
+		this(id, type, false, loopSound, supportsMask, icon, abilities, outfit, death);
 	}
 	
 	public void toPacket(FriendlyByteBuf buffer)
@@ -76,6 +78,9 @@ public class HuntedClass
 		buffer.writeBoolean(this.loopSound.isPresent());
 		this.loopSound.ifPresent(sound -> buffer.writeRegistryId(ForgeRegistries.SOUND_EVENTS, sound));
 		buffer.writeBoolean(this.supportsMask);
+		buffer.writeBoolean(this.icon != null);
+		if (this.icon != null)
+			buffer.writeResourceLocation(this.icon);
 	}
 	
 	public static HuntedClass fromPacket(FriendlyByteBuf buffer)
@@ -90,7 +95,10 @@ public class HuntedClass
 		if (buffer.readBoolean())
 			loopSound = Optional.ofNullable(buffer.readRegistryId());
 		boolean supportsMask = buffer.readBoolean();
-		return new HuntedClass(id, type, loopSound, supportsMask, ImmutableList.of(), slots, null);
+		ResourceLocation icon = null;
+		if (buffer.readBoolean())
+			icon = buffer.readResourceLocation();
+		return new HuntedClass(id, type, loopSound, supportsMask, icon, ImmutableList.of(), slots, null);
 	}
  	
 	public ResourceLocation id()
@@ -123,7 +131,7 @@ public class HuntedClass
 	{
 		ImmutableList.Builder<Ability> abilitiesCopy = ImmutableList.builder();
 		this.abilities.forEach((ability) -> abilitiesCopy.add(ability.copy()));
-		return new HuntedClass(this.id, this.type, true, this.loopSound, this.supportsMask, abilitiesCopy.build(), this.outfit, this.death);
+		return new HuntedClass(this.id, this.type, true, this.loopSound, this.supportsMask, this.icon, abilitiesCopy.build(), this.outfit, this.death);
 	}
 	
 	public boolean isMutable()
@@ -207,6 +215,11 @@ public class HuntedClass
 		return this.supportsMask;
 	}
 	
+	public @Nullable ResourceLocation getIcon()
+	{
+		return this.icon;
+	}
+	
 	public void save(CompoundTag tag)
 	{
 		if (this.isMutable())
@@ -256,10 +269,10 @@ public class HuntedClass
 		return String.format(Locale.ROOT, "%s[id='%s', type='%s', abilities='%s', outfit='%s', death_sequence='%s']", this.getClass().getSimpleName(), this.id.toString(), this.getType().toString(), this.abilities, this.outfit, this.death);
 	}
 	
-	public String getTranslation()
+	public String getTypeTranslation()
 	{
 		ResourceLocation id = HuntedRegistries.HUNTED_CLASS_TYPES.get().getKey(this.type);
-		return id.getNamespace() + ".class." + id.getPath();
+		return id.getNamespace() + ".class_type." + id.getPath();
 	}
 	
 	public void runDeathSequence(ServerPlayer player, HuntedGame game, CompoundTag tag)

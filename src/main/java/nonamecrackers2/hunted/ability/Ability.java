@@ -284,6 +284,11 @@ public class Ability implements Triggerable
 		return this.time > 0 && this.cooldownLore != null ? this.cooldownLore : this.lore;
 	}
 	
+	public Component getName()
+	{
+		return this.name;
+	}
+	
 	private ItemStack getAssociatedItem(Player player)
 	{
 		List<ItemStack> items = this.getAbilityItems(player);

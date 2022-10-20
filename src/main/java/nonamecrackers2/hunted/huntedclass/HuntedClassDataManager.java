@@ -70,6 +70,10 @@ public class HuntedClassDataManager extends SimpleDataManager<HuntedClass>
 		if (object.has("supports_mask"))
 			supportsMask = GsonHelper.getAsBoolean(object, "supports_mask");
 		
+		ResourceLocation icon = null;
+		if (object.has("icon"))
+			icon = new ResourceLocation(GsonHelper.getAsString(object, "icon"));
+		
 		List<Ability> abilities = getAbilities(GsonHelper.getAsJsonArray(object, "abilities"));
 
 		Map<EquipmentSlot, Item> outfit = getOutfitFromJson(object);
@@ -78,7 +82,7 @@ public class HuntedClassDataManager extends SimpleDataManager<HuntedClass>
 		if (type.requiresDeathSequence())
 			sequence = getConfiguredDeathSequence(object.get("death_sequence"));
 		
-		HuntedClass huntedClass = new HuntedClass(fileName, type, Optional.ofNullable(loopSound), supportsMask, abilities, outfit, sequence);
+		HuntedClass huntedClass = new HuntedClass(fileName, type, Optional.ofNullable(loopSound), supportsMask, icon, abilities, outfit, sequence);
 		return huntedClass;
 	}
 	

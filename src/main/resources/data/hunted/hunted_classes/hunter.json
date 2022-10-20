@@ -13,5 +13,6 @@
 		}
 	],
 	"loop_sound": "hunted:heartbeat",
-	"supports_mask": true
+	"supports_mask": true,
+	"icon": "hunted:textures/gui/class_icon/hunter.png"
 }

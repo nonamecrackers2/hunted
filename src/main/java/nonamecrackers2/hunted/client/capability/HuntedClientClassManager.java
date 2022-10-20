@@ -6,7 +6,6 @@ import javax.annotation.Nullable;
 
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.resources.ResourceLocation;
-import nonamecrackers2.hunted.HuntedMod;
 import nonamecrackers2.hunted.capability.PlayerClassManager;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
 

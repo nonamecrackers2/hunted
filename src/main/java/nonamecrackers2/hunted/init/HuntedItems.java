@@ -14,6 +14,7 @@ public class HuntedItems
 	private static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, HuntedMod.MOD_ID);
 	
 	public static final RegistryObject<BlockItem> KEYHOLE = ITEMS.register("keyhole", () -> new BlockItem(HuntedBlocks.KEYHOLE.get(), new Item.Properties().tab(CreativeModeTab.TAB_DECORATIONS)));
+	public static final RegistryObject<BlockItem> KIOSK = ITEMS.register("kiosk", () -> new BlockItem(HuntedBlocks.KIOSK.get(), new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 	
 	public static void register(IEventBus modBus)
 	{

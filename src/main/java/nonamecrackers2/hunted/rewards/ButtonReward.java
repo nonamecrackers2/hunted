@@ -10,12 +10,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonSyntaxException;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.registries.ForgeRegistries;
 import nonamecrackers2.hunted.map.event.MapEventDataManager;
 import nonamecrackers2.hunted.map.event.MapEventHolder;
 import nonamecrackers2.hunted.trigger.TriggerContext;
@@ -51,6 +53,31 @@ public class ButtonReward
 		this.effects = effects;
 		this.supplier = supplier;
 		this.events = events;
+	}
+	
+	public void toPacket(FriendlyByteBuf buffer)
+	{
+		buffer.writeResourceLocation(this.id);
+		buffer.writeNullable(this.globalMessage, FriendlyByteBuf::writeComponent);
+		buffer.writeCollection(this.rewardMessage, FriendlyByteBuf::writeComponent);
+		buffer.writeBoolean(this.randomMessage);
+		buffer.writeRegistryId(ForgeRegistries.SOUND_EVENTS, this.sound);
+		buffer.writeFloat(this.pitch);
+		buffer.writeCollection(this.rewards, (buf, item) -> item.toPacket(buf));
+		buffer.writeCollection(this.effects, (buf, effect) -> effect.toPacket(buf));
+	}
+	
+	public static ButtonReward fromPacket(FriendlyByteBuf buffer)
+	{
+		ResourceLocation id = buffer.readResourceLocation();
+		Component globalMessage = buffer.readNullable(FriendlyByteBuf::readComponent);
+		List<Component> rewardMessages = ImmutableList.copyOf(buffer.readList(FriendlyByteBuf::readComponent));
+		boolean randomMessage = buffer.readBoolean();
+		SoundEvent sound = buffer.readRegistryId();
+		float pitch = buffer.readFloat();
+		List<NamedItemHolder> rewards = ImmutableList.copyOf(buffer.readList(NamedItemHolder::fromPacket));
+		List<MobEffectHolder> effects = ImmutableList.copyOf(buffer.readList(MobEffectHolder::fromPacket));
+		return new ButtonReward(id, globalMessage, TargetSupplier.DEFAULT, rewardMessages, randomMessage, sound, pitch, rewards, effects, TargetSupplier.DEFAULT, ImmutableList.of());
 	}
 	
 	public void reward(TriggerContext context)

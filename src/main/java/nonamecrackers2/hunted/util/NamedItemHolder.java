@@ -6,6 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -47,5 +48,20 @@ public record NamedItemHolder(Item item, Optional<Component> name, Optional<Comp
 		this.name.ifPresent(name -> stack.setHoverName(name));
 		this.lore.ifPresent(lore -> HuntedUtil.setLore(stack, lore));
 		return stack;
+	}
+	
+	public void toPacket(FriendlyByteBuf buffer)
+	{
+		buffer.writeRegistryId(ForgeRegistries.ITEMS, this.item);
+		buffer.writeOptional(this.name, FriendlyByteBuf::writeComponent);
+		buffer.writeOptional(this.lore, FriendlyByteBuf::writeComponent);
+	}
+	
+	public static NamedItemHolder fromPacket(FriendlyByteBuf buffer)
+	{
+		Item item = buffer.readRegistryId();
+		Optional<Component> name = buffer.readOptional(FriendlyByteBuf::readComponent);
+		Optional<Component> lore = buffer.readOptional(FriendlyByteBuf::readComponent);
+		return new NamedItemHolder(item, name, lore);
 	}
 }

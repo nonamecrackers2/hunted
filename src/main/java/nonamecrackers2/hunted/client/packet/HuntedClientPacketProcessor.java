@@ -9,6 +9,7 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import nonamecrackers2.hunted.client.capability.HuntedClientClassManager;
+import nonamecrackers2.hunted.client.gui.HuntedGameMenuScreen;
 import nonamecrackers2.hunted.client.init.HuntedClientCapabilities;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
 import nonamecrackers2.hunted.huntedclass.HuntedClassDataManager;
@@ -17,6 +18,7 @@ import nonamecrackers2.hunted.map.HuntedMap;
 import nonamecrackers2.hunted.map.HuntedMapDataManager;
 import nonamecrackers2.hunted.packet.DoJumpscarePacket;
 import nonamecrackers2.hunted.packet.UpdateGameInfoPacket;
+import nonamecrackers2.hunted.packet.UpdateGameMenuPacket;
 import nonamecrackers2.hunted.packet.UpdatePlayerClassManagerPacket;
 
 public class HuntedClientPacketProcessor
@@ -84,5 +86,12 @@ public class HuntedClientPacketProcessor
 		mc.level.getCapability(HuntedClientCapabilities.EFFECTS_MANAGER).ifPresent(manager -> {
 			manager.doJumpscare(packet.getEvent(), packet.getTime());
 		});
+	}
+	
+	public static void processUpdateGameMenuPacket(UpdateGameMenuPacket packet)
+	{
+		Minecraft mc = Minecraft.getInstance();
+		if (mc.screen instanceof HuntedGameMenuScreen screen)
+			screen.processUpdatePacket(packet);
 	}
 }

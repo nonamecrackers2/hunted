@@ -160,8 +160,8 @@ public class HuntedGame implements DataHolder
 					HuntedClass huntedClass = manager.getCurrentClass().orElse(null);
 					if (huntedClass != null)
 					{
-						HuntedUtil.showTitle(player, Component.translatable(huntedClass.getTranslation()).withStyle(Style.EMPTY.withColor(huntedClass.getType().getColor()).withBold(true)), 20, 60, 20);
-						HuntedUtil.showSubtitle(player, Component.translatable(huntedClass.getTranslation() + ".description").withStyle(Style.EMPTY.applyFormat(ChatFormatting.GOLD)), 20, 60, 20);
+						HuntedUtil.showTitle(player, Component.translatable(huntedClass.getTypeTranslation()).withStyle(Style.EMPTY.withColor(huntedClass.getType().getColor()).withBold(true)), 20, 60, 20);
+						HuntedUtil.showSubtitle(player, Component.translatable(huntedClass.getTypeTranslation() + ".description").withStyle(Style.EMPTY.applyFormat(ChatFormatting.GOLD)), 20, 60, 20);
 						for (Ability ability : huntedClass.getAbilities())
 							player.getCooldowns().removeCooldown(ability.getItem());
 						if (huntedClass.getType().canCollectRewards() && this.buttonPressingDelay > 0)

@@ -32,6 +32,7 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.level.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.network.PacketDistributor;
 import nonamecrackers2.hunted.capability.HuntedClassManager;
 import nonamecrackers2.hunted.capability.PlayerClassManager;
 import nonamecrackers2.hunted.capability.ServerPlayerClassManager;
@@ -108,13 +109,18 @@ public class HuntedEvents
 				player.removeAllEffects();
 				player.setGameMode(GameType.SURVIVAL);
 			}
+			manager.updateGameMenus(PacketDistributor.DIMENSION.with(() -> player.level.dimension()));
 		});
 	}
 	
 	@SubscribeEvent
 	public static void onPlayerChangeDimensions(PlayerEvent.PlayerChangedDimensionEvent event)
 	{
-		update((ServerPlayer)event.getEntity());
+		ServerPlayer player = (ServerPlayer)event.getEntity();
+		update(player);
+		player.getLevel().getCapability(HuntedCapabilities.GAME_MANAGER).ifPresent(manager -> {
+			manager.updateGameMenus(PacketDistributor.DIMENSION.with(() -> player.level.dimension()));
+		});
 	}
 	
 	@SubscribeEvent

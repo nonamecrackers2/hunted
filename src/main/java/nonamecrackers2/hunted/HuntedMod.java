@@ -1,5 +1,6 @@
 package nonamecrackers2.hunted;
 
+import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -13,6 +14,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import nonamecrackers2.hunted.client.capability.HuntedEffectsManager;
 import nonamecrackers2.hunted.client.event.HuntedClientEvents;
 import nonamecrackers2.hunted.client.event.HuntedRenderEvents;
+import nonamecrackers2.hunted.client.gui.menu.KioskScreen;
 import nonamecrackers2.hunted.client.init.HuntedClientCapabilities;
 import nonamecrackers2.hunted.client.init.HuntedRenderers;
 import nonamecrackers2.hunted.client.keybind.HuntedKeybinds;
@@ -30,6 +32,7 @@ import nonamecrackers2.hunted.init.HuntedBlocks;
 import nonamecrackers2.hunted.init.HuntedCapabilities;
 import nonamecrackers2.hunted.init.HuntedClassTypes;
 import nonamecrackers2.hunted.init.HuntedItems;
+import nonamecrackers2.hunted.init.HuntedMenuTypes;
 import nonamecrackers2.hunted.init.HuntedOverlayTypes;
 import nonamecrackers2.hunted.init.HuntedPacketHandlers;
 import nonamecrackers2.hunted.init.HuntedSoundEvents;
@@ -60,6 +63,7 @@ public class HuntedMod
 		HuntedItems.register(modBus);
 		HuntedOverlayTypes.register(modBus);
 		HuntedSoundEvents.register(modBus);
+		HuntedMenuTypes.register(modBus);
 		IEventBus forgeBus = MinecraftForge.EVENT_BUS;
 		forgeBus.register(HuntedCapabilities.class);
 		forgeBus.addListener(HuntedMod::registerCommands);
@@ -80,6 +84,9 @@ public class HuntedMod
 		forgeBus.register(HuntedClientCapabilities.class);
 		forgeBus.register(HuntedSoundManager.Events.class);
 		forgeBus.register(HuntedEffectsManager.Events.class);
+		event.enqueueWork(() -> {
+			MenuScreens.register(HuntedMenuTypes.KIOSK.get(), KioskScreen::new);
+		});
 	}
 	
 	public void onCommonInit(final FMLCommonSetupEvent event)

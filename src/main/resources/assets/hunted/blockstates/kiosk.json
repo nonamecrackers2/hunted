@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "hunted:block/kiosk",
+      "y": 270
+    },
+    "facing=north": {
+      "model": "hunted:block/kiosk",
+      "y": 180
+    },
+    "facing=south": {
+      "model": "hunted:block/kiosk"
+    },
+    "facing=west": {
+      "model": "hunted:block/kiosk",
+      "y": 90
+    }
+  }
+}

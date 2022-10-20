@@ -85,4 +85,9 @@ public record HuntedMap(ResourceLocation id, Map<HuntedClassType, BlockPos> star
 	{
 		return new AABB(buffer.readDouble(), buffer.readDouble(), buffer.readDouble(), buffer.readDouble(), buffer.readDouble(), buffer.readDouble());
 	}
+	
+	public HuntedMap copyWithRewards(List<ButtonReward> rewards)
+	{
+		return new HuntedMap(this.id, this.startForTypes, this.defaultStartPos, this.buttons, ImmutableList.copyOf(rewards), this.boundary, this.preyExit, this.events, this.keyholes, this.overlay, this.revivalPositions, this.buttonPressingDelay, this.ambience);
+	}
 }
