@@ -3,6 +3,7 @@ package nonamecrackers2.hunted.game;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -58,6 +59,7 @@ public class HuntedGameManager
 	private final RandomSource random;
 	private List<Component> overlayText = Lists.newArrayList();
 	private int gameStartDelay;
+	private @Nullable UUID previousHunter;
 	
 	private int totalHunterWins;
 	private int totalPreyWins;
@@ -329,8 +331,9 @@ public class HuntedGameManager
 			
 			HuntedGame game = new HuntedGame(this.level, players.stream().collect(Collectors.mapping(ServerPlayer::getUUID, Collectors.toList())), this.map);
 			
-			int index = this.random.nextInt(players.size());
-			ServerPlayer hunter = players.get(index);
+			List<ServerPlayer> hunterApplicable = players.stream().filter(p -> !p.getUUID().equals(this.previousHunter)).toList();
+			int index = this.random.nextInt(hunterApplicable.size());
+			ServerPlayer hunter = hunterApplicable.get(index);
 			
 			this.players.forEach((player, holder) -> 
 			{
@@ -340,6 +343,8 @@ public class HuntedGameManager
 				});
 				player.closeContainer();
 			});
+			
+			this.previousHunter = hunter.getUUID();
 			
 			this.currentGame = Optional.of(game);
 			game.begin();
