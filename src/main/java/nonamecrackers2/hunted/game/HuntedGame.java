@@ -26,11 +26,14 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.ButtonBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import nonamecrackers2.hunted.ability.Ability;
 import nonamecrackers2.hunted.block.entity.KeyholeBlockEntity;
@@ -439,21 +442,6 @@ public class HuntedGame implements DataHolder
 	{
 		for (ServerPlayer player : this.getPlayers())
 			this.trigger(trigger, builder.player(player));
-//		for (ServerPlayer player : this.getPlayers())
-//		{
-//			TriggerContext context = builder.player(player).build(this.level, trigger);
-//			player.getCapability(HuntedCapabilities.PLAYER_CLASS_MANAGER).ifPresent(manager -> 
-//			{
-//				if (manager instanceof ServerPlayerClassManager serverManager)
-//				{
-//					if (serverManager.triggerCriteria().matches(context))
-//						serverManager.use(context);
-//				}
-//			});
-//		}
-//		TriggerContext context = builder.build(this.level, trigger);
-//		for (MapEventHolder event : this.map.events())
-//			event.use(context);
 	}
 	
 	public void save(CompoundTag tag)
@@ -467,14 +455,6 @@ public class HuntedGame implements DataHolder
 		if (this.data != null)
 			tag.put("Data", this.data);
 		tag.putInt("TimeElapsed", this.timeElapse);
-//		ListTag buttons = new ListTag();
-//		for (var entry : this.usedButtons.entrySet())
-//		{
-//			CompoundTag button = new CompoundTag();
-//			button.put("Pos", NbtUtils.writeBlockPos(entry.getKey()));
-//			button.put("State", NbtUtils.writeBlockState(entry.getValue()));
-//		}
-//		tag.put("ButtonsUsed", buttons);
 	}
 	
 	private void resetMap()
@@ -497,7 +477,12 @@ public class HuntedGame implements DataHolder
 					item.discard();
 			}
 		}
-//		this.usedButtons.forEach((pos, state) -> this.level.setBlock(pos, state, 3));
+		for (BlockPos pos : this.map.buttons())
+		{
+			BlockState state = this.level.getBlockState(pos);
+			if (state.hasProperty(ButtonBlock.POWERED) && state.getValue(ButtonBlock.POWERED) == true)
+				this.level.setBlock(pos, state.setValue(ButtonBlock.POWERED, false), 3);
+		}
 	}
 	
 	public int getTimeElapsed()

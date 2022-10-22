@@ -1,7 +1,6 @@
 {
 	"replace": false,
   	"values": [
-    	"hunted:keyhole",
     	"hunted:reward_button"
   	]
 }

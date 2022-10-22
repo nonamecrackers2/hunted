@@ -15,6 +15,7 @@ public class HuntedItems
 	
 	public static final RegistryObject<BlockItem> KEYHOLE = ITEMS.register("keyhole", () -> new BlockItem(HuntedBlocks.KEYHOLE.get(), new Item.Properties().tab(CreativeModeTab.TAB_DECORATIONS)));
 	public static final RegistryObject<BlockItem> KIOSK = ITEMS.register("kiosk", () -> new BlockItem(HuntedBlocks.KIOSK.get(), new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+	public static final RegistryObject<BlockItem> REWARD_BUTTON = ITEMS.register("reward_button", () -> new BlockItem(HuntedBlocks.REWARD_BUTTON.get(), new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 	
 	public static void register(IEventBus modBus)
 	{

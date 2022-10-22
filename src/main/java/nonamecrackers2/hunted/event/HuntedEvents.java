@@ -53,7 +53,7 @@ public class HuntedEvents
 		{
 			BlockPos pos = event.getHitVec().getBlockPos();
 			BlockState state = level.getBlockState(pos);
-			if (state.is(BlockTags.BUTTONS) && !state.getValue(ButtonBlock.POWERED))
+			if (state.hasProperty(ButtonBlock.POWERED) && !state.getValue(ButtonBlock.POWERED))
 				level.getCapability(HuntedCapabilities.GAME_MANAGER).ifPresent(manager -> manager.getCurrentGame().ifPresent(game -> game.processButton((ServerPlayer)event.getEntity(), pos)));
 		}
 		event.getEntity().getCapability(HuntedCapabilities.PLAYER_CLASS_MANAGER).ifPresent(manager -> 
