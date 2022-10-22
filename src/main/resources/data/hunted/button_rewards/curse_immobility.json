@@ -1,4 +1,8 @@
 {
+	"name": {
+		"translate": "hunted.reward.curse_immobility",
+		"color": "dark_red"
+	},
 	"global_message": {
 		"translate": "hunted.reward.curse.message.hunter"
 	},

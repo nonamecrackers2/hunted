@@ -9,6 +9,7 @@ import com.google.common.collect.ImmutableMap;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.AABB;
 import nonamecrackers2.hunted.huntedclass.type.HuntedClassType;
@@ -17,11 +18,12 @@ import nonamecrackers2.hunted.map.overlay.HuntedOverlay;
 import nonamecrackers2.hunted.registry.HuntedRegistries;
 import nonamecrackers2.hunted.rewards.ButtonReward;
 
-public record HuntedMap(ResourceLocation id, Map<HuntedClassType, BlockPos> startForTypes, BlockPos defaultStartPos, List<BlockPos> buttons, List<ButtonReward> rewards, AABB boundary, AABB preyExit, List<MapEventHolder> events, List<BlockPos> keyholes, Optional<HuntedOverlay.ConfiguredOverlay<?>> overlay, List<BlockPos> revivalPositions, int buttonPressingDelay, Optional<AmbienceSettings> ambience) 
+public record HuntedMap(ResourceLocation id, Component name, Map<HuntedClassType, BlockPos> startForTypes, BlockPos defaultStartPos, List<BlockPos> buttons, List<ButtonReward> rewards, AABB boundary, AABB preyExit, List<MapEventHolder> events, List<BlockPos> keyholes, Optional<HuntedOverlay.ConfiguredOverlay<?>> overlay, List<BlockPos> revivalPositions, int buttonPressingDelay, Optional<AmbienceSettings> ambience) 
 {
 	public void toPacket(FriendlyByteBuf buffer)
 	{
 		buffer.writeResourceLocation(this.id);
+		buffer.writeComponent(this.name);
 		buffer.writeVarInt(this.startForTypes.size());
 		this.startForTypes.forEach((type, pos) -> 
 		{
@@ -45,6 +47,7 @@ public record HuntedMap(ResourceLocation id, Map<HuntedClassType, BlockPos> star
 	public static HuntedMap fromPacket(FriendlyByteBuf buffer)
 	{
 		ResourceLocation id = buffer.readResourceLocation();
+		Component name = buffer.readComponent();
 		ImmutableMap.Builder<HuntedClassType, BlockPos> startForTypes = ImmutableMap.builder();
 		int startForTypesSize = buffer.readVarInt();
 		for (int i = 0; i < startForTypesSize; i++)
@@ -68,7 +71,7 @@ public record HuntedMap(ResourceLocation id, Map<HuntedClassType, BlockPos> star
 		Optional<AmbienceSettings> ambience = Optional.empty();
 		if (buffer.readBoolean())
 			ambience = Optional.of(AmbienceSettings.fromPacket(buffer));
-		return new HuntedMap(id, startForTypes.build(), defaultStart, buttons.build(), ImmutableList.of(), boundary, preyExit, ImmutableList.of(), keyholes.build(), Optional.empty(), revivalPositions.build(), buttonPressingDelay, ambience);
+		return new HuntedMap(id, name, startForTypes.build(), defaultStart, buttons.build(), ImmutableList.of(), boundary, preyExit, ImmutableList.of(), keyholes.build(), Optional.empty(), revivalPositions.build(), buttonPressingDelay, ambience);
 	}
 	
 	private static void aabbToPacket(AABB box, FriendlyByteBuf buffer)
@@ -88,6 +91,6 @@ public record HuntedMap(ResourceLocation id, Map<HuntedClassType, BlockPos> star
 	
 	public HuntedMap copyWithRewards(List<ButtonReward> rewards)
 	{
-		return new HuntedMap(this.id, this.startForTypes, this.defaultStartPos, this.buttons, ImmutableList.copyOf(rewards), this.boundary, this.preyExit, this.events, this.keyholes, this.overlay, this.revivalPositions, this.buttonPressingDelay, this.ambience);
+		return new HuntedMap(this.id, this.name, this.startForTypes, this.defaultStartPos, this.buttons, ImmutableList.copyOf(rewards), this.boundary, this.preyExit, this.events, this.keyholes, this.overlay, this.revivalPositions, this.buttonPressingDelay, this.ambience);
 	}
 }

@@ -17,6 +17,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.sounds.SoundEvent;
@@ -50,6 +51,11 @@ public class HuntedClassDataManager extends SimpleDataManager<HuntedClass>
 		ResourceLocation fileName = map.getKey();
 		JsonElement element = map.getValue();
 		JsonObject object = GsonHelper.convertToJsonObject(element, "hunted class");
+		
+		Component name = Component.Serializer.fromJson(object.get("name"));
+		
+		Component description = Component.Serializer.fromJson(object.get("description"));
+		
 		HuntedClassType type = getTypeFromJson(object);
 		if (type == null)
 		{
@@ -82,7 +88,7 @@ public class HuntedClassDataManager extends SimpleDataManager<HuntedClass>
 		if (type.requiresDeathSequence())
 			sequence = getConfiguredDeathSequence(object.get("death_sequence"));
 		
-		HuntedClass huntedClass = new HuntedClass(fileName, type, Optional.ofNullable(loopSound), supportsMask, icon, abilities, outfit, sequence);
+		HuntedClass huntedClass = new HuntedClass(fileName, name, description, type, Optional.ofNullable(loopSound), supportsMask, icon, abilities, outfit, sequence);
 		return huntedClass;
 	}
 	

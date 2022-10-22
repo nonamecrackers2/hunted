@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -466,7 +467,7 @@ public class HuntedGameMenuScreen extends Screen
 		{
 			this.lists.put(type, new SelectionList<>(HuntedClassDataManager.INSTANCE, huntedClass -> {
 				return huntedClass.getType().equals(type); 
-			}, "class", this.mc, LIST_WIDTH, WINDOW_HEIGHT, 0, WINDOW_HEIGHT));
+			}, HuntedClass::getName, this.mc, LIST_WIDTH, WINDOW_HEIGHT, 0, WINDOW_HEIGHT));
 		}
 		
 		@Override
@@ -519,7 +520,7 @@ public class HuntedGameMenuScreen extends Screen
 					titleX += ICON_SIZE + 16;
 					titleY += ICON_SIZE / 2 - this.mc.font.lineHeight / 2;
 				}
-				this.mc.font.drawWordWrap(Component.translatable(huntedClass.id().getNamespace() + ".class." + huntedClass.id().getPath()).withStyle(Style.EMPTY.withBold(true).withUnderlined(true)), titleX, titleY, boundWidth, 16777215);
+				this.mc.font.drawWordWrap(huntedClass.getName().copy().withStyle(Style.EMPTY.withBold(true).withUnderlined(true)), titleX, titleY, boundWidth, 16777215);
 				if (this.prevEntry != list.getSelected())
 					this.buildClassDescription(huntedClass);
 			}
@@ -611,7 +612,7 @@ public class HuntedGameMenuScreen extends Screen
 		{
 			this.textList.setScrollAmount(0.0D);
 			this.textList.clear();
-			this.textList.line(Component.translatable(huntedClass.id().getNamespace() + ".class." + huntedClass.id().getPath() + ".description"));
+			this.textList.line(huntedClass.getDescription());
 			this.textList.blank();
 			this.textList.line(Component.translatable("hunted.menu.abilities").withStyle(Style.EMPTY.withBold(true).withUnderlined(true)));
 			for (Ability ability : huntedClass.getAbilities())
@@ -619,10 +620,10 @@ public class HuntedGameMenuScreen extends Screen
 				if (!ability.getItem().equals(Items.AIR))
 				{
 					this.textList.blank();
-					MutableComponent component = (MutableComponent)ability.getName().copy();
+					MutableComponent component = ability.getName().copy();
 					this.textList.line(component.withStyle(component.getStyle().withItalic(true)));
 					this.textList.blank();
-					MutableComponent desc = (MutableComponent)ability.getLore().copy();
+					MutableComponent desc = ability.getLore().copy();
 					this.textList.line(desc.withStyle(desc.getStyle().withColor(ChatFormatting.GRAY)));
 				}
 			}
@@ -644,7 +645,7 @@ public class HuntedGameMenuScreen extends Screen
 		public GameMenu()
 		{
 			super("hunted.menu.game.title", 2);
-			this.list = new SelectionList<>(HuntedMapDataManager.INSTANCE, "map", this.mc, LIST_WIDTH, WINDOW_HEIGHT, 0, WINDOW_HEIGHT);
+			this.list = new SelectionList<>(HuntedMapDataManager.INSTANCE, HuntedMap::name, this.mc, LIST_WIDTH, WINDOW_HEIGHT, 0, WINDOW_HEIGHT);
 			this.select = new Button(0, 0, 80, 20, Component.translatable("hunted.menu.select.button"), button -> 
 			{
 				if (this.list.getSelected() != null)
@@ -851,7 +852,7 @@ public class HuntedGameMenuScreen extends Screen
 				for (int i = 0; i < rewards.size(); i++)
 				{
 					ButtonReward reward = rewards.get(i);
-					this.mapInfo.line(1, Component.literal(i + 1 + ". ").withStyle(ChatFormatting.DARK_GRAY).append(Component.translatable(reward.getId().getNamespace() + ".reward." + reward.getId().getPath())));
+					this.mapInfo.line(1, Component.literal(i + 1 + ". ").withStyle(ChatFormatting.DARK_GRAY).append(reward.getName()));
 				}
 				this.mapInfo.line(Component.translatable("hunted.menu.map.info.keyholes", Component.literal(String.valueOf(map.keyholes().size())).withStyle(ChatFormatting.GREEN)).withStyle(ChatFormatting.GRAY));
 			}
@@ -865,18 +866,18 @@ public class HuntedGameMenuScreen extends Screen
 	
 	public static class SelectionList<T> extends SimpleDataManagerList<T>
 	{
-		public SelectionList(SimpleDataManager<T> manager, Predicate<T> filter, String path, Minecraft mc, int width, int height, int top, int bottom)
+		public SelectionList(SimpleDataManager<T> manager, Predicate<T> filter, Function<T, Component> nameGetter, Minecraft mc, int width, int height, int top, int bottom)
 		{
-			super(manager, filter, path, mc, width, height, top, bottom);
+			super(manager, filter, nameGetter, mc, width, height, top, bottom);
 			this.setRenderBackground(false);
 			this.setRenderTopAndBottom(false);
 			if (this.children().size() == 1)
 				this.setSelected(this.getEntry(0));
 		}
 		
-		public SelectionList(SimpleDataManager<T> manager, String path, Minecraft mc, int width, int height, int top, int bottom)
+		public SelectionList(SimpleDataManager<T> manager, Function<T, Component> nameGetter, Minecraft mc, int width, int height, int top, int bottom)
 		{
-			this(manager, t -> true, path, mc, width, height, top, bottom);
+			this(manager, t -> true, nameGetter, mc, width, height, top, bottom);
 		}
 
 		@Override

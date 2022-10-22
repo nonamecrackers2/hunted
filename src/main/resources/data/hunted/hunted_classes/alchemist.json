@@ -1,4 +1,10 @@
 {
+	"name": {
+		"translate": "hunted.class.alchemist"
+	},
+	"description": {
+		"translate": "hunted.class.alchemist.description"
+	},
 	"type": "hunted:prey",
 	"abilities": [
 		"#hunted:alchemist",

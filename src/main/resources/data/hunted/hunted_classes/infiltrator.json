@@ -1,4 +1,10 @@
 {
+	"name": {
+		"translate": "hunted.class.infiltrator"
+	},
+	"description": {
+		"translate": "hunted.class.infiltrator.description"
+	},
 	"type": "hunted:prey",
 	"abilities": [
 		"#hunted:infiltrator",

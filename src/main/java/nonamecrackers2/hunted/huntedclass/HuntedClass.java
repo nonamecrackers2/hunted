@@ -17,6 +17,7 @@ import com.google.common.collect.Maps;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -32,11 +33,13 @@ import nonamecrackers2.hunted.huntedclass.type.HuntedClassType;
 import nonamecrackers2.hunted.registry.HuntedRegistries;
 import nonamecrackers2.hunted.util.HuntedUtil;
 
-public class HuntedClass 
+public class HuntedClass
 {
 	private static final Logger LOGGER = LogManager.getLogger();
 	
 	private final ResourceLocation id;
+	private final Component name;
+	private final Component description;
 	private final HuntedClassType type;
 	private final boolean mutable;
 	private final Optional<SoundEvent> loopSound;
@@ -47,9 +50,11 @@ public class HuntedClass
 	private final Map<EquipmentSlot, Item> outfit;
 	private final @Nullable DeathSequence.ConfiguredDeathSequence<?> death;
 	
-	private HuntedClass(ResourceLocation id, HuntedClassType type, boolean mutable, Optional<SoundEvent> loopSound, boolean supportsMask, @Nullable ResourceLocation icon, List<Ability> abilities, Map<EquipmentSlot, Item> outfit, DeathSequence.ConfiguredDeathSequence<?> death)
+	private HuntedClass(ResourceLocation id, Component name, Component description, HuntedClassType type, boolean mutable, Optional<SoundEvent> loopSound, boolean supportsMask, @Nullable ResourceLocation icon, List<Ability> abilities, Map<EquipmentSlot, Item> outfit, DeathSequence.ConfiguredDeathSequence<?> death)
 	{
 		this.id = id;
+		this.name = name;
+		this.description = description;
 		this.type = type;
 		this.mutable = mutable;
 		this.loopSound = loopSound;
@@ -60,14 +65,16 @@ public class HuntedClass
 		this.death = death;
 	}
 		
-	public HuntedClass(ResourceLocation id, HuntedClassType type, Optional<SoundEvent> loopSound, boolean supportsMask, @Nullable ResourceLocation icon, List<Ability> abilities, Map<EquipmentSlot, Item> outfit, DeathSequence.ConfiguredDeathSequence<?> death)
+	public HuntedClass(ResourceLocation id, Component name, Component description, HuntedClassType type, Optional<SoundEvent> loopSound, boolean supportsMask, @Nullable ResourceLocation icon, List<Ability> abilities, Map<EquipmentSlot, Item> outfit, DeathSequence.ConfiguredDeathSequence<?> death)
 	{
-		this(id, type, false, loopSound, supportsMask, icon, abilities, outfit, death);
+		this(id, name, description, type, false, loopSound, supportsMask, icon, abilities, outfit, death);
 	}
 	
 	public void toPacket(FriendlyByteBuf buffer)
 	{
 		buffer.writeResourceLocation(this.id);
+		buffer.writeComponent(this.name);
+		buffer.writeComponent(this.description);
 		buffer.writeRegistryId(HuntedRegistries.HUNTED_CLASS_TYPES.get(), this.type);
 		buffer.writeVarInt(this.outfit.size());
 		this.outfit.forEach((slot, item) -> 
@@ -86,6 +93,8 @@ public class HuntedClass
 	public static HuntedClass fromPacket(FriendlyByteBuf buffer)
 	{
 		ResourceLocation id = buffer.readResourceLocation();
+		Component name = buffer.readComponent();
+		Component description = buffer.readComponent();
 		HuntedClassType type = buffer.readRegistryIdSafe(HuntedClassType.class);
 		int outfitSize = buffer.readVarInt();
 		Map<EquipmentSlot, Item> slots = Maps.newHashMap();
@@ -98,12 +107,22 @@ public class HuntedClass
 		ResourceLocation icon = null;
 		if (buffer.readBoolean())
 			icon = buffer.readResourceLocation();
-		return new HuntedClass(id, type, loopSound, supportsMask, icon, ImmutableList.of(), slots, null);
+		return new HuntedClass(id, name, description, type, loopSound, supportsMask, icon, ImmutableList.of(), slots, null);
 	}
  	
 	public ResourceLocation id()
 	{
 		return this.id;
+	}
+	
+	public Component getName()
+	{
+		return this.name;
+	}
+	
+	public Component getDescription()
+	{
+		return this.description;
 	}
 	
 	public HuntedClassType getType()
@@ -131,7 +150,7 @@ public class HuntedClass
 	{
 		ImmutableList.Builder<Ability> abilitiesCopy = ImmutableList.builder();
 		this.abilities.forEach((ability) -> abilitiesCopy.add(ability.copy()));
-		return new HuntedClass(this.id, this.type, true, this.loopSound, this.supportsMask, this.icon, abilitiesCopy.build(), this.outfit, this.death);
+		return new HuntedClass(this.id, this.name, this.description, this.type, true, this.loopSound, this.supportsMask, this.icon, abilitiesCopy.build(), this.outfit, this.death);
 	}
 	
 	public boolean isMutable()

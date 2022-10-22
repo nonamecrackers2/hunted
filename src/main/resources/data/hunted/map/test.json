@@ -1,4 +1,7 @@
 {
+	"name": {
+		"translate": "hunted.map.test"
+	},
 	"start_positions": [
 		{
 			"type": "hunted:hunter",
@@ -60,24 +63,20 @@
 	"overlay": {
 		"type": "hunted:collected_rewards",
 		"settings": {
-			"rewards": {
-				"hunted:key_invigoration": {
-					"color": "aqua",
-					"bold": false
+			"rewards": [
+				{
+					"type": "hunted:key_invigoration"
 				},
-				"hunted:key_sabotage": {
-					"color": "red",
-					"bold": false
+				{
+					"type": "hunted:key_sabotage"
 				},
-				"hunted:key_origin": {
-					"color": "green",
-					"bold": false
+				{
+					"type": "hunted:key_origin"
 				},
-				"hunted:key_mist": {
-					"color": "yellow",
-					"bold": false
+				{
+					"type": "hunted:key_mist"
 				}
-			}
+			]
 		}
 	},
 	"revival_positions": [

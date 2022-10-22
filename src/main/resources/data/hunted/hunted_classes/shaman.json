@@ -1,4 +1,10 @@
 {
+	"name": {
+		"translate": "hunted.class.shaman"
+	},
+	"description": {
+		"translate": "hunted.class.shaman.description"
+	},
 	"type": "hunted:prey",
 	"abilities": [
 		"#hunted:shaman",

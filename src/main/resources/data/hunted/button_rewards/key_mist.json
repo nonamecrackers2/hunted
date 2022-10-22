@@ -1,4 +1,8 @@
 {
+	"name": {
+		"translate": "hunted.reward.key_mist",
+		"color": "yellow"
+	},
 	"global_message": {
 		"translate": "hunted.reward.key_mist.message.global",
 		"color": "gold",

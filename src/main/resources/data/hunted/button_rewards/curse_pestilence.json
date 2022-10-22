@@ -1,4 +1,8 @@
 {
+	"name": {
+		"translate": "hunted.reward.curse_pestilence",
+		"color": "dark_red"
+	},
 	"global_message": {
 		"translate": "hunted.reward.curse.message.hunter"
 	},

@@ -29,6 +29,7 @@ import nonamecrackers2.hunted.util.TargetSupplier;
 public class ButtonReward
 {
 	private final ResourceLocation id;
+	private final Component name;
 	private final @Nullable Component globalMessage;
 	private final TargetSupplier globalMessageSupplier;
 	private final List<Component> rewardMessage;
@@ -40,9 +41,10 @@ public class ButtonReward
 	private final TargetSupplier supplier;
 	private final List<String> events;
 	
-	public ButtonReward(ResourceLocation id, @Nullable Component globalMessage, TargetSupplier globalMessageSupplier, List<Component> rewardMessage, boolean randomMessage, SoundEvent sound, float pitch, List<NamedItemHolder> rewards, List<MobEffectHolder> effects, TargetSupplier supplier, List<String> events)
+	public ButtonReward(ResourceLocation id, Component name, @Nullable Component globalMessage, TargetSupplier globalMessageSupplier, List<Component> rewardMessage, boolean randomMessage, SoundEvent sound, float pitch, List<NamedItemHolder> rewards, List<MobEffectHolder> effects, TargetSupplier supplier, List<String> events)
 	{
 		this.id = id;
+		this.name = name;
 		this.globalMessage = globalMessage;
 		this.globalMessageSupplier = globalMessageSupplier;
 		this.rewardMessage = rewardMessage;
@@ -58,6 +60,7 @@ public class ButtonReward
 	public void toPacket(FriendlyByteBuf buffer)
 	{
 		buffer.writeResourceLocation(this.id);
+		buffer.writeComponent(this.name);
 		buffer.writeNullable(this.globalMessage, FriendlyByteBuf::writeComponent);
 		buffer.writeCollection(this.rewardMessage, FriendlyByteBuf::writeComponent);
 		buffer.writeBoolean(this.randomMessage);
@@ -70,6 +73,7 @@ public class ButtonReward
 	public static ButtonReward fromPacket(FriendlyByteBuf buffer)
 	{
 		ResourceLocation id = buffer.readResourceLocation();
+		Component name = buffer.readComponent();
 		Component globalMessage = buffer.readNullable(FriendlyByteBuf::readComponent);
 		List<Component> rewardMessages = ImmutableList.copyOf(buffer.readList(FriendlyByteBuf::readComponent));
 		boolean randomMessage = buffer.readBoolean();
@@ -77,7 +81,7 @@ public class ButtonReward
 		float pitch = buffer.readFloat();
 		List<NamedItemHolder> rewards = ImmutableList.copyOf(buffer.readList(NamedItemHolder::fromPacket));
 		List<MobEffectHolder> effects = ImmutableList.copyOf(buffer.readList(MobEffectHolder::fromPacket));
-		return new ButtonReward(id, globalMessage, TargetSupplier.DEFAULT, rewardMessages, randomMessage, sound, pitch, rewards, effects, TargetSupplier.DEFAULT, ImmutableList.of());
+		return new ButtonReward(id, name, globalMessage, TargetSupplier.DEFAULT, rewardMessages, randomMessage, sound, pitch, rewards, effects, TargetSupplier.DEFAULT, ImmutableList.of());
 	}
 	
 	public void reward(TriggerContext context)
@@ -113,6 +117,11 @@ public class ButtonReward
 	public ResourceLocation getId()
 	{
 		return this.id;
+	}
+	
+	public Component getName()
+	{
+		return this.name;
 	}
 	
 	public List<MapEventHolder> getEvents()

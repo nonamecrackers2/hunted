@@ -1,4 +1,10 @@
 {
+	"name": {
+		"translate": "hunted.class.rogue"
+	},
+	"description": {
+		"translate": "hunted.class.rogue.description"
+	},
 	"type": "hunted:prey",
 	"abilities": [
 		"#hunted:rogue",

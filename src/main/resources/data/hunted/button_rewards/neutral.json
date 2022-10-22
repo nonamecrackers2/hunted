@@ -1,4 +1,8 @@
 {
+	"name": {
+		"translate": "hunted.reward.neutral",
+		"color": "blue"
+	},
 	"message": [
 		{
 			"translate": "hunted.reward.neutral.message.prefix",

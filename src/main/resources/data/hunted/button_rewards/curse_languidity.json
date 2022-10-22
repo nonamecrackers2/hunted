@@ -1,4 +1,8 @@
 {
+	"name": {
+		"translate": "hunted.reward.curse_languidity",
+		"color": "dark_red"
+	},
 	"global_message": {
 		"translate": "hunted.reward.curse_languidity.message.hunter"
 	},

@@ -20,6 +20,7 @@ import com.google.gson.JsonSyntaxException;
 import com.mojang.serialization.JsonOps;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
@@ -54,6 +55,7 @@ public class HuntedMapDataManager extends SimpleDataManager<HuntedMap>
 		
 		JsonObject object = GsonHelper.convertToJsonObject(element, "hunted_map");
 		
+		Component name = Component.Serializer.fromJson(object.get("name"));
 		Map<HuntedClassType, BlockPos> startPositions = getStartPositions(GsonHelper.getAsJsonArray(object, "start_positions"));
 		BlockPos defaultStartPos = BlockPos.CODEC.parse(JsonOps.INSTANCE, object.get("default_start_pos")).resultOrPartial(HuntedUtil::throwJSE).get();
 		List<BlockPos> buttons = getBlockPosList(GsonHelper.getAsJsonArray(object, "buttons"));
@@ -83,7 +85,7 @@ public class HuntedMapDataManager extends SimpleDataManager<HuntedMap>
 		AmbienceSettings ambience = null;
 		if (object.has("ambience"))
 			ambience = AmbienceSettings.fromJson(GsonHelper.getAsJsonObject(object, "ambience"));
-		return new HuntedMap(id, startPositions, defaultStartPos, buttons, rewards, boundary, preyExit, events, keyholes, overlay, revivalPositions, buttonPressingDelay, Optional.ofNullable(ambience));
+		return new HuntedMap(id, name, startPositions, defaultStartPos, buttons, rewards, boundary, preyExit, events, keyholes, overlay, revivalPositions, buttonPressingDelay, Optional.ofNullable(ambience));
 	}
 	
 	private static Map<HuntedClassType, BlockPos> getStartPositions(JsonArray array)

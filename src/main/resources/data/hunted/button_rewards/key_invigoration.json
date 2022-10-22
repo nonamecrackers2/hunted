@@ -1,4 +1,8 @@
 {
+	"name": {
+		"translate": "hunted.reward.key_invigoration",
+		"color": "aqua"
+	},
 	"global_message": {
 		"translate": "hunted.reward.key_invigoration.message.global",
 		"color": "gold",

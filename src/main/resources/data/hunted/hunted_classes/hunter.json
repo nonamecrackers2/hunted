@@ -1,4 +1,10 @@
 {
+	"name": {
+		"translate": "hunted.class.hunter"
+	},
+	"description": {
+		"translate": "hunted.class.hunter.description"
+	},
 	"type": "hunted:hunter",
 	"abilities": [
 		"#hunted:hunter"

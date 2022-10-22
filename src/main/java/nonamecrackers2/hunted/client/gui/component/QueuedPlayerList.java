@@ -16,6 +16,7 @@ import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.FormattedCharSequence;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
 import nonamecrackers2.hunted.init.HuntedClassTypes;
@@ -99,8 +100,8 @@ public class QueuedPlayerList extends ObjectSelectionList<QueuedPlayerList.Entry
 					
 			}
 			HuntedClass huntedClass = this.selector.getFromType(HuntedClassTypes.PREY.get());
-			Component prey = Component.translatable(huntedClass.id().getNamespace() + ".class." + huntedClass.id().getPath()).withStyle(ChatFormatting.DARK_GRAY);
-			GuiComponent.drawString(stack, font, prey, left + 8 + FACE_SIZE, top + 4 + font.lineHeight, 16777215);
+			Component prey = huntedClass.getName();
+			GuiComponent.drawString(stack, font, prey, left + 8 + FACE_SIZE, top + 4 + font.lineHeight, ChatFormatting.DARK_GRAY.getColor());
 		}
 	}
 }

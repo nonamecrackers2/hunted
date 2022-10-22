@@ -42,6 +42,7 @@ public class ButtonRewardsDataManager extends SimpleDataManager<ButtonReward>
 	{
 		JsonElement element = value.getValue();
 		JsonObject object = GsonHelper.convertToJsonObject(element, "reward");
+		Component name = Component.Serializer.fromJson(object.get("name"));
 		if (!object.has("message"))
 			throw new JsonSyntaxException("Must include a reward message!");
 		Component globalMessage = null;
@@ -67,7 +68,7 @@ public class ButtonRewardsDataManager extends SimpleDataManager<ButtonReward>
 		List<String> events = Lists.newArrayList();
 		if (object.has("events"))
 			events = getEvents(GsonHelper.getAsJsonArray(object, "events"));
-		return new ButtonReward(value.getKey(), globalMessage, globalMessageSupplier, messages, randomMessage, sound, pitch, items, effects, supplier, events);
+		return new ButtonReward(value.getKey(), name, globalMessage, globalMessageSupplier, messages, randomMessage, sound, pitch, items, effects, supplier, events);
 	}
 	
 	private static List<NamedItemHolder> getItemList(JsonArray array)
