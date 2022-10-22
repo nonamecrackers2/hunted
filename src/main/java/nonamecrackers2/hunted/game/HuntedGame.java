@@ -512,6 +512,11 @@ public class HuntedGame implements DataHolder
 		return list;
 	}
 	
+	public boolean canPressButtons()
+	{
+		return this.buttonPressingDelay <= 0;
+	}
+	
 	public static HuntedGame read(ServerLevel level, CompoundTag tag) throws NullPointerException
 	{
 		List<UUID> players = readUUIDList(tag.getList("Players", 11));

@@ -6,13 +6,24 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.ButtonBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import nonamecrackers2.hunted.capability.PlayerClassManager;
+import nonamecrackers2.hunted.game.HuntedGame;
+import nonamecrackers2.hunted.game.HuntedGameManager;
+import nonamecrackers2.hunted.huntedclass.HuntedClass;
+import nonamecrackers2.hunted.init.HuntedCapabilities;
 
 public class RewardButtonBlock extends ButtonBlock
 {
@@ -74,4 +85,37 @@ public class RewardButtonBlock extends ButtonBlock
 	
 	@Override
 	public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {}
+	
+	@Override
+	public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult result)
+	{
+		if (state.getValue(ButtonBlock.POWERED))
+		{
+			return InteractionResult.CONSUME;
+		}
+		else
+		{
+			HuntedGameManager manager = level.getCapability(HuntedCapabilities.GAME_MANAGER).orElse(null);
+			if (manager != null)
+			{
+				HuntedGame game = manager.getCurrentGame().orElse(null);
+				if (game != null && game.canPressButtons())
+				{
+					PlayerClassManager classManager = player.getCapability(HuntedCapabilities.PLAYER_CLASS_MANAGER).orElse(null);
+					if (classManager != null)
+					{
+						HuntedClass huntedClass = classManager.getCurrentClass().orElse(null);
+						if (huntedClass != null && huntedClass.getType().canCollectRewards())
+						{
+							this.press(state, level, pos);
+							this.playSound(null, level, pos, true);
+							level.gameEvent(player, GameEvent.BLOCK_ACTIVATE, pos);
+							return InteractionResult.CONSUME;
+						}
+					}
+				}
+			}
+			return InteractionResult.SUCCESS;
+		}
+	}
 }
