@@ -85,7 +85,7 @@
 		[8, -59, 3],
 		[8, -59, -3]
 	],
-	"button_pressing_delay": 0,
+	"button_pressing_delay": 120,
 	"ambience": {
 		"background": "hunted:mansion_ambience",
 		"foreground": "hunted:creak",
