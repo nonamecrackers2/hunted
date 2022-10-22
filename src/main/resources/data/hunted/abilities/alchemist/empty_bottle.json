@@ -16,7 +16,7 @@
 								}
 							],
 							"display": {
-								"Name": "\"Nausea\""
+								"Name": "[{\"translate\": \"hunted.ability.empty_bottle.nausea\"}]"
 							}
 						}
 					},
@@ -33,7 +33,7 @@
 								}
 							],
 							"display": {
-								"Name": "\"Invincibility\""
+								"Name": "[{\"translate\": \"hunted.ability.empty_bottle.invincibility\"}]"
 							}
 						}
 					},
@@ -49,7 +49,7 @@
 								}
 							],
 							"display": {
-								"Name": "\"Blindness\""
+								"Name": "[{\"translate\": \"hunted.ability.empty_bottle.blindness\"}]"
 							}
 						}
 					},
@@ -65,7 +65,7 @@
 								}
 							],
 							"display": {
-								"Name": "\"Invisibility\""
+								"Name": "[{\"translate\": \"hunted.ability.empty_bottle.invisibility\"}]"
 							}
 						}
 					},
@@ -81,7 +81,7 @@
 								}
 							],
 							"display": {
-								"Name": "\"Slowness\""
+								"Name": "[{\"translate\": \"hunted.ability.empty_bottle.slowness\"}]"
 							}
 						}
 					}
