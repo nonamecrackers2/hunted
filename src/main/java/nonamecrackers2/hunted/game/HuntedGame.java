@@ -68,12 +68,14 @@ public class HuntedGame implements DataHolder
 	private @Nullable CompoundTag data;
 	private int timeElapse;
 	private int buttonPressingDelay;
+	private final boolean buttonHighlighting;
 
-	public HuntedGame(ServerLevel level, List<UUID> players, HuntedMap map)
+	public HuntedGame(ServerLevel level, List<UUID> players, HuntedMap map, boolean buttonHighlighting)
 	{
 		this.level = level;
 		this.players = players;
 		this.map = map;
+		this.buttonHighlighting = buttonHighlighting;
 	}
 	
 	public void tick()
@@ -455,6 +457,7 @@ public class HuntedGame implements DataHolder
 		if (this.data != null)
 			tag.put("Data", this.data);
 		tag.putInt("TimeElapsed", this.timeElapse);
+		tag.putBoolean("ButtonHighlighting", this.buttonHighlighting);
 	}
 	
 	private void resetMap()
@@ -517,6 +520,11 @@ public class HuntedGame implements DataHolder
 		return this.buttonPressingDelay <= 0;
 	}
 	
+	public boolean buttonHighlighting()
+	{
+		return this.buttonHighlighting;
+	}
+	
 	public static HuntedGame read(ServerLevel level, CompoundTag tag) throws NullPointerException
 	{
 		List<UUID> players = readUUIDList(tag.getList("Players", 11));
@@ -526,7 +534,8 @@ public class HuntedGame implements DataHolder
 		HuntedMap map = HuntedMapDataManager.INSTANCE.get(mapId);
 		if (map == null)
 			throw new NullPointerException("Failed to load map");
-		HuntedGame game = new HuntedGame(level, players, map);
+		boolean buttonHighlighting = tag.getBoolean("ButtonHighlighting");
+		HuntedGame game = new HuntedGame(level, players, map, buttonHighlighting);
 		game.availableRewards = readRewardMap(tag.getList("Rewards", 10));
 		game.collectedRewards = readRewardMap(tag.getList("CollectedRewards", 10));
 		for (UUID uuid : eliminated)

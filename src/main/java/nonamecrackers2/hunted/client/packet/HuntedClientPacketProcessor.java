@@ -77,6 +77,7 @@ public class HuntedClientPacketProcessor
 			{
 				manager.setMap(null);
 			}
+			manager.setButtonHighlighting(packet.buttonHighlighting());
 		});
 	}
 	

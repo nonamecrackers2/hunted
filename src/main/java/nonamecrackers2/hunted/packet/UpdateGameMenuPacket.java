@@ -1,5 +1,6 @@
 package nonamecrackers2.hunted.packet;
 
+import java.awt.BufferCapabilities;
 import java.util.Map;
 import java.util.UUID;
 
@@ -25,8 +26,9 @@ public class UpdateGameMenuPacket extends Packet
 	private @Nullable UUID vip;
 	private boolean gameRunning;
 	private boolean gameStarting;
+	private boolean buttonHighlighting;
 	
-	public UpdateGameMenuPacket(@Nullable EventType processed, Map<UUID, HuntedClassSelector> queued, @Nullable HuntedMap selectedMap, @Nullable UUID vip, boolean gameRunning, boolean gameStarting)
+	public UpdateGameMenuPacket(@Nullable EventType processed, Map<UUID, HuntedClassSelector> queued, @Nullable HuntedMap selectedMap, @Nullable UUID vip, boolean gameRunning, boolean gameStarting, boolean buttonHighlighting)
 	{
 		super(true);
 		this.processed = processed;
@@ -36,6 +38,7 @@ public class UpdateGameMenuPacket extends Packet
 		this.vip = vip;
 		this.gameRunning = gameRunning;
 		this.gameStarting = gameStarting;
+		this.buttonHighlighting = buttonHighlighting;
 	}
 	
 	public UpdateGameMenuPacket()
@@ -73,6 +76,11 @@ public class UpdateGameMenuPacket extends Packet
 		return this.gameStarting;
 	}
 	
+	public boolean buttonHighlighting()
+	{
+		return this.buttonHighlighting;
+	}
+	
 	@Override
 	public void decode(FriendlyByteBuf buffer) throws IllegalArgumentException, IndexOutOfBoundsException
 	{
@@ -89,6 +97,7 @@ public class UpdateGameMenuPacket extends Packet
 			this.vip = buffer.readUUID();
 		this.gameRunning = buffer.readBoolean();
 		this.gameStarting = buffer.readBoolean();
+		this.buttonHighlighting = buffer.readBoolean();
 	}
 	
 	@Override
@@ -112,6 +121,7 @@ public class UpdateGameMenuPacket extends Packet
 			buffer.writeUUID(this.vip);
 		buffer.writeBoolean(this.gameRunning);
 		buffer.writeBoolean(this.gameStarting);
+		buffer.writeBoolean(this.buttonHighlighting);
 	}
 	
 	@Override
@@ -128,6 +138,7 @@ public class UpdateGameMenuPacket extends Packet
 				+ "map=" + this.map + ", "
 				+ "vip=" + this.vip + ", "
 				+ "gameRunning=" + this.gameRunning + ", "
-				+ "gameStarting=" + this.gameStarting + "]";
+				+ "gameStarting=" + this.gameStarting + ", "
+				+ "buttonHighlighting=" + this.buttonHighlighting + "]";
 	}
 }

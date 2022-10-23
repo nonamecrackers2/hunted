@@ -15,6 +15,7 @@ public class HuntedClientGameInfo
 	private boolean gameRunning;
 	private List<Component> overlay = Lists.newArrayList();
 	private Optional<HuntedMap> map;
+	private boolean buttonHighlighting;
 	
 	public boolean isGameRunning()
 	{
@@ -44,5 +45,15 @@ public class HuntedClientGameInfo
 	public void setMap(@Nullable HuntedMap map)
 	{
 		this.map = Optional.ofNullable(map);
+	}
+	
+	public boolean buttonHighlighting()
+	{
+		return this.buttonHighlighting;
+	}
+	
+	public void setButtonHighlighting(boolean flag)
+	{
+		this.buttonHighlighting = flag;
 	}
 }

@@ -27,6 +27,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -51,6 +52,7 @@ import nonamecrackers2.hunted.packet.JoinGamePacket;
 import nonamecrackers2.hunted.packet.LeaveGamePacket;
 import nonamecrackers2.hunted.packet.RequestMenuUpdatePacket;
 import nonamecrackers2.hunted.packet.SelectMapPacket;
+import nonamecrackers2.hunted.packet.SetButtonHighlightingPacket;
 import nonamecrackers2.hunted.packet.StopGameCountdownPacket;
 import nonamecrackers2.hunted.packet.UpdateGameMenuPacket;
 import nonamecrackers2.hunted.registry.HuntedRegistries;
@@ -97,6 +99,7 @@ public class HuntedGameMenuScreen extends Screen
 	private @Nullable UUID vip;
 	private boolean gameRunning;
 	private boolean gameStarting;
+	private boolean buttonHighlighting;
 	
 	public HuntedGameMenuScreen()
 	{
@@ -243,6 +246,11 @@ public class HuntedGameMenuScreen extends Screen
 				HuntedPacketHandlers.MAIN.sendToServer(new StopGameCountdownPacket());
 				break;
 			}
+			case SET_BUTTON_HIGHLIGHTING:
+			{
+				HuntedPacketHandlers.MAIN.sendToServer(new SetButtonHighlightingPacket(!this.buttonHighlighting));
+				break;
+			}
 			}
 			this.processingEvent = event;
 		}
@@ -274,6 +282,7 @@ public class HuntedGameMenuScreen extends Screen
 		
 		this.gameRunning = packet.gameRunning();
 		this.gameStarting = packet.gameStarting();
+		this.buttonHighlighting = packet.buttonHighlighting();
 		
 		this.menu.onUpdatePacketReceived();
 	}
@@ -632,8 +641,10 @@ public class HuntedGameMenuScreen extends Screen
 	
 	public class GameMenu extends MenuTab
 	{
+		private static final ResourceLocation BUTTON_HIGHLIGHTING = HuntedMod.resource("textures/gui/button_highlighting.png");
 		private static final int BUTTON_WIDTH = 80;
-		private static final int BUTTON_BACKGROUND_WIDTH = BUTTON_WIDTH * 2 + 20;
+		private static final int BUTTON_HIGHLIGHTING_SIZE = 20;
+		private static final int BUTTON_BACKGROUND_WIDTH = BUTTON_WIDTH * 2 + BUTTON_HIGHLIGHTING_SIZE + 20;
 		private final SelectionList<HuntedMap> list;
 		private final Button select;
 		private final QueuedPlayerList playerList;
@@ -641,6 +652,7 @@ public class HuntedGameMenuScreen extends Screen
 		private final Button begin;
 		private final FormattedTextList mapInfo;
 		private @Nullable SimpleDataManagerList.Entry<HuntedMap> prevEntry;
+		private final Button buttonHighlighting;
 		
 		public GameMenu()
 		{
@@ -700,6 +712,16 @@ public class HuntedGameMenuScreen extends Screen
 			this.joinLeave.active = false;
 			this.begin.active = false;
 			this.mapInfo = new FormattedTextList(this.mc, LIST_WIDTH, WINDOW_HEIGHT, 0, WINDOW_HEIGHT, false);
+			this.buttonHighlighting =  new ImageButton(0, 0, BUTTON_HIGHLIGHTING_SIZE, BUTTON_HIGHLIGHTING_SIZE, 0, 0, BUTTON_HIGHLIGHTING_SIZE, BUTTON_HIGHLIGHTING, 256, 256, button -> {
+				HuntedGameMenuScreen.this.doEvent(EventType.SET_BUTTON_HIGHLIGHTING);
+			}, (button, stack, mouseX, mouseY) -> 
+			{
+				if (HuntedGameMenuScreen.this.isVip())
+					HuntedGameMenuScreen.this.renderTooltip(stack, Component.translatable("hunted.menu.game.buttonHighlighting"), mouseX, mouseY);
+				else
+					HuntedGameMenuScreen.this.renderTooltip(stack, Component.translatable("hunted.menu.select.button.notVip"), mouseX, mouseY);
+			}, CommonComponents.EMPTY);
+			this.buttonHighlighting.active = false;
 		}
 		
 		@Override
@@ -740,6 +762,12 @@ public class HuntedGameMenuScreen extends Screen
 			HuntedGameMenuScreen.this.renderButtonBackground(stack, x + width / 2 - BUTTON_BACKGROUND_WIDTH / 2, y + height + WINDOW_BORDER / 2 - BUTTON_WINDOW_HEIGHT / 2, BUTTON_BACKGROUND_WIDTH);
 			this.joinLeave.render(stack, mouseX, mouseY, partialTicks);
 			this.begin.render(stack, mouseX, mouseY, partialTicks);
+			this.buttonHighlighting.render(stack, mouseX, mouseY, partialTicks);
+			if (!HuntedGameMenuScreen.this.buttonHighlighting)
+			{
+				RenderSystem.setShaderTexture(0, BUTTON_HIGHLIGHTING);
+				this.blit(stack, this.buttonHighlighting.x, this.buttonHighlighting.y, BUTTON_HIGHLIGHTING_SIZE, 0, this.buttonHighlighting.getWidth(), this.buttonHighlighting.getHeight());
+			}
 			if (this.playerList.children().isEmpty())
 				this.mc.font.drawWordWrap(Component.translatable("hunted.menu.game.noPlayers").withStyle(ChatFormatting.DARK_GRAY), this.playerList.getLeft() + 10, this.playerList.getTop() + this.playerList.getHeight() / 2 - this.mc.font.lineHeight / 2, this.playerList.getWidth(), 16777215);
 			HuntedMap highlighted = this.getHighlighted();
@@ -784,12 +812,15 @@ public class HuntedGameMenuScreen extends Screen
 			this.playerList.updateSize(width / 2 - 10, height, y, y + height);
 			this.playerList.setLeftPos(x);
 			HuntedGameMenuScreen.this.addRenderableWidget(this.playerList);
-			this.joinLeave.x = x + width / 2 - this.joinLeave.getWidth() - 2;
+			this.joinLeave.x = x + width / 2 - 4 - this.joinLeave.getWidth() - BUTTON_HIGHLIGHTING_SIZE / 2;
 			this.joinLeave.y = y + height + WINDOW_BORDER / 2 - this.joinLeave.getHeight() / 2;
 			HuntedGameMenuScreen.this.addWidget(this.joinLeave);
-			this.begin.x = x + width / 2 + 2;
-			this.begin.y = y + height + WINDOW_BORDER / 2 - this.joinLeave.getHeight() / 2;
+			this.begin.x = x + width / 2 - BUTTON_HIGHLIGHTING_SIZE / 2;
+			this.begin.y = y + height + WINDOW_BORDER / 2 - this.begin.getHeight() / 2;
 			HuntedGameMenuScreen.this.addWidget(this.begin);
+			this.buttonHighlighting.x = this.begin.x + this.begin.getWidth() + 4;
+			this.buttonHighlighting.y = y + height + WINDOW_BORDER / 2 - this.buttonHighlighting.getHeight() / 2;
+			HuntedGameMenuScreen.this.addWidget(this.buttonHighlighting);
 			this.mapInfo.updateSize(width / 2, height, y, y + height - 15);
 			this.mapInfo.setLeftPos(x + width / 2);
 			HuntedGameMenuScreen.this.addRenderableWidget(this.mapInfo);
@@ -822,6 +853,7 @@ public class HuntedGameMenuScreen extends Screen
 					this.list.setSelected(entry);
 			}
 			this.buildMapDescription();
+			this.buttonHighlighting.active = HuntedGameMenuScreen.this.isVip();
 		}
 		
 		@Override

@@ -7,7 +7,9 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -16,11 +18,13 @@ import nonamecrackers2.hunted.client.event.HuntedClientEvents;
 import nonamecrackers2.hunted.client.event.HuntedRenderEvents;
 import nonamecrackers2.hunted.client.gui.menu.KioskScreen;
 import nonamecrackers2.hunted.client.init.HuntedClientCapabilities;
+import nonamecrackers2.hunted.client.init.HuntedParticleProviders;
 import nonamecrackers2.hunted.client.init.HuntedRenderers;
 import nonamecrackers2.hunted.client.keybind.HuntedKeybinds;
 import nonamecrackers2.hunted.client.overlay.HuntedOverlays;
 import nonamecrackers2.hunted.client.sound.manager.HuntedSoundManager;
 import nonamecrackers2.hunted.commands.HuntedCommands;
+import nonamecrackers2.hunted.config.HuntedConfig;
 import nonamecrackers2.hunted.event.HuntedDataEvents;
 import nonamecrackers2.hunted.event.HuntedEvents;
 import nonamecrackers2.hunted.game.HuntedGameManager;
@@ -35,6 +39,7 @@ import nonamecrackers2.hunted.init.HuntedItems;
 import nonamecrackers2.hunted.init.HuntedMenuTypes;
 import nonamecrackers2.hunted.init.HuntedOverlayTypes;
 import nonamecrackers2.hunted.init.HuntedPacketHandlers;
+import nonamecrackers2.hunted.init.HuntedParticleTypes;
 import nonamecrackers2.hunted.init.HuntedSoundEvents;
 import nonamecrackers2.hunted.init.MapEvents;
 import nonamecrackers2.hunted.init.TriggerTypes;
@@ -64,6 +69,7 @@ public class HuntedMod
 		HuntedOverlayTypes.register(modBus);
 		HuntedSoundEvents.register(modBus);
 		HuntedMenuTypes.register(modBus);
+		HuntedParticleTypes.register(modBus);
 		IEventBus forgeBus = MinecraftForge.EVENT_BUS;
 		forgeBus.register(HuntedCapabilities.class);
 		forgeBus.addListener(HuntedMod::registerCommands);
@@ -73,7 +79,10 @@ public class HuntedMod
 			modBus.addListener(HuntedOverlays::registerOverlays);
 			modBus.addListener(HuntedClientCapabilities::registerCapabilities);
 			modBus.register(HuntedRenderers.class);
+			modBus.addListener(HuntedParticleProviders::registerProviders);
 		});
+		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, HuntedConfig.CLIENT_SPEC);
+		ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, HuntedConfig.SERVER_SPEC);
 	}
 	
 	public void onClientInit(final FMLClientSetupEvent event)

@@ -20,13 +20,15 @@ public class UpdateGameInfoPacket extends Packet
 	private boolean gameRunning;
 	private List<Component> text;
 	private @Nullable ResourceLocation mapId;
+	private boolean buttonHighlighting;
 	
-	public UpdateGameInfoPacket(boolean gameRunning, List<Component> text, @Nullable HuntedMap map)
+	public UpdateGameInfoPacket(boolean gameRunning, List<Component> text, @Nullable HuntedMap map, boolean buttonHighlighting)
 	{
 		super(true);
 		this.gameRunning = gameRunning;
 		this.text = text;
 		this.mapId = map != null ? map.id() : null;
+		this.buttonHighlighting = buttonHighlighting;
 	}
 	
 	public UpdateGameInfoPacket()
@@ -49,6 +51,11 @@ public class UpdateGameInfoPacket extends Packet
 		return this.mapId;
 	}
 	
+	public boolean buttonHighlighting()
+	{
+		return this.buttonHighlighting;
+	}
+	
 	@Override
 	public void decode(FriendlyByteBuf buffer) throws IllegalArgumentException, IndexOutOfBoundsException
 	{
@@ -60,6 +67,7 @@ public class UpdateGameInfoPacket extends Packet
 		this.text = text;
 		if (buffer.readBoolean())
 			this.mapId = buffer.readResourceLocation();
+		this.buttonHighlighting = buffer.readBoolean();
 	}
 	
 	@Override
@@ -73,6 +81,7 @@ public class UpdateGameInfoPacket extends Packet
 		buffer.writeBoolean(this.mapId != null);
 		if (this.mapId != null)
 			buffer.writeResourceLocation(this.mapId);
+		buffer.writeBoolean(this.buttonHighlighting);
 	}
 	
 	@Override
@@ -87,6 +96,7 @@ public class UpdateGameInfoPacket extends Packet
 		return "UpdateGameInfoPacket[" 
 				+ "gameIsRunning: " + this.gameRunning + ", "
 				+ "text: " + this.text + ", "
-				+ "mapId: " + this.mapId + "]";
+				+ "mapId: " + this.mapId + ", "
+				+ "buttonHighlighting: " + this.buttonHighlighting + "]";
 	}
 }

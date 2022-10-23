@@ -29,6 +29,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.PacketDistributor.PacketTarget;
 import nonamecrackers2.hunted.capability.ServerPlayerClassManager;
+import nonamecrackers2.hunted.config.HuntedConfig;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
 import nonamecrackers2.hunted.huntedclass.type.HuntedClassType;
 import nonamecrackers2.hunted.huntedclass.type.HunterClassType;
@@ -210,7 +211,7 @@ public class HuntedGameManager
 		HuntedGame game = this.currentGame.orElse(null);
 		if (game != null)
 			map = game.getMap();
-		HuntedPacketHandlers.MAIN.send(PacketDistributor.PLAYER.with(() -> player), new UpdateGameInfoPacket(this.isGameRunning(), this.overlayText, map));
+		HuntedPacketHandlers.MAIN.send(PacketDistributor.PLAYER.with(() -> player), new UpdateGameInfoPacket(this.isGameRunning(), this.overlayText, map, game != null ? game.buttonHighlighting() : false));
 	}
 	
 	public Optional<HuntedGame> getCurrentGame()
@@ -329,7 +330,7 @@ public class HuntedGameManager
 		{
 			List<ServerPlayer> players = this.players.keySet().stream().collect(Collectors.toList());
 			
-			HuntedGame game = new HuntedGame(this.level, players.stream().collect(Collectors.mapping(ServerPlayer::getUUID, Collectors.toList())), this.map);
+			HuntedGame game = new HuntedGame(this.level, players.stream().collect(Collectors.mapping(ServerPlayer::getUUID, Collectors.toList())), this.map, HuntedConfig.SERVER.buttonHighlighting.get());
 			
 			List<ServerPlayer> hunterApplicable = players.stream().filter(p -> !p.getUUID().equals(this.previousHunter)).toList();
 			int index = this.random.nextInt(hunterApplicable.size());
@@ -508,7 +509,7 @@ public class HuntedGameManager
 	public void updateGameMenus(PacketTarget target, @Nullable EventType event)
 	{
 		var vip = this.getVip();
-		HuntedPacketHandlers.MAIN.send(target, new UpdateGameMenuPacket(event, this.players.entrySet().stream().collect(Collectors.toUnmodifiableMap(entry -> entry.getKey().getUUID(), Map.Entry::getValue)), this.getMap(), vip != null ? vip.getUUID() : null, this.isGameRunning(), this.gameStartDelay > 0));
+		HuntedPacketHandlers.MAIN.send(target, new UpdateGameMenuPacket(event, this.players.entrySet().stream().collect(Collectors.toUnmodifiableMap(entry -> entry.getKey().getUUID(), Map.Entry::getValue)), this.getMap(), vip != null ? vip.getUUID() : null, this.isGameRunning(), this.gameStartDelay > 0, HuntedConfig.SERVER.buttonHighlighting.get()));
 	}
 	
 	public void purgeRemovedPlayers(boolean updateMenus)

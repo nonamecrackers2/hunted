@@ -1,6 +1,6 @@
 {
 	"hunted.game.title": "HUNTED",
-	"hunted.game.description": "In Hunted, prey trapped by the Hunter must collect all the required keys and escape before they meet their untimely demise. The prey must work together to strategize and form plans on how they’ll go about collecting the keys, while avoiding curses, obstacles, and ultimately the Hunter. Each prey has special abilities pertaining to a specific class that benefits them in their escape and optionally slows down the Hunter.\n\nButtons hidden around the map have a chance to give out keys, while also inflicting curses or even doing completely nothing. While button positioning remains the same, the keys, curses and neutrals are randomized each time. When all keys are collected (indicated by the sidebar during the game), make your way to the gate, unlock it and escape before you’re caught.\n\nTo join a game, select your prey and Hunter class in the next tab, then in the tab over join a game.",
+	"hunted.game.description": "In Hunted, prey trapped by the Hunter must collect all the required keys and escape before they meet their untimely demise. The prey must work together to strategize and form plans on how they’ll go about collecting the keys, while avoiding curses, obstacles, and ultimately the Hunter. Each prey has special abilities pertaining to a specific class that benefits them in their escape and optionally slows down the Hunter.\n\nButtons hidden around the map have a chance to give out keys, while also inflicting curses or even doing completely nothing. While button positioning remains the same, the keys, curses and neutrals are randomized each time. When all keys are collected (indicated by the sidebar during the game), make your way to the gate, unlock it and escape before you’re caught.\n\nTo join a game, select your prey and Hunter class in the next tab, then in the tab over join a game. Only the VIP (the first person who joined) can select maps, button highlighting, etc. Button highlighting (the button to the right of the ‘Begin’ button) is meant to get familiar with a map, by highlighting nearby buttons. After playing with it for a few rounds, it’s recommended to disable it and try without highlighting. Good luck!",
 	"hunted.class_type.hunter": "Hunter",
 	"hunted.class_type.hunter.description": "Murder the prey before they escape!",
 	"hunted.class_type.prey": "Prey",
@@ -18,7 +18,7 @@
 	"hunted.class.shaman": "Shaman",
 	"hunted.class.shaman.description": "With another life, the shaman can rest uneasily knowing that after they suffer once to the hands of the Hunter, they get to do it again.",
 	"hunted.class.rogue": "Rogue",
-	"hunted.class.rogue.description": "The rogue can teleport back in time, useful seemingly vanishing when trouble makes way.",
+	"hunted.class.rogue.description": "The rogue can teleport back in time, seemingly vanishing when trouble makes way.",
 	"hunted.map.test": "Test",
 	"hunted.map.mansion": "Mansion",
 	"hunted.overlay.stats.win": "%s wins: %s",
@@ -158,7 +158,10 @@
 	"hunted.menu.game.begin.alreadyRunning": "Game is already running!",
 	"hunted.menu.game.begin.invalidPlayers": "Not enough players!",
 	"hunted.menu.game.begin.starting": "Game is already starting!",
+	"hunted.menu.game.buttonHighlighting": "Specifies if buttons should be highlighted when nearby.",
 	"hunted.menu.map.info.buttons": "Total buttons: %s",
 	"hunted.menu.map.info.rewards": "Rewards:",
-	"hunted.menu.map.info.keyholes": "Key holes: %s"
+	"hunted.menu.map.info.keyholes": "Key holes: %s",
+	"hunted.config.server.buttonHighlighting": "Button Highlighting",
+	"hunted.config.server.horrorElements": "Horror Elements"
 }
