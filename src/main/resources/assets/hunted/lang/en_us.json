@@ -162,6 +162,8 @@
 	"hunted.menu.map.info.buttons": "Total buttons: %s",
 	"hunted.menu.map.info.rewards": "Rewards:",
 	"hunted.menu.map.info.keyholes": "Key holes: %s",
+	"hunted.menu.settings.title": "Client Settings",
 	"hunted.config.server.buttonHighlighting": "Button Highlighting",
-	"hunted.config.server.horrorElements": "Horror Elements"
+	"hunted.config.client.horrorElements": "Horror Elements",
+	"hunted.config.client.horrorElements.description": "Horror Elements"
 }

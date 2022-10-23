@@ -20,6 +20,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.OptionInstance;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
@@ -34,11 +35,14 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.Items;
+import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
 import nonamecrackers2.hunted.HuntedMod;
 import nonamecrackers2.hunted.ability.Ability;
+import nonamecrackers2.hunted.client.gui.component.FormattedOptionsList;
 import nonamecrackers2.hunted.client.gui.component.QueuedPlayerList;
 import nonamecrackers2.hunted.client.gui.component.SimpleDataManagerList;
 import nonamecrackers2.hunted.client.gui.component.TextElementList;
+import nonamecrackers2.hunted.config.HuntedConfig;
 import nonamecrackers2.hunted.game.HuntedGameManager;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
 import nonamecrackers2.hunted.huntedclass.HuntedClassDataManager;
@@ -115,6 +119,7 @@ public class HuntedGameMenuScreen extends Screen
 			this.menus.add(new InfoMenu());
 			this.menus.add(new ClassSelectMenu());
 			this.menus.add(new GameMenu());
+			this.menus.add(new SettingsMenu());
 		}
 		if (this.menu == null)
 			this.menu = this.menus.get(0);
@@ -893,6 +898,55 @@ public class HuntedGameMenuScreen extends Screen
 		private boolean canShowMapWindow()
 		{
 			return this.list.children().size() > 1;
+		}
+	}
+	
+	public class SettingsMenu extends MenuTab
+	{
+		private final FormattedOptionsList settings;
+		
+		public SettingsMenu()
+		{
+			super("hunted.menu.settings.title", 3);
+			this.settings = new FormattedOptionsList(this.mc, WINDOW_WIDTH, WINDOW_HEIGHT, 0, WINDOW_HEIGHT, 25);
+		}
+		
+		@Override
+		public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks, int x, int y, int width, int height)
+		{
+			super.render(stack, mouseX, mouseY, partialTicks, x, y, width, height);
+		}
+		
+		@Override
+		protected void onSelected(int x, int y, int width, int height)
+		{
+			this.settings.updateSize(width, height, y, y + height);
+			this.settings.setLeftPos(x);
+			HuntedGameMenuScreen.this.addRenderableWidget(this.settings);
+			this.addConfigOptions();
+		}
+		
+		@Override
+		protected void onUnselected()
+		{
+			HuntedGameMenuScreen.this.removeWidget(this.settings);
+		}
+		
+		private void addConfigOptions()
+		{
+			this.settings.clear();
+			this.settings.addBig(createBooleanValue("hunted.config.client.horrorElements", Component.translatable("hunted.config.client.horrorElements.description"), HuntedConfig.CLIENT.horrorElements));
+		}
+		
+		private static OptionInstance<Boolean> createBooleanValue(String title, Component desc, BooleanValue value)
+		{
+			OptionInstance<Boolean> option = OptionInstance.createBoolean(
+					title,
+					(mc) -> (unused) -> Lists.newArrayList(desc.getVisualOrderText()),
+					value.get(),
+					(newValue) -> value.set(newValue)
+			);
+			return option;
 		}
 	}
 	

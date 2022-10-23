@@ -11,6 +11,7 @@ import net.minecraft.world.entity.Entity;
 import nonamecrackers2.hunted.client.capability.HuntedClientClassManager;
 import nonamecrackers2.hunted.client.gui.HuntedGameMenuScreen;
 import nonamecrackers2.hunted.client.init.HuntedClientCapabilities;
+import nonamecrackers2.hunted.config.HuntedConfig;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
 import nonamecrackers2.hunted.huntedclass.HuntedClassDataManager;
 import nonamecrackers2.hunted.init.HuntedCapabilities;
@@ -83,10 +84,13 @@ public class HuntedClientPacketProcessor
 	
 	public static void processDoJumpscarePacket(DoJumpscarePacket packet)
 	{
-		Minecraft mc = Minecraft.getInstance();
-		mc.level.getCapability(HuntedClientCapabilities.EFFECTS_MANAGER).ifPresent(manager -> {
-			manager.doJumpscare(packet.getEvent(), packet.getTime());
-		});
+		if (HuntedConfig.CLIENT.horrorElements.get())
+		{
+			Minecraft mc = Minecraft.getInstance();
+			mc.level.getCapability(HuntedClientCapabilities.EFFECTS_MANAGER).ifPresent(manager -> {
+				manager.doJumpscare(packet.getEvent(), packet.getTime());
+			});
+		}
 	}
 	
 	public static void processUpdateGameMenuPacket(UpdateGameMenuPacket packet)

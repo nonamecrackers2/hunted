@@ -1,42 +1,21 @@
 package nonamecrackers2.hunted.client.event;
 
-import java.util.OptionalDouble;
-import java.util.function.Function;
-
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.math.Vector3f;
 
-import net.minecraft.Util;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.OutlineBufferSource;
-import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlas;
-import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
-import net.minecraftforge.client.model.EmptyModel;
-import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import nonamecrackers2.hunted.client.init.HuntedClientCapabilities;
+import nonamecrackers2.hunted.config.HuntedConfig;
 import nonamecrackers2.hunted.init.HuntedCapabilities;
 
 public class HuntedRenderEvents
@@ -44,22 +23,25 @@ public class HuntedRenderEvents
 	@SubscribeEvent
 	public static void onRenderPlayer(RenderPlayerEvent.Pre event)
 	{
-		Player player = event.getEntity();
-		player.getCapability(HuntedCapabilities.PLAYER_CLASS_MANAGER).ifPresent(manager -> 
+		if (HuntedConfig.CLIENT.horrorElements.get())
 		{
-			if (manager.isInGame())
+			Player player = event.getEntity();
+			player.getCapability(HuntedCapabilities.PLAYER_CLASS_MANAGER).ifPresent(manager -> 
 			{
-				manager.getCurrentClass().ifPresent(huntedClass -> 
+				if (manager.isInGame())
 				{
-					if (huntedClass.supportsMask())
+					manager.getCurrentClass().ifPresent(huntedClass -> 
 					{
-						event.setCanceled(true);
-						Minecraft mc = Minecraft.getInstance();
-						renderMask(player, event.getPoseStack(), event.getMultiBufferSource(), event.getPartialTick(), mc.gameRenderer.getMainCamera());
-					}
-				});
-			}
-		});
+						if (huntedClass.supportsMask())
+						{
+							event.setCanceled(true);
+							Minecraft mc = Minecraft.getInstance();
+							renderMask(player, event.getPoseStack(), event.getMultiBufferSource(), event.getPartialTick(), mc.gameRenderer.getMainCamera());
+						}
+					});
+				}
+			});
+		}
 	}
 	
 	private static void renderMask(Entity entity, PoseStack stack, MultiBufferSource source, float partialTicks, Camera camera)
@@ -82,62 +64,62 @@ public class HuntedRenderEvents
 			}
 		});
 	}
-
-//	@SubscribeEvent
-	public static void onRenderLevelLast(RenderLevelStageEvent event)
-	{
-		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES)
-		{
-			Minecraft mc = Minecraft.getInstance();
-//			mc.level.getCapability(HuntedClientCapabilities.GAME_INFO).ifPresent(info -> 
-//			{
-//				if (info.isGameRunning() && info.buttonHighlighting())
-//				{
-//					info.getMap().ifPresent(map -> 
-//					{
-						PoseStack stack = event.getPoseStack();
-						MultiBufferSource.BufferSource source = mc.renderBuffers().bufferSource();
-						OutlineBufferSource buffer = mc.renderBuffers().outlineBufferSource();
-						buffer.setColor(255, 255, 255, 255);
-						RenderSystem.disableDepthTest();
-						VertexConsumer consumer = buffer.getBuffer(RenderType.solid());
-//						for (BlockPos blockPos : map.buttons())
-//						{
-						BlockPos blockPos = mc.player.blockPosition().below();
-							stack.pushPose();
-							Vec3 camPos = mc.gameRenderer.getMainCamera().getPosition();
-							Vec3 inversePos = camPos.scale(-1.0D);
-							stack.translate(inversePos.x, inversePos.y, inversePos.z);
-							stack.translate(blockPos.getX(), blockPos.getY(), blockPos.getZ());
-							BlockState state = mc.level.getBlockState(blockPos);
-							if (!state.isAir())
-								mc.getBlockRenderer().getModelRenderer().tesselateBlock(mc.level, mc.getBlockRenderer().getBlockModel(state), state, blockPos, stack, consumer, false, RandomSource.create(), 0, OverlayTexture.NO_OVERLAY, ModelData.EMPTY, null);
-								//renderShape(stack, consumer, state.getShape(mc.level, blockPos, CollisionContext.of(mc.getCameraEntity())), blockPos.getX(), blockPos.getY(), blockPos.getZ(), 1.0F, 1.0F, 1.0F, 1.0F);
-							stack.popPose();
-//						}
-						RenderSystem.enableDepthTest();
-						source.endBatch();
-						buffer.endOutlineBatch();
-//					});
-//				}
-//			});
-		}
-	}
-	
-	private static void renderShape(PoseStack stack, VertexConsumer consumer, VoxelShape shape, double x, double y, double z, float r, float g, float b, float a)
-	{
-		PoseStack.Pose pose = stack.last();
-		shape.forAllEdges((xl, yl, zl, xl2, yl2, zl2) ->
-		{
-			float f = (float)(xl2 - xl);
-			float f1 = (float)(yl2 - yl);
-			float f2 = (float)(zl2 - zl);
-			float f3 = Mth.sqrt(f * f + f1 * f1 + f2 * f2);
-			f /= f3;
-			f1 /= f3;
-			f2 /= f3;
-			consumer.vertex(pose.pose(), (float)(xl + x), (float)(yl + y), (float)(zl + z)).color(r, g, b, a).uv(0, 1).normal(pose.normal(), f, f1, f2).endVertex();
-			consumer.vertex(pose.pose(), (float)(xl2 + x), (float)(yl2 + y), (float)(zl2 + z)).color(r, g, b, a).uv(1, 1).normal(pose.normal(), f, f1, f2).endVertex();
-		});
-	}
+//
+////	@SubscribeEvent
+//	public static void onRenderLevelLast(RenderLevelStageEvent event)
+//	{
+//		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES)
+//		{
+//			Minecraft mc = Minecraft.getInstance();
+////			mc.level.getCapability(HuntedClientCapabilities.GAME_INFO).ifPresent(info -> 
+////			{
+////				if (info.isGameRunning() && info.buttonHighlighting())
+////				{
+////					info.getMap().ifPresent(map -> 
+////					{
+//						PoseStack stack = event.getPoseStack();
+//						MultiBufferSource.BufferSource source = mc.renderBuffers().bufferSource();
+//						OutlineBufferSource buffer = mc.renderBuffers().outlineBufferSource();
+//						buffer.setColor(255, 255, 255, 255);
+//						RenderSystem.disableDepthTest();
+//						VertexConsumer consumer = buffer.getBuffer(RenderType.solid());
+////						for (BlockPos blockPos : map.buttons())
+////						{
+//						BlockPos blockPos = mc.player.blockPosition().below();
+//							stack.pushPose();
+//							Vec3 camPos = mc.gameRenderer.getMainCamera().getPosition();
+//							Vec3 inversePos = camPos.scale(-1.0D);
+//							stack.translate(inversePos.x, inversePos.y, inversePos.z);
+//							stack.translate(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+//							BlockState state = mc.level.getBlockState(blockPos);
+//							if (!state.isAir())
+//								mc.getBlockRenderer().getModelRenderer().tesselateBlock(mc.level, mc.getBlockRenderer().getBlockModel(state), state, blockPos, stack, consumer, false, RandomSource.create(), 0, OverlayTexture.NO_OVERLAY, ModelData.EMPTY, null);
+//								//renderShape(stack, consumer, state.getShape(mc.level, blockPos, CollisionContext.of(mc.getCameraEntity())), blockPos.getX(), blockPos.getY(), blockPos.getZ(), 1.0F, 1.0F, 1.0F, 1.0F);
+//							stack.popPose();
+////						}
+//						RenderSystem.enableDepthTest();
+//						source.endBatch();
+//						buffer.endOutlineBatch();
+////					});
+////				}
+////			});
+//		}
+//	}
+//	
+//	private static void renderShape(PoseStack stack, VertexConsumer consumer, VoxelShape shape, double x, double y, double z, float r, float g, float b, float a)
+//	{
+//		PoseStack.Pose pose = stack.last();
+//		shape.forAllEdges((xl, yl, zl, xl2, yl2, zl2) ->
+//		{
+//			float f = (float)(xl2 - xl);
+//			float f1 = (float)(yl2 - yl);
+//			float f2 = (float)(zl2 - zl);
+//			float f3 = Mth.sqrt(f * f + f1 * f1 + f2 * f2);
+//			f /= f3;
+//			f1 /= f3;
+//			f2 /= f3;
+//			consumer.vertex(pose.pose(), (float)(xl + x), (float)(yl + y), (float)(zl + z)).color(r, g, b, a).uv(0, 1).normal(pose.normal(), f, f1, f2).endVertex();
+//			consumer.vertex(pose.pose(), (float)(xl2 + x), (float)(yl2 + y), (float)(zl2 + z)).color(r, g, b, a).uv(1, 1).normal(pose.normal(), f, f1, f2).endVertex();
+//		});
+//	}
 }
