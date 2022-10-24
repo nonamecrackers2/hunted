@@ -5,6 +5,7 @@ license="All rights reserved"
 modId="hunted"
 version="0.3.2"
 displayName="Hunted"
+logoFile="hunted_logo.png"
 authors="nonamecrackers2"
 credits="TheFrostySoul, TCBlizz707, Funglscrun"
 description='''
