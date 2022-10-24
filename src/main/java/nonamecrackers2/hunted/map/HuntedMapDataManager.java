@@ -66,7 +66,7 @@ public class HuntedMapDataManager extends SimpleDataManager<HuntedMap>
 			return null;
 		}
 		AABB boundary = getAabb(GsonHelper.getAsJsonObject(object, "boundary"));
-		AABB preyExit = getAabb(GsonHelper.getAsJsonObject(object, "prey_exit"));
+		List<AABB> preyExits = getPreyExits(object.get("prey_exit"));
 		List<MapEventHolder> events = ImmutableList.of();
 		if (object.has("events"))
 			events = getEvents(GsonHelper.getAsJsonArray(object, "events"));
@@ -85,7 +85,7 @@ public class HuntedMapDataManager extends SimpleDataManager<HuntedMap>
 		AmbienceSettings ambience = null;
 		if (object.has("ambience"))
 			ambience = AmbienceSettings.fromJson(GsonHelper.getAsJsonObject(object, "ambience"));
-		return new HuntedMap(id, name, startPositions, defaultStartPos, buttons, rewards, boundary, preyExit, events, keyholes, overlay, revivalPositions, buttonPressingDelay, Optional.ofNullable(ambience));
+		return new HuntedMap(id, name, startPositions, defaultStartPos, buttons, rewards, boundary, preyExits, events, keyholes, overlay, revivalPositions, buttonPressingDelay, Optional.ofNullable(ambience));
 	}
 	
 	private static Map<HuntedClassType, BlockPos> getStartPositions(JsonArray array)
@@ -170,5 +170,20 @@ public class HuntedMapDataManager extends SimpleDataManager<HuntedMap>
 		if (overlay == null)
 			throw new JsonSyntaxException("Unknown or unsupported overlay type '" + id + "'");
 		return overlay.configure(object.get("settings"));
+	}
+	
+	private static List<AABB> getPreyExits(JsonElement element)
+	{
+		ImmutableList.Builder<AABB> exits = ImmutableList.builder();
+		if (element instanceof JsonObject object)
+		{
+			exits.add(getAabb(object));
+		}
+		else if (element instanceof JsonArray array)
+		{
+			for (int i = 0; i < array.size(); i++)
+				exits.add(getAabb(GsonHelper.convertToJsonObject(array.get(i), "exit")));
+		}
+		return exits.build();
 	}
 }

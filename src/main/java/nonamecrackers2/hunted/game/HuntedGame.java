@@ -26,7 +26,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -34,6 +33,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.ButtonBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import nonamecrackers2.hunted.ability.Ability;
 import nonamecrackers2.hunted.block.entity.KeyholeBlockEntity;
@@ -105,8 +105,17 @@ public class HuntedGame implements DataHolder
 					serverManager.tick(this.level, this);
 					serverManager.getCurrentClass().ifPresent(huntedClass -> 
 					{
-						if (huntedClass.getType().canEscape() && this.map.preyExit().contains(player.position()))
-							this.escape(player);
+						if (huntedClass.getType().canEscape())
+						{
+							for (AABB exit : this.map.preyExits())
+							{
+								if (exit.contains(player.position()))
+								{
+									this.escape(player);
+									break;
+								}
+							}
+						}
 					});
 				}
 			});
