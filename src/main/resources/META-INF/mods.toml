@@ -3,7 +3,7 @@ loaderVersion="[41,)"
 license="All rights reserved"
 [[mods]]
 modId="hunted"
-version="0.3"
+version="0.3.1"
 displayName="Hunted"
 authors="nonamecrackers2"
 credits="TheFrostySoul, TCBlizz707, Funglscrun"
