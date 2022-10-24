@@ -10,6 +10,7 @@ import nonamecrackers2.hunted.init.TriggerTypes;
 import nonamecrackers2.hunted.trigger.Trigger;
 import nonamecrackers2.hunted.trigger.TriggerContext;
 import nonamecrackers2.hunted.trigger.Triggerable;
+import nonamecrackers2.hunted.util.HuntedUtil;
 
 public record MapEventHolder(ResourceLocation id, Trigger.ConfiguredTrigger<?> trigger, List<MapEvent.ConfiguredMapEvent<?>> events) implements Triggerable
 {
@@ -17,24 +18,40 @@ public record MapEventHolder(ResourceLocation id, Trigger.ConfiguredTrigger<?> t
 	{
 		if (this.triggerCriteria().matches(context) && this.trigger.matches(context))
 		{
-			this.events.forEach(event -> event.use(context, this.getTag(context.getGame())));
+			for (int i = 0; i < this.events.size(); i++)
+			{
+				var event = this.events.get(i);
+				event.use(context, this.getTag(context.getGame(), i));
+			}
 			context.getGame().trigger(TriggerTypes.EVENT.get(), TriggerContext.builder().event(this));
 		}
 	}
 	
 	public void begin(ServerLevel level, HuntedGame game)
 	{
-		this.events.forEach(event -> event.begin(level, game, this.getTag(game)));
+		for (int i = 0; i < this.events.size(); i++)
+		{
+			var event = this.events.get(i);
+			event.begin(level, game, this.getTag(game, i));
+		}
 	}
 	
 	public void tick(ServerLevel level, HuntedGame game)
 	{
-		this.events.forEach(event -> event.tick(level, game, this.getTag(game)));
+		for (int i = 0; i < this.events.size(); i++)
+		{
+			var event = this.events.get(i);
+			event.tick(level, game, this.getTag(game, i));
+		}
 	}
 	
 	public void reset(ServerLevel level, HuntedGame game)
 	{
-		this.events.forEach(event -> event.reset(level, game, this.getTag(game)));
+		for (int i = 0; i < this.events.size(); i++)
+		{
+			var event = this.events.get(i);
+			event.reset(level, game, this.getTag(game, i));
+		}
 	}
 	
 	@Override
@@ -46,8 +63,8 @@ public record MapEventHolder(ResourceLocation id, Trigger.ConfiguredTrigger<?> t
 		return criteria;
 	}
 	
-	private CompoundTag getTag(HuntedGame game)
+	private CompoundTag getTag(HuntedGame game, int index)
 	{
-		return game.getOrCreateTagElement(this.id().toString());
+		return HuntedUtil.getOrCreateTagElement(game.getOrCreateTagElement(this.id().toString()), String.valueOf(index));
 	}
 }
