@@ -6,6 +6,8 @@ import com.mojang.math.Vector3f;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -13,10 +15,18 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.RenderPlayerEvent;
+import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import nonamecrackers2.hunted.capability.PlayerClassManager;
+import nonamecrackers2.hunted.client.capability.HuntedClientGameInfo;
+import nonamecrackers2.hunted.client.init.HuntedClientCapabilities;
 import nonamecrackers2.hunted.config.HuntedConfig;
+import nonamecrackers2.hunted.huntedclass.HuntedClass;
 import nonamecrackers2.hunted.init.HuntedCapabilities;
+import nonamecrackers2.hunted.map.HuntedMap;
 
 public class HuntedRenderEvents
 {
@@ -63,6 +73,73 @@ public class HuntedRenderEvents
 				stack.popPose();
 			}
 		});
+	}
+	
+	@SubscribeEvent
+	public static void onRenderFog(ViewportEvent.RenderFog event)
+	{
+		Minecraft mc = Minecraft.getInstance();
+		if (mc.level != null && mc.player != null)
+		{
+			float factor = getFogFactor(mc.level, mc.player);
+			if (factor > 0.0F)
+			{
+				event.setNearPlaneDistance(0.0F);
+				event.scaleFarPlaneDistance(Math.max(0.015F, 1.0F - factor));
+				event.setCanceled(true);
+			}
+		}
+	}
+	
+	@SubscribeEvent
+	public static void onComputeFogColor(ViewportEvent.ComputeFogColor event)
+	{
+		Minecraft mc = Minecraft.getInstance();
+		if (mc.level != null && mc.player != null)
+		{
+			float factor = getFogFactor(mc.level, mc.player);
+			if (factor > 0.0F)
+			{
+				event.setRed(event.getRed() * (1.0F - factor));
+				event.setBlue(event.getBlue() * (1.0F - factor));
+				event.setGreen(event.getGreen() * (1.0F - factor));
+			}
+		}
+	}
+	
+	private static float getFogFactor(ClientLevel level, AbstractClientPlayer player)
+	{
+		HuntedClientGameInfo info = level.getCapability(HuntedClientCapabilities.GAME_INFO).orElse(null);
+		if (info != null)
+		{
+			HuntedMap map = info.getMap().orElse(null); 
+			if (map != null)
+			{
+				PlayerClassManager manager = player.getCapability(HuntedCapabilities.PLAYER_CLASS_MANAGER).orElse(null);
+				if (manager != null)
+				{
+					HuntedClass huntedClass = manager.getCurrentClass().orElse(null);
+					if (huntedClass != null)
+					{
+						if (!huntedClass.getType().canEscape())
+						{
+							float factor = -1.0F;
+							for (AABB exit : map.preyExits())
+							{
+								Vec3 center = exit.getCenter();
+								Vec3 pos = player.position();
+								float cFactor = Math.max(0.0F, (float)(exit.getSize() - center.distanceTo(pos) + exit.getSize())) / (float)exit.getSize();
+								if (factor == -1.0F || cFactor > factor)
+									factor = cFactor;
+							}
+							if (factor > 0.0F)
+								return factor;
+						}
+					}
+				}
+			}
+		}
+		return 0.0F;
 	}
 //
 ////	@SubscribeEvent
