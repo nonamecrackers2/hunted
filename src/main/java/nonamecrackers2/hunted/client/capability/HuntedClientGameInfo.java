@@ -14,7 +14,7 @@ public class HuntedClientGameInfo
 {
 	private boolean gameRunning;
 	private List<Component> overlay = Lists.newArrayList();
-	private Optional<HuntedMap> map;
+	private Optional<HuntedMap> map = Optional.empty();
 	private boolean buttonHighlighting;
 	
 	public boolean isGameRunning()
