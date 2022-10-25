@@ -101,7 +101,7 @@
 	"hunted.reward.key_invigoration.message": "\u00A76You have been given \u00A7e\u00A7lSPEED \u00A7r\u00A76and cooldown \u00A7d\u00A7lREDUCTION",
 	"hunted.reward.key_invigoration": "Key of Invigoration",
 	"hunted.reward.key_sabotage.message.global": "%s has collected the ",
-	"hunted.reward.key_sabotage.message": "\u00A7cYou have received \u00A76\u00A7lGLOWNING \u00A7r\u00A7cand \u00A76\u00A7lSLOWNESS",
+	"hunted.reward.key_sabotage.message": "\u00A7cYou have received \u00A76\u00A7lGLOWING \u00A7r\u00A7cand \u00A76\u00A7lSLOWNESS",
 	"hunted.reward.key_sabotage": "Key of Sabotage",
 	"hunted.reward.key_origin.message.global": "%s has collected the ",
 	"hunted.reward.key_origin.message.prey": "\u00A7dThe Hunter has been sent back to their starting position!",
