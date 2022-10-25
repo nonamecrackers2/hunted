@@ -13,6 +13,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraftforge.network.PacketDistributor;
 import nonamecrackers2.hunted.game.HuntedGame;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
+import nonamecrackers2.hunted.huntedclass.type.PreyClassType;
 import nonamecrackers2.hunted.init.HuntedPacketHandlers;
 import nonamecrackers2.hunted.init.HuntedSoundEvents;
 import nonamecrackers2.hunted.packet.DoJumpscarePacket;
@@ -44,7 +45,7 @@ public class GenericDeathSequence extends DeathSequence<GenericDeathSequence.Set
 		players.forEach(p -> p.playNotifySound(settings.sound.event(), SoundSource.PLAYERS, settings.sound.volume(), settings.sound.pitch()));
 		if (players.size() > 0)
 		{
-			ServerPlayer toAward = players.get(player.getRandom().nextInt(players.size()));
+			ServerPlayer toAward = game.getActiveBy(PreyClassType.class).get(player.getRandom().nextInt(players.size()));
 			player.getInventory().items.forEach(item -> 
 			{
 				if (item.getOrCreateTag().contains("HuntedGameData"))
