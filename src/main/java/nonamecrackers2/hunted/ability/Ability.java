@@ -46,8 +46,8 @@ public class Ability implements Triggerable
 	private final @Nullable SoundEventHolder resetSound;
 	private final @Nullable Component text;
 	
-	private Component name;
-	private Component lore;
+	private @Nullable Component name;
+	private @Nullable Component lore;
 	private @Nullable Component cooldownLore;
 	private int cooldown = 120;
 	
@@ -279,12 +279,12 @@ public class Ability implements Triggerable
 		return this.time;
 	}
 	
-	public Component getLore()
+	public @Nullable Component getLore()
 	{
 		return this.time > 0 && this.cooldownLore != null ? this.cooldownLore : this.lore;
 	}
 	
-	public Component getName()
+	public @Nullable Component getName()
 	{
 		return this.name;
 	}
