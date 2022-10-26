@@ -43,9 +43,10 @@ public class GenericDeathSequence extends DeathSequence<GenericDeathSequence.Set
 		HuntedUtil.showSubtitle(player, settings.subtitle, 20, 60, 20);
 		List<ServerPlayer> players = game.getPlayers();
 		players.forEach(p -> p.playNotifySound(settings.sound.event(), SoundSource.PLAYERS, settings.sound.volume(), settings.sound.pitch()));
-		if (players.size() > 0)
+		List<ServerPlayer> active = game.getActiveBy(PreyClassType.class);
+		if (active.size() > 0)
 		{
-			ServerPlayer toAward = game.getActiveBy(PreyClassType.class).get(player.getRandom().nextInt(players.size()));
+			ServerPlayer toAward = active.get(player.getRandom().nextInt(active.size()));
 			player.getInventory().items.forEach(item -> 
 			{
 				if (item.getOrCreateTag().contains("HuntedGameData"))
