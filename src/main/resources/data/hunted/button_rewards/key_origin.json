@@ -1,6 +1,6 @@
 {
 	"name": {
-		"translate": "hunted.reward.key_origin",
+		"translate": "item.hunted.key_origin",
 		"color": "green"
 	},
 	"global_message": {
@@ -8,7 +8,7 @@
 		"color": "gold",
 		"extra": [
 			{
-				"translate": "hunted.reward.key_origin",
+				"translate": "item.hunted.key_origin",
 				"color": "green",
 				"bold": true
 			}
@@ -21,9 +21,9 @@
 	"pitch": 2.0,
 	"items": [
 		{
-			"item": "minecraft:iron_hoe",
+			"item": "hunted:key_origin",
 			"name": {
-				"translate": "hunted.reward.key_origin",
+				"translate": "item.hunted.key_origin",
 				"color": "green",
 				"italic": false
 			}

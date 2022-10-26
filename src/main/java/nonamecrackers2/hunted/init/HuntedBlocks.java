@@ -10,6 +10,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import nonamecrackers2.hunted.HuntedMod;
+import nonamecrackers2.hunted.block.BearTrapBlock;
 import nonamecrackers2.hunted.block.KeyholeBlock;
 import nonamecrackers2.hunted.block.KioskBlock;
 import nonamecrackers2.hunted.block.RewardButtonBlock;
@@ -23,6 +24,7 @@ public class HuntedBlocks
 		return 10;
 	})));
 	public static final RegistryObject<RewardButtonBlock> REWARD_BUTTON = BLOCKS.register("reward_button", () -> new RewardButtonBlock(BlockBehaviour.Properties.of(Material.DECORATION).noCollission().strength(1.0F, 1200.0F)));
+	public static final RegistryObject<BearTrapBlock> BEAR_TRAP = BLOCKS.register("bear_trap", () -> new BearTrapBlock(BlockBehaviour.Properties.of(Material.METAL).noCollission().strength(5.0F, 6.0F).requiresCorrectToolForDrops()));
 	
 	public static void register(IEventBus modBus)
 	{

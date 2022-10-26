@@ -1,6 +1,6 @@
 {
 	"name": {
-		"translate": "hunted.reward.key_invigoration",
+		"translate": "item.hunted.key_invigoration",
 		"color": "aqua"
 	},
 	"global_message": {
@@ -8,7 +8,7 @@
 		"color": "gold",
 		"extra": [
 			{
-				"translate": "hunted.reward.key_invigoration",
+				"translate": "item.hunted.key_invigoration",
 				"color": "aqua",
 				"bold": true
 			}
@@ -21,9 +21,9 @@
 	"pitch": 2.0,
 	"items": [
 		{
-			"item": "minecraft:diamond_hoe",
+			"item": "hunted:key_invigoration",
 			"name": {
-				"translate": "hunted.reward.key_invigoration",
+				"translate": "item.hunted.key_invigoration",
 				"color": "aqua",
 				"italic": false
 			}

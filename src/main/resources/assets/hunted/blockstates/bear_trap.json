@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "triggered=false": {
+      "model": "hunted:block/bear_trap"
+    },
+    "triggered=true": {
+      "model": "hunted:block/bear_trap_closed"
+    }
+  }
+}

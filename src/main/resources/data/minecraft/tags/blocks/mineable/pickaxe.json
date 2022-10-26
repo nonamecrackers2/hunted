@@ -2,6 +2,7 @@
 	"replace": false,
   	"values": [
     	"hunted:keyhole",
-    	"hunted:reward_button"
+    	"hunted:reward_button",
+    	"hunted:bear_trap"
   	]
 }
