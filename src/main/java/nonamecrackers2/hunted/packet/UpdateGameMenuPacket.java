@@ -1,6 +1,5 @@
 package nonamecrackers2.hunted.packet;
 
-import java.awt.BufferCapabilities;
 import java.util.Map;
 import java.util.UUID;
 
