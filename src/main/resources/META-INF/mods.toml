@@ -3,7 +3,7 @@ loaderVersion="[41,)"
 license="All rights reserved"
 [[mods]]
 modId="hunted"
-version="0.3.4"
+version="0.3.5"
 displayName="Hunted"
 logoFile="hunted_logo.png"
 authors="nonamecrackers2"
