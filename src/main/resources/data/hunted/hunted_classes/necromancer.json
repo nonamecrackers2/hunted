@@ -7,8 +7,11 @@
 	},
 	"type": "hunted:prey",
 	"abilities": [
-		"#hunted:necromancer",
+		"#hunted:necromancer/normal",
 		"hunted:speed"
+	],
+	"passive_abilities": [
+		"#hunted:necromancer/passive"
 	],
 	"outfit": [],
 	"death_sequence": "hunted:generic",
