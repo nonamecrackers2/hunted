@@ -21,16 +21,19 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.behavior.LookAtTargetSink;
+import net.minecraft.world.entity.ai.behavior.MeleeAttack;
 import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
 import net.minecraft.world.entity.ai.behavior.RandomStroll;
-import net.minecraft.world.entity.ai.behavior.RunIf;
-import net.minecraft.world.entity.ai.behavior.RunOne;
-import net.minecraft.world.entity.ai.behavior.SetEntityLookTarget;
+import net.minecraft.world.entity.ai.behavior.SetWalkTargetFromAttackTargetIfTargetOutOfReach;
+import net.minecraft.world.entity.ai.behavior.StartAttacking;
+import net.minecraft.world.entity.ai.behavior.StopAttackingIfTargetInvalid;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.monster.Monster;
@@ -40,7 +43,6 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import nonamecrackers2.hunted.HuntedMod;
 import nonamecrackers2.hunted.capability.HunterEntityClassManager;
-import nonamecrackers2.hunted.entity.ai.behavior.FollowPredeterminedPath;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
 import nonamecrackers2.hunted.init.HuntedCapabilities;
 import nonamecrackers2.hunted.init.HuntedClassTypes;
@@ -75,8 +77,8 @@ public class HunterEntity extends Monster
 	private static final EntityDataAccessor<ResourceLocation> MASK = SynchedEntityData.defineId(HunterEntity.class, HuntedDataSerializers.RESOURCE_LOCATION.get());
 	private static final EntityDataAccessor<Boolean> IS_IN_GAME = SynchedEntityData.defineId(HunterEntity.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> HAS_ESCAPED = SynchedEntityData.defineId(HunterEntity.class, EntityDataSerializers.BOOLEAN);
-	protected static final ImmutableList<SensorType<? extends Sensor<? super HunterEntity>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_PLAYERS);
-	protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.PATH, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.WALK_TARGET, MemoryModuleType.NEAREST_PLAYERS, MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_PLAYER);
+	protected static final ImmutableList<SensorType<? extends Sensor<? super HunterEntity>>> SENSOR_TYPES = ImmutableList.of(SensorType.NEAREST_PLAYERS, SensorType.NEAREST_LIVING_ENTITIES);
+	protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.PATH, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.WALK_TARGET, MemoryModuleType.LOOK_TARGET, MemoryModuleType.NEAREST_PLAYERS, MemoryModuleType.NEAREST_VISIBLE_ATTACKABLE_PLAYER, MemoryModuleType.NEAREST_VISIBLE_PLAYER, MemoryModuleType.NEAREST_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.ATTACK_COOLING_DOWN);
 	private final HunterEntityClassManager classManager = new HunterEntityClassManager(this, HUNTER_ENTITY_CLASS.copy());
 	private List<BlockPos> path = Lists.newArrayList();
 	private int currentPathIndex;
@@ -89,7 +91,7 @@ public class HunterEntity extends Monster
 	
 	public static AttributeSupplier.Builder createAttributes()
 	{
-		return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH, 64.0D);
+		return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH, 64.0D).add(Attributes.MOVEMENT_SPEED, 0.3D).add(Attributes.FOLLOW_RANGE, 128.0D);
 	}
 	
 	@Override
@@ -135,17 +137,28 @@ public class HunterEntity extends Monster
 	protected Brain<?> makeBrain(Dynamic<?> dynamic)
 	{
 		Brain<HunterEntity> brain = this.brainProvider().makeBrain(dynamic);
-		brain.addActivity(Activity.CORE, 0, ImmutableList.of(new MoveToTargetSink()));
+		brain.addActivity(Activity.CORE, 0, ImmutableList.of(new LookAtTargetSink(45, 90), new MoveToTargetSink()));
 		brain.addActivity(Activity.IDLE, 0, ImmutableList.of(
 			//new RunIf<>((e) -> !this.getPath().isEmpty(), new FollowPredeterminedPath((l) -> this.getPath())), 
-			new RandomStroll((float)this.getAttributeValue(Attributes.MOVEMENT_SPEED), 20, 20)
+			new StartAttacking<>(HunterEntity::findNearestValidTarget),
+			new RandomStroll(0.8F, 50, 50)
 		));
 		//brain.addActivityWithConditions(Activity.INVESTIGATE, ImmutableList.of(), ImmutableSet.of());
-		//brain.addActivityWithConditions(Activity.FIGHT, ImmutableList.of(), ImmutableSet.of());
+		brain.addActivityAndRemoveMemoryWhenStopped(Activity.FIGHT, 0, ImmutableList.of(
+				new SetWalkTargetFromAttackTargetIfTargetOutOfReach(1.0F),
+				new MeleeAttack(30),
+				new StopAttackingIfTargetInvalid<>()
+			), MemoryModuleType.ATTACK_TARGET
+		);
 		brain.setCoreActivities(ImmutableSet.of(Activity.CORE));
 		brain.setDefaultActivity(Activity.IDLE);
 		brain.useDefaultActivity();
 		return brain;
+	}
+	
+	private static Optional<? extends LivingEntity> findNearestValidTarget(HunterEntity entity)
+	{
+		return entity.getBrain().getMemory(MemoryModuleType.NEAREST_VISIBLE_PLAYER);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -226,7 +239,11 @@ public class HunterEntity extends Monster
 		this.level.getProfiler().push("hunterBrain");
 		this.getBrain().tick((ServerLevel)this.level, this);
 		this.level.getProfiler().pop();
-		this.getBrain().setActiveActivityToFirstValid(ImmutableList.of(Activity.IDLE));
+		this.getBrain().setActiveActivityToFirstValid(ImmutableList.of(Activity.FIGHT, Activity.IDLE));
 		super.customServerAiStep();
+		System.out.println(this.getBrain().getRunningBehaviors());
 	}
+	
+	@Override
+	public void checkDespawn() {}
 }
