@@ -1,20 +1,20 @@
 package nonamecrackers2.hunted.client.sound;
 
-import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.resources.sounds.AbstractTickableSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.LivingEntity;
 import nonamecrackers2.hunted.init.HuntedCapabilities;
 
 public class HuntedClassLoop extends AbstractTickableSoundInstance
 {
-	private final AbstractClientPlayer player;
+	private final LivingEntity entity;
 	
-	public HuntedClassLoop(AbstractClientPlayer player, SoundEvent event)
+	public HuntedClassLoop(LivingEntity player, SoundEvent event)
 	{
 		super(event, SoundSource.PLAYERS, SoundInstance.createUnseededRandom());
-		this.player = player;
+		this.entity = player;
 		this.looping = true;
 		this.delay = 0;
 	}
@@ -22,19 +22,19 @@ public class HuntedClassLoop extends AbstractTickableSoundInstance
 	@Override
 	public void tick()
 	{
-		this.x = this.player.getX();
-		this.y = this.player.getY();
-		this.z = this.player.getZ();
+		this.x = this.entity.getX();
+		this.y = this.entity.getY();
+		this.z = this.entity.getZ();
 		
-		this.player.getCapability(HuntedCapabilities.PLAYER_CLASS_MANAGER).ifPresent(manager -> 
+		this.entity.getCapability(HuntedCapabilities.PLAYER_CLASS_MANAGER).ifPresent(manager -> 
 		{
-			if (!manager.isInGame() || !this.player.isAlive())
+			if (!manager.isInGame() || !this.entity.isAlive())
 				this.stop();
 		});
 	}
 	
-	public AbstractClientPlayer getPlayer()
+	public LivingEntity getPlayer()
 	{
-		return this.player;
+		return this.entity;
 	}
 }

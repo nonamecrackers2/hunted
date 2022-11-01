@@ -31,7 +31,7 @@ public class ToggleAbilities extends AbilityType<ToggleAbilities.Settings>
 		var result = AbilityType.Result.FAIL;
 		for (ResourceLocation id : settings.ids())
 		{
-			for (Ability ability : huntedClass.getAbilities())
+			for (Ability ability : huntedClass.getAllAbilities())
 			{
 				if (ability.id().equals(id))
 				{

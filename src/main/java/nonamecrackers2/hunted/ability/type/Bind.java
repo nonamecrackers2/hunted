@@ -13,6 +13,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import nonamecrackers2.hunted.capability.PlayerClassManager;
+import nonamecrackers2.hunted.capability.ServerPlayerClassManager;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
 import nonamecrackers2.hunted.huntedclass.type.HuntedClassType;
 import nonamecrackers2.hunted.registry.HuntedRegistries;
@@ -80,26 +86,23 @@ public class Bind extends AbilityType<Bind.Settings>
 	@Override
 	public AbilityType.Result use(Bind.Settings settings, TriggerContext context, CompoundTag tag, TargetSupplier supplier)
 	{
-		CompoundTag bindTag = tag;
-		if (settings.tagPath().isPresent())
-			bindTag = context.getClassManager().getOrCreateTagElement(settings.tagPath().get());
-		
 		var result = AbilityType.Result.FAIL;
+		CompoundTag bindTag = tag;
+		if (settings.tagPath().isPresent() && context.getClassManager() instanceof ServerPlayerClassManager serverManager)
+			bindTag = serverManager.getOrCreateTagElement(settings.tagPath().get());
 		
 		if (!bindTag.contains(BINDED))
 		{
-			if (context.target() != null)
+			HuntedClass huntedClass = PlayerClassManager.getClassFor(context.target());
+			if (huntedClass != null && settings.bindType().isPresent() ? huntedClass.getType().equals(settings.bindType().get()) : true)
 			{
-				HuntedClass huntedClass = context.getTargetHuntedClass();
-				if (settings.bindType().isPresent() ? huntedClass.getType().equals(settings.bindType().get()) : true)
-				{
-					bindTag.putUUID(BINDED, context.target().getUUID());
-					settings.bindSound().ifPresent(sound -> context.player().playNotifySound(sound.event(), SoundSource.PLAYERS, sound.volume(), sound.pitch()));
-					result = AbilityType.Result.PASS;
-					settings.bindMessage.ifPresent(message -> {
-						context.player().sendSystemMessage(HuntedUtil.appendArgs(message, context.target().getDisplayName()));
-					});
-				}
+				bindTag.putUUID(BINDED, context.target().getUUID());
+				if (context.player() instanceof ServerPlayer player)
+					settings.bindSound().ifPresent(sound -> player.playNotifySound(sound.event(), SoundSource.PLAYERS, sound.volume(), sound.pitch()));
+				result = AbilityType.Result.PASS;
+				settings.bindMessage.ifPresent(message -> {
+					context.player().sendSystemMessage(HuntedUtil.appendArgs(message, context.target().getDisplayName()));
+				});
 			}
 		}
 		else
@@ -109,10 +112,12 @@ public class Bind extends AbilityType<Bind.Settings>
 		
 		if (result.equals(settings.resultCriteria()))
 		{
-			ServerPlayer target = null;
+			LivingEntity target = null;
 			if (bindTag.contains(BINDED))
 			{
-				target = (ServerPlayer)context.level().getPlayerByUUID(bindTag.getUUID(BINDED));
+				Entity entity = context.level().getEntity(bindTag.getUUID(BINDED));
+				if (entity instanceof LivingEntity living)
+					target = living;
 				if (target != null && context.getGame().isPlayerEliminated(target))
 					target = null;
 			}

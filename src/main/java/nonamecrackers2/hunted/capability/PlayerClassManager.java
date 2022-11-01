@@ -5,7 +5,9 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
+import nonamecrackers2.hunted.init.HuntedCapabilities;
 
 public interface PlayerClassManager
 {
@@ -23,4 +25,13 @@ public interface PlayerClassManager
 	boolean hasEscaped();
 	
 	@Nullable ResourceLocation getMask();
+	
+	public static @Nullable HuntedClass getClassFor(LivingEntity entity)
+	{
+		PlayerClassManager manager = entity.getCapability(HuntedCapabilities.PLAYER_CLASS_MANAGER).orElse(null);
+		if (manager != null)
+			return manager.getCurrentClass().orElse(null);
+		else
+			return null;
+	}
 }

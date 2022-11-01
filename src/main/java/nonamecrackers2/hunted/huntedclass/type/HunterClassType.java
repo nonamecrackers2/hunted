@@ -5,7 +5,9 @@ import java.util.stream.Collectors;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import nonamecrackers2.hunted.capability.HuntedClassManager;
+import nonamecrackers2.hunted.capability.PlayerClassManager;
 import nonamecrackers2.hunted.game.HuntedGame;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
 
@@ -17,15 +19,14 @@ public class HunterClassType extends HuntedClassType
 	}
 	
 	@Override
-	public boolean checkObjective(ServerLevel level, HuntedGame game, ServerPlayer player, HuntedClass huntedClass)
+	public boolean checkObjective(ServerLevel level, HuntedGame game, LivingEntity player, HuntedClass huntedClass)
 	{
-		List<ServerPlayer> players = game.getPlayers().stream().filter(p -> 
+		List<LivingEntity> players = game.getPlayers().stream().filter(p -> 
 		{
-			HuntedClass pHuntedClass = HuntedClassManager.getClassForPlayer(p);
+			HuntedClass pHuntedClass = PlayerClassManager.getClassFor(p);
 			return pHuntedClass != null && !(pHuntedClass.getType() instanceof HunterClassType) && !game.isPlayerEliminated(p);
 		}
 		).collect(Collectors.toList());
-		
 		return players.size() <= 0;
 	}
 }

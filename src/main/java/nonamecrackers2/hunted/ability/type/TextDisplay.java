@@ -7,8 +7,8 @@ import com.mojang.serialization.JsonOps;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.entity.LivingEntity;
 import nonamecrackers2.hunted.trigger.Trigger;
 import nonamecrackers2.hunted.trigger.TriggerContext;
 import nonamecrackers2.hunted.util.HuntedUtil;
@@ -24,7 +24,7 @@ public class TextDisplay extends AbilityType<TextDisplay.Settings>
 	@Override
 	public AbilityType.Result use(TextDisplay.Settings settings, TriggerContext context, CompoundTag tag, TargetSupplier supplier)
 	{
-		for (ServerPlayer player : settings.supplier().getPlayers(context, false))
+		for (LivingEntity player : settings.supplier().getPlayers(context, false))
 			player.sendSystemMessage(settings.text());
 		return AbilityType.Result.PASS;
 	}

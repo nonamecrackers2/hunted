@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.LivingEntity;
 import nonamecrackers2.hunted.game.HuntedGame;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
 import nonamecrackers2.hunted.trigger.Trigger;
@@ -38,14 +39,15 @@ public class BlinkTeleport extends AbilityType<BlinkTeleport.Settings>
 	}
 	
 	@Override
-	public void tick(BlinkTeleport.Settings settings, ServerLevel level, HuntedGame game, ServerPlayer player, HuntedClass huntedClass, CompoundTag tag, TargetSupplier supplier)
+	public void tick(BlinkTeleport.Settings settings, ServerLevel level, HuntedGame game, LivingEntity player, HuntedClass huntedClass, CompoundTag tag, TargetSupplier supplier)
 	{
 		if (game.getTimeElapsed() % settings.saveInterval == 0)
 		{
 			tag.put("Pos", NbtUtils.writeBlockPos(player.blockPosition()));
 			tag.putFloat("XRot", player.getXRot());
 			tag.putFloat("YRot", player.getYRot());
-			player.playNotifySound(SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 1.0F, 2.0F);
+			if (player instanceof ServerPlayer serverPlayer)
+				serverPlayer.playNotifySound(SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 1.0F, 2.0F);
 		}
 	}
 	

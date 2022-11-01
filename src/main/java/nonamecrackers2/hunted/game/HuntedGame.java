@@ -26,7 +26,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
@@ -40,9 +42,12 @@ import nonamecrackers2.hunted.block.entity.KeyholeBlockEntity;
 import nonamecrackers2.hunted.capability.HuntedClassManager;
 import nonamecrackers2.hunted.capability.PlayerClassManager;
 import nonamecrackers2.hunted.capability.ServerPlayerClassManager;
+import nonamecrackers2.hunted.entity.HunterEntity;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
 import nonamecrackers2.hunted.huntedclass.type.HuntedClassType;
 import nonamecrackers2.hunted.init.HuntedCapabilities;
+import nonamecrackers2.hunted.init.HuntedClassTypes;
+import nonamecrackers2.hunted.init.HuntedEntityTypes;
 import nonamecrackers2.hunted.init.TriggerTypes;
 import nonamecrackers2.hunted.map.HuntedMap;
 import nonamecrackers2.hunted.map.HuntedMapDataManager;
@@ -53,10 +58,12 @@ import nonamecrackers2.hunted.rewards.ButtonRewardsDataManager;
 import nonamecrackers2.hunted.trigger.Trigger;
 import nonamecrackers2.hunted.trigger.TriggerContext;
 import nonamecrackers2.hunted.util.DataHolder;
+import nonamecrackers2.hunted.util.HuntedClassSelector;
 import nonamecrackers2.hunted.util.HuntedUtil;
 
 public class HuntedGame implements DataHolder
 {
+	private final HuntedGame.GameMode mode;
 	private final ServerLevel level;
 	private final List<UUID> players;
 	private final List<UUID> eliminated = Lists.newArrayList();
@@ -69,14 +76,26 @@ public class HuntedGame implements DataHolder
 	private int timeElapse;
 	private int buttonPressingDelay;
 	private final boolean buttonHighlighting;
+	//private @Nullable HunterEntity hunter;
 
-	public HuntedGame(ServerLevel level, List<UUID> players, HuntedMap map, boolean buttonHighlighting)
+	public HuntedGame(HuntedGame.GameMode mode, ServerLevel level, List<UUID> players, HuntedMap map, boolean buttonHighlighting)
 	{
+		this.mode = mode;
 		this.level = level;
 		this.players = players;
 		this.map = map;
 		this.buttonHighlighting = buttonHighlighting;
 	}
+	
+//	public void setHunter(HunterEntity hunter)
+//	{
+//		this.hunter = hunter;
+//	}
+//	
+//	public HunterEntity getHunterReplacement()
+//	{
+//		return this.hunter;
+//	}
 	
 	public void tick()
 	{
@@ -88,15 +107,15 @@ public class HuntedGame implements DataHolder
 			this.buttonPressingDelay--;
 			if (this.buttonPressingDelay == 0)
 			{
-				for (ServerPlayer player : this.getActive())
+				for (LivingEntity player : this.getActive())
 				{
-					HuntedClass huntedClass = HuntedClassManager.getClassForPlayer(player);
+					HuntedClass huntedClass = PlayerClassManager.getClassFor(player);
 					if (huntedClass != null && huntedClass.getType().canCollectRewards())
 						player.sendSystemMessage(Component.translatable("hunted.game.button.active").withStyle(Style.EMPTY.withBold(true).withColor(ChatFormatting.LIGHT_PURPLE)));
 				}
 			}
 		}
-		for (ServerPlayer player : this.getActive())
+		for (LivingEntity player : this.getActive())
 		{
 			player.getCapability(HuntedCapabilities.PLAYER_CLASS_MANAGER).ifPresent(manager ->
 			{
@@ -124,8 +143,8 @@ public class HuntedGame implements DataHolder
 		escapedOrEliminated.addAll(this.escaped);
 		for (UUID uuid : escapedOrEliminated)
 		{
-			ServerPlayer player = (ServerPlayer)this.level.getPlayerByUUID(uuid);
-			if (player != null)
+			Entity entity = this.level.getEntity(uuid);
+			if (entity instanceof LivingEntity player)
 			{
 				if (!this.map.boundary().contains(player.position()))
 					player.moveTo(Vec3.atBottomCenterOf(this.map.defaultStartPos()));
@@ -137,14 +156,14 @@ public class HuntedGame implements DataHolder
 //			reward.reset(this.level, this);
 	}
 	
-	public void processButton(ServerPlayer player, BlockPos pos)
+	public void processButton(LivingEntity player, BlockPos pos)
 	{
 		if (this.buttonPressingDelay <= 0 && this.players.contains(player.getUUID()) && this.availableRewards.size() > 0)
 		{
 			ButtonReward reward = this.availableRewards.get(pos);
 			if (reward != null)
 			{
-				HuntedClass huntedClass = HuntedClassManager.getClassForPlayer(player);
+				HuntedClass huntedClass = PlayerClassManager.getClassFor(player);
 				if (huntedClass != null && huntedClass.getType().canCollectRewards())
 				{
 					reward.reward(TriggerContext.builder().player(player).reward(reward).build(this.level, TriggerTypes.NONE.get()));
@@ -162,10 +181,11 @@ public class HuntedGame implements DataHolder
 		this.data = null;
 		this.buttonPressingDelay = this.map.buttonPressingDelay();
 		this.resetMap();
+		this.mode.begin(this.level, this);
 		for (UUID uuid : this.players)
 		{
-			ServerPlayer player = (ServerPlayer)this.level.getPlayerByUUID(uuid);
-			if (player != null)
+			Entity entity = this.level.getEntity(uuid);
+			if (entity instanceof LivingEntity player)
 			{
 				player.getCapability(HuntedCapabilities.PLAYER_CLASS_MANAGER).ifPresent(manager -> 
 				{
@@ -174,17 +194,23 @@ public class HuntedGame implements DataHolder
 					HuntedClass huntedClass = manager.getCurrentClass().orElse(null);
 					if (huntedClass != null)
 					{
-						HuntedUtil.showTitle(player, Component.translatable(huntedClass.getTypeTranslation()).withStyle(Style.EMPTY.withColor(huntedClass.getType().getColor()).withBold(true)), 20, 60, 20);
-						HuntedUtil.showSubtitle(player, Component.translatable(huntedClass.getTypeTranslation() + ".description").withStyle(Style.EMPTY.applyFormat(ChatFormatting.GOLD)), 20, 60, 20);
-						for (Ability ability : huntedClass.getAbilities())
-							player.getCooldowns().removeCooldown(ability.getItem());
+						if (player instanceof ServerPlayer serverPlayer)
+						{
+							HuntedUtil.showTitle(serverPlayer, Component.translatable(huntedClass.getTypeTranslation()).withStyle(Style.EMPTY.withColor(huntedClass.getType().getColor()).withBold(true)), 20, 60, 20);
+							HuntedUtil.showSubtitle(serverPlayer, Component.translatable(huntedClass.getTypeTranslation() + ".description").withStyle(Style.EMPTY.applyFormat(ChatFormatting.GOLD)), 20, 60, 20);
+							for (Ability ability : huntedClass.getAllAbilities())
+								serverPlayer.getCooldowns().removeCooldown(ability.getItem());
+						}
 						if (huntedClass.getType().canCollectRewards() && this.buttonPressingDelay > 0)
 							player.sendSystemMessage(Component.translatable("hunted.game.button.delay", Component.literal(String.valueOf(this.buttonPressingDelay/20)).withStyle(Style.EMPTY.withBold(true).withColor(ChatFormatting.LIGHT_PURPLE))).withStyle(ChatFormatting.GOLD));
 					}
 				});
-				player.playNotifySound(SoundEvents.CAT_HISS, SoundSource.PLAYERS, 1.0F, 0.0F);
-				player.refreshDisplayName();
-				player.refreshTabListName();
+				if (player instanceof ServerPlayer serverPlayer)
+				{
+					serverPlayer.playNotifySound(SoundEvents.CAT_HISS, SoundSource.PLAYERS, 1.0F, 0.0F);
+					serverPlayer.refreshDisplayName();
+					serverPlayer.refreshTabListName();
+				}
 				player.setHealth(player.getMaxHealth());
 				player.removeAllEffects();
 				this.trigger(TriggerTypes.PLAYER_BEGIN.get(), TriggerContext.builder().player(player));
@@ -203,25 +229,33 @@ public class HuntedGame implements DataHolder
 	
 	public void finish(GameWinContext context)
 	{
+		this.mode.finish(this.level, this);
+		
 		if (!context.isEmpty())
 		{
 			context.winners().forEach((player, huntedClass) -> 
 			{
-				HuntedUtil.showTitle(player, Component.translatable("hunted.game.finish.win.title").withStyle(Style.EMPTY.withBold(true).withColor(ChatFormatting.AQUA)), 20, 60, 20);
-				HuntedUtil.showSubtitle(player, Component.translatable("hunted.game.finish.win." + HuntedRegistries.HUNTED_CLASS_TYPES.get().getKey(huntedClass.getType()).getPath() + ".subtitle").withStyle(Style.EMPTY.withColor(ChatFormatting.BLUE)), 20, 60, 20);
-				player.playNotifySound(SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 100.0F, 0.0F);
+				if (player instanceof ServerPlayer serverPlayer)
+				{
+					HuntedUtil.showTitle(serverPlayer, Component.translatable("hunted.game.finish.win.title").withStyle(Style.EMPTY.withBold(true).withColor(ChatFormatting.AQUA)), 20, 60, 20);
+					HuntedUtil.showSubtitle(serverPlayer, Component.translatable("hunted.game.finish.win." + HuntedRegistries.HUNTED_CLASS_TYPES.get().getKey(huntedClass.getType()).getPath() + ".subtitle").withStyle(Style.EMPTY.withColor(ChatFormatting.BLUE)), 20, 60, 20);
+					serverPlayer.playNotifySound(SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 100.0F, 0.0F);
+				}
 			});
 			context.losers().forEach((player, huntedClass) -> 
 			{
-				HuntedUtil.showTitle(player, Component.translatable("hunted.game.finish.loss.title").withStyle(Style.EMPTY.withBold(true).withColor(ChatFormatting.RED)), 20, 60, 20);
-				HuntedUtil.showSubtitle(player, Component.translatable("hunted.game.finish.loss." + HuntedRegistries.HUNTED_CLASS_TYPES.get().getKey(huntedClass.getType()).getPath() + ".subtitle").withStyle(Style.EMPTY.withColor(ChatFormatting.GOLD)), 20, 60, 20);
-				player.playNotifySound(SoundEvents.BAT_DEATH, SoundSource.PLAYERS, 100.0F, 0.0F);
+				if (player instanceof ServerPlayer serverPlayer)
+				{
+					HuntedUtil.showTitle(serverPlayer, Component.translatable("hunted.game.finish.loss.title").withStyle(Style.EMPTY.withBold(true).withColor(ChatFormatting.RED)), 20, 60, 20);
+					HuntedUtil.showSubtitle(serverPlayer, Component.translatable("hunted.game.finish.loss." + HuntedRegistries.HUNTED_CLASS_TYPES.get().getKey(huntedClass.getType()).getPath() + ".subtitle").withStyle(Style.EMPTY.withColor(ChatFormatting.GOLD)), 20, 60, 20);
+					serverPlayer.playNotifySound(SoundEvents.BAT_DEATH, SoundSource.PLAYERS, 100.0F, 0.0F);
+				}
 			});
 		}
 		
-		for (ServerPlayer player : this.getPlayers())
+		for (LivingEntity entity : this.getPlayers())
 		{
-			if (player != null)
+			if (entity instanceof ServerPlayer player)
 			{
 				player.getCapability(HuntedCapabilities.PLAYER_CLASS_MANAGER).ifPresent(manager -> 
 				{
@@ -243,74 +277,92 @@ public class HuntedGame implements DataHolder
 		
 		this.resetMap();
 		
+		
 		this.data = new CompoundTag();
 	}
 	
 	/*
 	 * Returns all players that are participating in the game
 	 */
-	public List<ServerPlayer> getPlayers()
+	public List<LivingEntity> getPlayers()
 	{
 		List<UUID> uuids = Lists.newArrayList(this.players);
 		uuids.addAll(this.eliminated);
 		uuids.addAll(this.escaped);
-		List<ServerPlayer> players = Lists.newArrayList();
+		List<LivingEntity> players = Lists.newArrayList();
 		for (UUID uuid : uuids)
 		{
-			ServerPlayer player = (ServerPlayer)this.level.getPlayerByUUID(uuid);
-			if (player != null)
-				players.add(player);
+			Entity entity = this.level.getEntity(uuid);
+			if (entity instanceof LivingEntity player)
+			{
+				if (player != null)
+					players.add(player);
+			}
 		}
 		return players;
 	}
 	
-	public List<ServerPlayer> getActive()
+	public List<LivingEntity> getActive()
 	{
-		List<ServerPlayer> players = Lists.newArrayList();
+		List<LivingEntity> players = Lists.newArrayList();
 		for (UUID uuid : this.players)
 		{
-			ServerPlayer player = (ServerPlayer)this.level.getPlayerByUUID(uuid);
-			if (player != null)
-				players.add(player);
+			Entity entity = this.level.getEntity(uuid);
+			if (entity instanceof LivingEntity player)
+			{
+				if (player != null)
+					players.add(player);
+			}
 		}
 		return players;
 	}
 	
-	public List<ServerPlayer> getEliminated()
+	public List<LivingEntity> getEliminated()
 	{
-		List<ServerPlayer> players = Lists.newArrayList();
+		List<LivingEntity> players = Lists.newArrayList();
 		for (UUID uuid : this.eliminated)
 		{
-			ServerPlayer player = (ServerPlayer)this.level.getPlayerByUUID(uuid);
-			if (player != null)
-				players.add(player);
+			Entity entity = this.level.getEntity(uuid);
+			if (entity instanceof LivingEntity player)
+			{
+				if (player != null)
+					players.add(player);
+			}
 		}
 		return players;
 	}
 	
-	public List<ServerPlayer> getEscaped()
+	public List<LivingEntity> getEscaped()
 	{
-		List<ServerPlayer> players = Lists.newArrayList();
+		List<LivingEntity> players = Lists.newArrayList();
 		for (UUID uuid : this.escaped)
 		{
-			ServerPlayer player = (ServerPlayer)this.level.getPlayerByUUID(uuid);
-			if (player != null)
-				players.add(player);
+			Entity entity = this.level.getEntity(uuid);
+			if (entity instanceof LivingEntity player)
+			{
+				if (player != null)
+					players.add(player);
+			}
 		}
 		return players;
 	}
 	
-	public boolean isPlayerEliminated(ServerPlayer player)
+	public boolean isActive(LivingEntity player)
+	{
+		return this.players.contains(player.getUUID());
+	}
+	
+	public boolean isPlayerEliminated(LivingEntity player)
 	{
 		return this.eliminated.contains(player.getUUID());
 	}
 	
-	public boolean hasPlayerEscaped(ServerPlayer player)
+	public boolean hasPlayerEscaped(LivingEntity player)
 	{
 		return this.escaped.contains(player.getUUID());
 	}
 	
-	public void eliminate(ServerPlayer player)
+	public void eliminate(LivingEntity player)
 	{
 		player.getCapability(HuntedCapabilities.PLAYER_CLASS_MANAGER).ifPresent(manager -> 
 		{
@@ -326,32 +378,36 @@ public class HuntedGame implements DataHolder
 		});
 	}
 	
-	public void removePlayer(ServerPlayer player)
+	public void removePlayer(LivingEntity player)
 	{
 		UUID uuid = player.getUUID();
 		if (this.players.contains(uuid))
 		{
 			this.players.remove(uuid);
 			this.eliminated.add(uuid);
-			player.setGameMode(GameType.SPECTATOR);
+			if (player instanceof ServerPlayer serverPlayer)
+				serverPlayer.setGameMode(GameType.SPECTATOR);
 			this.triggerForActive(TriggerTypes.ELIMINATED.get(), TriggerContext.builder().target(player));
 		}
 	}
 	
-	public void escape(ServerPlayer player)
+	public void escape(LivingEntity player)
 	{
 		UUID uuid = player.getUUID();
 		if (this.players.contains(uuid))
 		{
 			this.players.remove(uuid);
 			this.escaped.add(uuid);
-			player.setGameMode(GameType.SPECTATOR);
 			player.getCapability(HuntedCapabilities.PLAYER_CLASS_MANAGER).ifPresent(manager -> 
 			{
 				if (manager instanceof ServerPlayerClassManager serverManager)
 					serverManager.setUpdateRequest(true);
 			});
-			player.playNotifySound(SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 300.0F, 0.0F);
+			if (player instanceof ServerPlayer serverPlayer)
+			{
+				serverPlayer.setGameMode(GameType.SPECTATOR);
+				serverPlayer.playNotifySound(SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 300.0F, 0.0F);
+			}
 		}
 	}
 	
@@ -359,11 +415,11 @@ public class HuntedGame implements DataHolder
 	{
 		HuntedClassType winning = null;
 		
-		List<ServerPlayer> players = this.getPlayers();
+		List<LivingEntity> players = this.getPlayers();
 		
-		for (ServerPlayer player : players)
+		for (LivingEntity player : players)
 		{
-			HuntedClass huntedClass = HuntedClassManager.getClassForPlayer(player);
+			HuntedClass huntedClass = PlayerClassManager.getClassFor(player);
 			if (huntedClass != null)
 			{
 				if (huntedClass.getType().checkObjective(this.level, this, player, huntedClass))
@@ -374,11 +430,11 @@ public class HuntedGame implements DataHolder
 			}
 		}
 		
-		Map<ServerPlayer, HuntedClass> winningPlayers = Maps.newHashMap();
-		Map<ServerPlayer, HuntedClass> losingPlayers = Maps.newHashMap();
+		Map<LivingEntity, HuntedClass> winningPlayers = Maps.newHashMap();
+		Map<LivingEntity, HuntedClass> losingPlayers = Maps.newHashMap();
 		if (winning != null)
 		{
-			for (ServerPlayer player : players)
+			for (LivingEntity player : players)
 			{
 				PlayerClassManager manager = player.getCapability(HuntedCapabilities.PLAYER_CLASS_MANAGER).orElse(null);
 				if (manager != null)
@@ -451,12 +507,13 @@ public class HuntedGame implements DataHolder
 	
 	public void triggerForActive(Trigger<?> trigger, TriggerContext.Builder builder)
 	{
-		for (ServerPlayer player : this.getPlayers())
+		for (LivingEntity player : this.getPlayers())
 			this.trigger(trigger, builder.player(player));
 	}
 	
 	public void save(CompoundTag tag)
 	{
+		tag.putInt("Mode", this.mode.ordinal());
 		tag.put("Players", saveUUIDList(this.players));
 		tag.put("Eliminated", saveUUIDList(this.eliminated));
 		tag.put("Escaped", saveUUIDList(this.escaped));
@@ -507,12 +564,12 @@ public class HuntedGame implements DataHolder
 		return ImmutableList.copyOf(this.collectedRewards.values());
 	}
 	
-	public List<ServerPlayer> getActiveBy(Class<? extends HuntedClassType> type)
+	public List<LivingEntity> getActiveBy(Class<? extends HuntedClassType> type)
 	{
 		return sortBy(this.getActive(), type);
 	}
 	
-	public List<ServerPlayer> getPlayersBy(Class<? extends HuntedClassType> type)
+	public List<LivingEntity> getPlayersBy(Class<? extends HuntedClassType> type)
 	{
 		return sortBy(this.getPlayers(), type);
 	}
@@ -534,8 +591,25 @@ public class HuntedGame implements DataHolder
 		return this.buttonHighlighting;
 	}
 	
+	public HuntedGame.GameMode getMode()
+	{
+		return this.mode;
+	}
+	
 	public static HuntedGame read(ServerLevel level, CompoundTag tag) throws NullPointerException
 	{
+		HuntedGame.GameMode mode = null;
+		int ordinal = tag.getInt("Mode");
+		for (int i = 0; i < HuntedGame.GameMode.values().length; i++)
+		{
+			if (i >= 0 && i < HuntedGame.GameMode.values().length)
+			{
+				if (i == ordinal)
+					mode = HuntedGame.GameMode.values()[ordinal];
+			}
+		}
+		if (mode == null)
+			throw new NullPointerException("Unknown game mode of ordinal " + ordinal);
 		List<UUID> players = readUUIDList(tag.getList("Players", 11));
 		List<UUID> eliminated = readUUIDList(tag.getList("Eliminated", 11));
 		List<UUID> escaped = readUUIDList(tag.getList("Escaped", 11));
@@ -544,7 +618,7 @@ public class HuntedGame implements DataHolder
 		if (map == null)
 			throw new NullPointerException("Failed to load map");
 		boolean buttonHighlighting = tag.getBoolean("ButtonHighlighting");
-		HuntedGame game = new HuntedGame(level, players, map, buttonHighlighting);
+		HuntedGame game = new HuntedGame(mode, level, players, map, buttonHighlighting);
 		game.availableRewards = readRewardMap(tag.getList("Rewards", 10));
 		game.collectedRewards = readRewardMap(tag.getList("CollectedRewards", 10));
 		for (UUID uuid : eliminated)
@@ -605,12 +679,82 @@ public class HuntedGame implements DataHolder
 		return rewards;
 	}
 	
-	public static List<ServerPlayer> sortBy(List<ServerPlayer> player, Class<? extends HuntedClassType> type)
+	public static List<LivingEntity> sortBy(List<LivingEntity> player, Class<? extends HuntedClassType> type)
 	{
 		return player.stream().filter(p -> 
 		{
-			HuntedClass huntedClass = HuntedClassManager.getClassForPlayer(p);
+			HuntedClass huntedClass = PlayerClassManager.getClassFor(p);
 			return huntedClass != null && huntedClass.getType().getClass().isAssignableFrom(type);
 		}).collect(Collectors.toList());
+	}
+	
+	public static enum GameMode
+	{
+		MULTIPLAYER(2),
+		SINGLEPLAYER(1) 
+		{
+			@Override
+			public void begin(ServerLevel level, HuntedGame game)
+			{
+				HunterEntity hunter = HuntedEntityTypes.HUNTER.get().create(level);
+				hunter.onGameBegin(game.getMap());
+				game.players.add(hunter.getUUID());
+				hunter.getCapability(HuntedCapabilities.PLAYER_CLASS_MANAGER).ifPresent(manager -> 
+				{
+					manager.getCurrentClass().ifPresent(huntedClass ->
+					{
+						if (game.getMap().startForTypes().containsKey(huntedClass.getType()))
+						{
+							Vec3 pos = Vec3.atBottomCenterOf(game.getMap().startForTypes().get(huntedClass.getType()));
+							hunter.moveTo(pos);
+						}
+						else
+						{
+							hunter.moveTo(Vec3.atBottomCenterOf(game.getMap().defaultStartPos()));
+						}
+					});
+				});
+				level.addFreshEntity(hunter);
+			}
+			
+			@Override
+			public void finish(ServerLevel level, HuntedGame game)
+			{
+				for (LivingEntity living : game.getPlayers())
+				{
+					if (living instanceof HunterEntity)
+						living.discard();
+				}
+			}
+			
+			@Override
+			public ServerPlayer pickHunter(List<ServerPlayer> players, UUID previousHunter, RandomSource random)
+			{
+				return null;
+			}
+		}; 
+		
+		private final int minimumPlayers;
+		
+		private GameMode(int minimumPlayers)
+		{
+			this.minimumPlayers = minimumPlayers;
+		}
+		
+		public int getMinimumPlayerCount()
+		{
+			return this.minimumPlayers;
+		}
+		
+		public void begin(ServerLevel level, HuntedGame game) {}
+		
+		public void finish(ServerLevel level, HuntedGame game) {}
+		
+		public @Nullable ServerPlayer pickHunter(List<ServerPlayer> players, @Nullable UUID previousHunter, RandomSource random)
+		{
+			List<ServerPlayer> hunterApplicable = players.stream().filter(p -> !p.getUUID().equals(previousHunter)).toList();
+			int index = random.nextInt(hunterApplicable.size());
+			return hunterApplicable.get(index);
+		}
 	}
 }

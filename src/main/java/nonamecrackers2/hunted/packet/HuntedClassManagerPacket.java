@@ -29,6 +29,7 @@ public class HuntedClassManagerPacket extends SimpleDataManagerPacket<HuntedClas
 	private static final Logger LOGGER = LogManager.getLogger();
 	
 	private Map<ResourceLocation, List<ResourceLocation>> abilities = Maps.newHashMap();
+	private Map<ResourceLocation, List<ResourceLocation>> passiveAbilities = Maps.newHashMap();
 	
 	public HuntedClassManagerPacket(Map<ResourceLocation, HuntedClass> values)
 	{
@@ -46,8 +47,10 @@ public class HuntedClassManagerPacket extends SimpleDataManagerPacket<HuntedClas
 		return (huntedClass, buffer) -> 
 		{
 			huntedClass.toPacket(buffer);
-			buffer.writeVarInt(huntedClass.getAbilities().size());
-			huntedClass.getAbilities().forEach(ability -> buffer.writeResourceLocation(ability.id()));
+			buffer.writeCollection(huntedClass.getAbilities(), (b, a) -> b.writeResourceLocation(a.id()));
+			buffer.writeCollection(huntedClass.getPassiveAbilities(), (b, a) -> b.writeResourceLocation(a.id()));
+//			buffer.writeVarInt(huntedClass.getAllAbilities().size());
+//			huntedClass.getAllAbilities().forEach(ability -> buffer.writeResourceLocation(ability.id()));
 		};
 	}
 	
@@ -57,11 +60,14 @@ public class HuntedClassManagerPacket extends SimpleDataManagerPacket<HuntedClas
 		return buffer -> 
 		{
 			HuntedClass huntedClass = HuntedClass.fromPacket(buffer);
-			int abilitySize = buffer.readVarInt();
-			List<ResourceLocation> abilities = Lists.newArrayList();
-			for (int i = 0; i < abilitySize; i++)
-				abilities.add(buffer.readResourceLocation());
+			List<ResourceLocation> abilities = buffer.readList(FriendlyByteBuf::readResourceLocation);
 			this.abilities.computeIfAbsent(huntedClass.id(), (id) -> abilities);
+			List<ResourceLocation> passiveAbilities = buffer.readList(FriendlyByteBuf::readResourceLocation);
+			this.passiveAbilities.computeIfAbsent(huntedClass.id(), (id) -> passiveAbilities);
+//			int abilitySize = buffer.readVarInt();
+//			List<ResourceLocation> abilities = Lists.newArrayList();
+//			for (int i = 0; i < abilitySize; i++)
+//				abilities.add(buffer.readResourceLocation());
 			return huntedClass;
 		};
 	}
@@ -80,18 +86,29 @@ public class HuntedClassManagerPacket extends SimpleDataManagerPacket<HuntedClas
 			LOGGER.debug("Received {} {}(s)", this.values.size(), this.manager().getDirectory());
 			for (var entry : this.abilities.entrySet())
 			{
-				List<Ability> abilities = Lists.newArrayList();
-				for (ResourceLocation abilityId : entry.getValue())
-				{
-					Ability ability = AbilityDataManager.INSTANCE.getSynced(abilityId);
-					if (ability != null)
-						abilities.add(ability);
-					else
-						LOGGER.error("Received unknown ability '{}'!", abilityId);
-				}
+				List<Ability> abilities = getAbilities(entry.getValue());
 				this.values.get(entry.getKey()).setAbilities(ImmutableList.copyOf(abilities));
+			}
+			for (var entry : this.passiveAbilities.entrySet())
+			{
+				List<Ability> abilities = getAbilities(entry.getValue());
+				this.values.get(entry.getKey()).setPassiveAbilities(ImmutableList.copyOf(abilities));
 			}
 			this.manager().setSynced(ImmutableMap.copyOf(this.values));
 		});
+	}
+	
+	private static List<Ability> getAbilities(List<ResourceLocation> abilityLocs)
+	{
+		List<Ability> abilities = Lists.newArrayList();
+		for (ResourceLocation abilityId : abilityLocs)
+		{
+			Ability ability = AbilityDataManager.INSTANCE.getSynced(abilityId);
+			if (ability != null)
+				abilities.add(ability);
+			else
+				LOGGER.error("Received unknown ability '{}'!", abilityId);
+		}
+		return abilities;
 	}
 }

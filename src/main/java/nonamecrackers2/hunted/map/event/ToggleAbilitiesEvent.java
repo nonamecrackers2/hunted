@@ -21,7 +21,7 @@ public class ToggleAbilitiesEvent extends MapEvent<ToggleAbilities.Settings>
 		HuntedClass huntedClass = context.getHuntedClass();
 		for (ResourceLocation id : settings.ids())
 		{
-			for (Ability ability : huntedClass.getAbilities())
+			for (Ability ability : huntedClass.getAllAbilities())
 			{
 				if (ability.id().equals(id))
 				{

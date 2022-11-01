@@ -19,7 +19,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -131,7 +132,7 @@ public class Ability implements Triggerable
 		return new Ability(id, Lists.newArrayList(), null, abilityItem, useSound, resetSound, text, name, lore, cooldownLore, cooldown);
 	}
 	
-	public void tick(ServerLevel level, HuntedGame game, ServerPlayer player, HuntedClass huntedClass, CompoundTag tag)
+	public void tick(ServerLevel level, HuntedGame game, LivingEntity player, HuntedClass huntedClass, CompoundTag tag)
 	{
 		if (this.isMutable())
 		{
@@ -178,9 +179,12 @@ public class Ability implements Triggerable
 						this.time = this.cooldown;
 						ItemStack stack = this.getAssociatedItem(context.player());
 						HuntedUtil.setLore(stack, this.getLore());
-						context.player().getCooldowns().addCooldown(stack.getItem(), this.cooldown);
-						if (this.useSound != null)
-							context.player().playNotifySound(this.useSound.event(), SoundSource.PLAYERS, this.useSound.volume(), this.useSound.pitch());
+						if (context.player() instanceof ServerPlayer player)
+						{
+							player.getCooldowns().addCooldown(stack.getItem(), this.cooldown);
+							if (this.useSound != null)
+								player.playNotifySound(this.useSound.event(), SoundSource.PLAYERS, this.useSound.volume(), this.useSound.pitch());
+						}
 						if (this.text != null)
 							context.player().sendSystemMessage(this.text);
 					}
@@ -207,22 +211,26 @@ public class Ability implements Triggerable
 		return this.trigger;
 	}
 	
-	public void assign(ServerPlayer player)
+	public void assign(LivingEntity player)
 	{
 		if (this.isMutable())
 		{
-			if (!this.abilityItem.equals(Items.AIR))
+			Container inv = HuntedUtil.getInventoryFor(player);
+			if (inv != null)
 			{
-				if (this.getAssociatedItem(player).isEmpty())
+				if (!this.abilityItem.equals(Items.AIR))
 				{
-					ItemStack stack = new ItemStack(this.abilityItem);
-					CompoundTag extra = new CompoundTag();
-					extra.putString("Ability", this.id.toString());
-					stack.addTagElement("HuntedGameData", extra);
-					stack.setHoverName(this.name);
-					HuntedUtil.setLore(stack, this.getLore());
-					stack.getTag().putBoolean("Unbreakable", true);
-					player.getInventory().add(stack);
+					if (this.getAssociatedItem(player).isEmpty())
+					{
+						ItemStack stack = new ItemStack(this.abilityItem);
+						CompoundTag extra = new CompoundTag();
+						extra.putString("Ability", this.id.toString());
+						stack.addTagElement("HuntedGameData", extra);
+						stack.setHoverName(this.name);
+						HuntedUtil.setLore(stack, this.getLore());
+						stack.getTag().putBoolean("Unbreakable", true);
+						HuntedUtil.addItem(inv, stack);
+					}
 				}
 			}
 		}
@@ -232,36 +240,44 @@ public class Ability implements Triggerable
 		}
 	}
 	
-	public void clear(ServerPlayer player)
+	public void clear(LivingEntity player)
 	{
 		if (this.isMutable())
 		{
-			for (ItemStack stack : player.getInventory().items)
+			Container inv = HuntedUtil.getInventoryFor(player);
+			if (inv != null)
 			{
-				if (stack.getOrCreateTag().contains("HuntedGameData"))
+				for (int i = 0; i < inv.getContainerSize(); i++)
 				{
-					CompoundTag extra = stack.getTagElement("HuntedGameData");
-					if (extra.contains("Ability"))
+					ItemStack stack = inv.getItem(i);
+					if (stack.getOrCreateTag().contains("HuntedGameData"))
 					{
-						ResourceLocation id = new ResourceLocation(extra.getString("Ability"));
-						if (id.equals(this.id()))
-							player.getInventory().removeItem(stack);
+						CompoundTag extra = stack.getTagElement("HuntedGameData");
+						if (extra.contains("Ability"))
+						{
+							ResourceLocation id = new ResourceLocation(extra.getString("Ability"));
+							if (id.equals(this.id()))
+								HuntedUtil.removeItem(inv, stack);
+						}
 					}
 				}
 			}
 		}
 	}
 	
-	public void reset(ServerLevel level, HuntedGame game, ServerPlayer player, HuntedClass huntedClass, CompoundTag tag)
+	public void reset(ServerLevel level, HuntedGame game, LivingEntity player, HuntedClass huntedClass, CompoundTag tag)
 	{
 		if (this.isMutable())
 		{
 			this.time = 0;
 			this.types.forEach(type -> type.reset(level, game, player, huntedClass, tag));
 			HuntedUtil.setLore(this.getAssociatedItem(player), this.getLore());
-			if (this.resetSound != null)
-				player.playNotifySound(this.resetSound.event(), SoundSource.PLAYERS, this.resetSound.pitch(), this.resetSound.volume());
-			player.playNotifySound(SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 2.0F, 1.0F);
+			if (player instanceof ServerPlayer serverPlayer)
+			{
+				if (this.resetSound != null)
+					serverPlayer.playNotifySound(this.resetSound.event(), SoundSource.PLAYERS, this.resetSound.pitch(), this.resetSound.volume());
+				serverPlayer.playNotifySound(SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 2.0F, 1.0F);
+			}
 		}
 		else
 		{
@@ -289,7 +305,7 @@ public class Ability implements Triggerable
 		return this.name;
 	}
 	
-	private ItemStack getAssociatedItem(Player player)
+	private ItemStack getAssociatedItem(LivingEntity player)
 	{
 		List<ItemStack> items = this.getAbilityItems(player);
 		if (items.size() > 0)
@@ -298,7 +314,7 @@ public class Ability implements Triggerable
 			return ItemStack.EMPTY;
 	}
 	
-	private void removePotentialDuplicates(Player player)
+	private void removePotentialDuplicates(LivingEntity player)
 	{
 		List<ItemStack> items = this.getAbilityItems(player);
 		for (ItemStack stack : items)
@@ -308,25 +324,34 @@ public class Ability implements Triggerable
 		}
 		if (items.size() > 1)
 		{
-			for (int i = 1; i < items.size(); i++)
-				player.getInventory().removeItem(items.get(i));
+			Container inv = HuntedUtil.getInventoryFor(player);
+			if (inv != null)
+			{
+				for (int i = 1; i < items.size(); i++)
+					HuntedUtil.removeItem(inv, items.get(i));
+			}
 		}
 	}
 	
 	//Returns all items that are associated with this ability. There should be only one, this is used for duplication checking
-	private List<ItemStack> getAbilityItems(Player player)
+	private List<ItemStack> getAbilityItems(LivingEntity player)
 	{
 		List<ItemStack> stacks = Lists.newArrayList();
-		for (ItemStack stack : player.getInventory().items)
+		Container inv = HuntedUtil.getInventoryFor(player);
+		if (inv != null)
 		{
-			if (stack.getOrCreateTag().contains("HuntedGameData"))
+			for (int i = 0; i < inv.getContainerSize(); i++)
 			{
-				CompoundTag extra = stack.getTagElement("HuntedGameData");
-				if (extra.contains("Ability"))
+				ItemStack stack = inv.getItem(i);
+				if (stack.getOrCreateTag().contains("HuntedGameData"))
 				{
-					ResourceLocation id = new ResourceLocation(extra.getString("Ability"));
-					if (id.equals(this.id()))
-						stacks.add(stack);
+					CompoundTag extra = stack.getTagElement("HuntedGameData");
+					if (extra.contains("Ability"))
+					{
+						ResourceLocation id = new ResourceLocation(extra.getString("Ability"));
+						if (id.equals(this.id()))
+							stacks.add(stack);
+					}
 				}
 			}
 		}

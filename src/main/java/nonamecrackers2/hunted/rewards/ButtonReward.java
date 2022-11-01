@@ -16,6 +16,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.registries.ForgeRegistries;
 import nonamecrackers2.hunted.map.event.MapEventDataManager;
@@ -88,7 +90,7 @@ public class ButtonReward
 	{
 		if (this.globalMessage != null)
 			this.globalMessageSupplier.getPlayers(context).forEach(active -> active.sendSystemMessage(HuntedUtil.appendArgs(this.globalMessage, context.player().getDisplayName())));
-		for (ServerPlayer player : this.supplier.getPlayers(context, false))
+		for (LivingEntity player : this.supplier.getPlayers(context, false))
 		{
 			if (!this.randomMessage)
 			{
@@ -100,9 +102,10 @@ public class ButtonReward
 					player.sendSystemMessage(this.rewardMessage.get(player.getRandom().nextInt(this.rewardMessage.size())));
 			}
 		}
-		for (ServerPlayer player : this.supplier.getPlayers(context))
+		for (LivingEntity player : this.supplier.getPlayers(context))
 			this.effects.forEach(holder -> player.addEffect(holder.createInstance()));
-		context.player().playNotifySound(this.sound, SoundSource.PLAYERS, 100.0F, this.pitch);
+		if (context.player() instanceof ServerPlayer serverPlayer)
+			serverPlayer.playNotifySound(this.sound, SoundSource.PLAYERS, 100.0F, this.pitch);
 		this.rewards.stream().collect(Collectors.mapping(item -> {
 			ItemStack stack = item.toStack();
 			CompoundTag extra = new CompoundTag();
@@ -111,7 +114,12 @@ public class ButtonReward
 			stack.addTagElement("HuntedGameData", extra);
 			stack.getTag().putBoolean("Unbreakable", true);
 			return stack;
-		}, Collectors.toList())).forEach(context.player()::addItem);
+		}, Collectors.toList())).forEach(item -> 
+		{
+			Container inv = HuntedUtil.getInventoryFor(context.player());
+			if (inv != null)
+				HuntedUtil.addItem(inv, item);
+		});
 	}
 	
 	public ResourceLocation getId()

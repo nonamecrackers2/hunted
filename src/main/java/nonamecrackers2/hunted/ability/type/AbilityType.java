@@ -11,6 +11,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.entity.LivingEntity;
 import nonamecrackers2.hunted.game.HuntedGame;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
 import nonamecrackers2.hunted.trigger.Trigger;
@@ -39,9 +40,9 @@ public abstract class AbilityType<T>
 	
 	public abstract Trigger.Criteria triggerCriteria(T settings);
 	
-	public void reset(T settings, ServerLevel level, HuntedGame game, ServerPlayer player, HuntedClass huntedClass, CompoundTag tag, TargetSupplier supplier) {}
+	public void reset(T settings, ServerLevel level, HuntedGame game, LivingEntity player, HuntedClass huntedClass, CompoundTag tag, TargetSupplier supplier) {}
 	
-	public void tick(T settings, ServerLevel level, HuntedGame game, ServerPlayer player, HuntedClass huntedClass, CompoundTag tag, TargetSupplier supplier) {}
+	public void tick(T settings, ServerLevel level, HuntedGame game, LivingEntity player, HuntedClass huntedClass, CompoundTag tag, TargetSupplier supplier) {}
 	
 	public ConfiguredAbilityType<T> configure(JsonElement element)
 	{
@@ -72,12 +73,12 @@ public abstract class AbilityType<T>
 			return this.type.triggerCriteria(this.settings).combine(this.supplier.getTriggerCriteria());
 		}
 		
-		public void reset(ServerLevel level, HuntedGame game, ServerPlayer player, HuntedClass huntedClass, CompoundTag tag)
+		public void reset(ServerLevel level, HuntedGame game, LivingEntity player, HuntedClass huntedClass, CompoundTag tag)
 		{
 			this.type.reset(this.settings, level, game, player, huntedClass, tag, this.supplier);
 		}
 		
-		public void tick(ServerLevel level, HuntedGame game, ServerPlayer player, HuntedClass huntedClass, CompoundTag tag)
+		public void tick(ServerLevel level, HuntedGame game, LivingEntity player, HuntedClass huntedClass, CompoundTag tag)
 		{
 			this.type.tick(this.settings, level, game, player, huntedClass, tag, this.supplier);
 		}

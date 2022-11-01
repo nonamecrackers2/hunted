@@ -6,7 +6,7 @@ import com.mojang.serialization.JsonOps;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import nonamecrackers2.hunted.game.HuntedGame;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
 import nonamecrackers2.hunted.util.HuntedUtil;
@@ -20,9 +20,9 @@ public abstract class DeathSequence<T>
 		this.codec = codec;
 	}
 	
-	protected abstract void runSequence(T settings, ServerLevel level, ServerPlayer player, HuntedClass huntedClass, HuntedGame game, CompoundTag tag);
+	protected abstract void runSequence(T settings, ServerLevel level, LivingEntity player, HuntedClass huntedClass, HuntedGame game, CompoundTag tag);
 	
-	protected void tick(T settings, ServerLevel level, ServerPlayer player, HuntedClass huntedClass, HuntedGame game, CompoundTag tag) {}
+	protected void tick(T settings, ServerLevel level, LivingEntity player, HuntedClass huntedClass, HuntedGame game, CompoundTag tag) {}
 	
 	public ConfiguredDeathSequence<T> configure(JsonElement element)
 	{
@@ -31,12 +31,12 @@ public abstract class DeathSequence<T>
 	
 	public static record ConfiguredDeathSequence<T>(DeathSequence<T> type, T settings)
 	{
-		public void runSequence(ServerLevel level, ServerPlayer player, HuntedClass huntedClass, HuntedGame game, CompoundTag tag)
+		public void runSequence(ServerLevel level, LivingEntity player, HuntedClass huntedClass, HuntedGame game, CompoundTag tag)
 		{
 			this.type.runSequence(this.settings, level, player, huntedClass, game, tag);
 		}
 		
-		public void tick(ServerLevel level, ServerPlayer player, HuntedClass huntedClass, HuntedGame game, CompoundTag tag)
+		public void tick(ServerLevel level, LivingEntity player, HuntedClass huntedClass, HuntedGame game, CompoundTag tag)
 		{
 			this.type.tick(this.settings, level, player, huntedClass, game, tag);
 		}

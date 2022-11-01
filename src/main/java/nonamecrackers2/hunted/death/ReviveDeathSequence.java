@@ -15,6 +15,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.GameType;
 import nonamecrackers2.hunted.game.HuntedGame;
 import nonamecrackers2.hunted.game.HuntedGameManager;
@@ -47,15 +48,22 @@ public class ReviveDeathSequence extends DeathSequence<ReviveDeathSequence.Setti
 	}
 
 	@Override
-	protected void runSequence(ReviveDeathSequence.Settings settings, ServerLevel level, ServerPlayer player, HuntedClass huntedClass, HuntedGame game, CompoundTag tag)
+	protected void runSequence(ReviveDeathSequence.Settings settings, ServerLevel level, LivingEntity player, HuntedClass huntedClass, HuntedGame game, CompoundTag tag)
 	{
 		if (tag.getInt(REVIVAL_TIMES) < settings.revivalTimes)
 		{
-			HuntedUtil.showTitle(player, settings.title, 20, 60, 20);
-			HuntedUtil.showSubtitle(player, settings.subtitle, 20, 60, 20);
-			List<ServerPlayer> players = game.getPlayers();
-			players.forEach(p -> p.playNotifySound(settings.sound.event(), SoundSource.PLAYERS, settings.sound.volume(), settings.sound.pitch()));
-			player.setGameMode(GameType.SPECTATOR);
+			List<LivingEntity> players = game.getPlayers();
+			players.forEach(p -> 
+			{
+				if (p instanceof ServerPlayer sp)
+					sp.playNotifySound(settings.sound.event(), SoundSource.PLAYERS, settings.sound.volume(), settings.sound.pitch());
+			});
+			if (player instanceof ServerPlayer serverPlayer)
+			{
+				HuntedUtil.showTitle(serverPlayer, settings.title, 20, 60, 20);
+				HuntedUtil.showSubtitle(serverPlayer, settings.subtitle, 20, 60, 20);
+				serverPlayer.setGameMode(GameType.SPECTATOR);
+			}
 			HuntedUtil.count(tag, REVIVAL_TIMES);
 			tag.putInt(DELAY, settings.reviveDelay);
 		}
@@ -70,7 +78,7 @@ public class ReviveDeathSequence extends DeathSequence<ReviveDeathSequence.Setti
 	}
 	
 	@Override
-	protected void tick(ReviveDeathSequence.Settings settings, ServerLevel level, ServerPlayer player, HuntedClass huntedClass, HuntedGame game, CompoundTag tag)
+	protected void tick(ReviveDeathSequence.Settings settings, ServerLevel level, LivingEntity player, HuntedClass huntedClass, HuntedGame game, CompoundTag tag)
 	{
 		if (tag.getInt(REVIVAL_TIMES) >= settings.revivalTimes)
 		{
@@ -84,7 +92,8 @@ public class ReviveDeathSequence extends DeathSequence<ReviveDeathSequence.Setti
 					if (positions.size() > 0)
 						pos = positions.get(player.getRandom().nextInt(positions.size()));
 					player.teleportTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D);
-					player.setGameMode(HuntedGameManager.DEFAULT_GAME_MODE);
+					if (player instanceof ServerPlayer serverPlayer)
+						serverPlayer.setGameMode(HuntedGameManager.DEFAULT_GAME_MODE);
 					game.triggerForActive(TriggerTypes.REVIVED.get(), TriggerContext.builder().target(player));
 				}
 			}

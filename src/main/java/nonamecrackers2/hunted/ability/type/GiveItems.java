@@ -9,7 +9,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import nonamecrackers2.hunted.trigger.Trigger;
 import nonamecrackers2.hunted.trigger.TriggerContext;
@@ -35,7 +36,7 @@ public class GiveItems extends AbilityType<GiveItems.Settings>
 	public AbilityType.Result use(GiveItems.Settings settings, TriggerContext context, CompoundTag tag, TargetSupplier supplier)
 	{
 		AbilityType.Result result = AbilityType.Result.FAIL;
-		for (ServerPlayer player : supplier.getPlayers(context))
+		for (LivingEntity player : supplier.getPlayers(context))
 		{
 			AbilityType.Result current = giveItems(player, settings.items, settings.randomFromList, settings.allowMultiple, settings.canDropItems);
 			if (current.isMoreSuccessful(result))
@@ -60,24 +61,32 @@ public class GiveItems extends AbilityType<GiveItems.Settings>
 //		return AbilityType.Result.FAIL;
 	}
 	
-	private static AbilityType.Result giveItems(ServerPlayer player, List<ItemStack> items, boolean randomFromList, boolean allowMultiple, boolean canDropItems)
+	private static AbilityType.Result giveItems(LivingEntity player, List<ItemStack> items, boolean randomFromList, boolean allowMultiple, boolean canDropItems)
 	{
-		if (!allowMultiple ? !player.getInventory().hasAnyOf(items.stream().map(ItemStack::getItem).collect(Collectors.toSet())) : true)
+		Container inv = HuntedUtil.getInventoryFor(player);
+		if (inv != null)
 		{
-			List<ItemStack> stacks = Lists.newArrayList();
-			if (randomFromList)
-				stacks = Lists.newArrayList(items.get(player.getRandom().nextInt(items.size())).copy());
-			else
-				stacks = items.stream().map(ItemStack::copy).collect(Collectors.toList());
-			for (ItemStack stack : stacks)
+			if (!allowMultiple ? !inv.hasAnyOf(items.stream().map(ItemStack::getItem).collect(Collectors.toSet())) : true)
 			{
-				CompoundTag extra = stack.getOrCreateTagElement("HuntedGameData");
-				extra.putBoolean("IsGivenItem", true);
-				extra.putBoolean(HuntedUtil.IS_DROPPABLE, canDropItems);
-				stack.getTag().putBoolean("Unbreakable", true);
-				player.getInventory().add(stack);
+				List<ItemStack> stacks = Lists.newArrayList();
+				if (randomFromList)
+					stacks = Lists.newArrayList(items.get(player.getRandom().nextInt(items.size())).copy());
+				else
+					stacks = items.stream().map(ItemStack::copy).collect(Collectors.toList());
+				for (ItemStack stack : stacks)
+				{
+					CompoundTag extra = stack.getOrCreateTagElement("HuntedGameData");
+					extra.putBoolean("IsGivenItem", true);
+					extra.putBoolean(HuntedUtil.IS_DROPPABLE, canDropItems);
+					stack.getTag().putBoolean("Unbreakable", true);
+					HuntedUtil.addItem(inv, stack);
+				}
+				return AbilityType.Result.SUCCESS;
 			}
-			return AbilityType.Result.SUCCESS;
+			else
+			{
+				return AbilityType.Result.FAIL;
+			}
 		}
 		else
 		{

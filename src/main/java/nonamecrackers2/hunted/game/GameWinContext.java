@@ -4,12 +4,12 @@ import java.util.Map;
 
 import com.google.common.collect.Maps;
 
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
 import nonamecrackers2.hunted.huntedclass.type.HuntedClassType;
 import nonamecrackers2.hunted.huntedclass.type.HunterClassType;
 
-public record GameWinContext(HuntedClassType status, Map<ServerPlayer, HuntedClass> winners, Map<ServerPlayer, HuntedClass> losers)
+public record GameWinContext(HuntedClassType status, Map<LivingEntity, HuntedClass> winners, Map<LivingEntity, HuntedClass> losers)
 {
 	public static GameWinContext empty()
 	{

@@ -12,6 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringRepresentable;
 import nonamecrackers2.hunted.ability.Ability;
 import nonamecrackers2.hunted.ability.type.Bind;
+import nonamecrackers2.hunted.capability.HuntedClassManager;
 import nonamecrackers2.hunted.capability.PlayerClassManager;
 import nonamecrackers2.hunted.capability.ServerPlayerClassManager;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
@@ -138,7 +139,7 @@ public record TargetCriteria(TargetCriteria.Type type, Optional<ResourceLocation
 					HuntedClass huntedClass = serverManager.getCurrentClass().orElse(null);
 					if (huntedClass != null)
 					{
-						for (Ability ability : huntedClass.getAbilities())
+						for (Ability ability : huntedClass.getAllAbilities())
 						{
 							CompoundTag tag = serverManager.getOrCreateTagElement(ability.id().toString());
 							if (tag.contains(Bind.BINDED))
@@ -147,9 +148,9 @@ public record TargetCriteria(TargetCriteria.Type type, Optional<ResourceLocation
 								if (context.target().getUUID().equals(uuid))
 								{
 									if (target.huntedClass().isPresent())
-										return target.huntedClass().get().equals(context.getTargetHuntedClass().id());
+										return target.huntedClass().get().equals(PlayerClassManager.getClassFor(context.target()).id());
 									else if (target.huntedClassType().isPresent())
-										return target.huntedClassType().get().equals(context.getTargetHuntedClass().getType());
+										return target.huntedClassType().get().equals(PlayerClassManager.getClassFor(context.target()).getType());
 									else
 										return true;
 								}

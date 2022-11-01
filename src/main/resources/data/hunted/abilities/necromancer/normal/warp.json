@@ -5,7 +5,7 @@
 			"settings": {
 				"masked": "hunted:target_teleport",
 				"settings": {},
-				"bind_tag_path": "hunted:necromancer/bind"
+				"bind_tag_path": "hunted:necromancer/normal/bind"
 			}
 		}
 	],

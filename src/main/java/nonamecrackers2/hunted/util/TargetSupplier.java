@@ -14,6 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.entity.LivingEntity;
 import nonamecrackers2.hunted.ability.type.AbilityType;
 import nonamecrackers2.hunted.huntedclass.type.HuntedClassType;
 import nonamecrackers2.hunted.registry.HuntedRegistries;
@@ -48,12 +49,12 @@ public record TargetSupplier(TargetSupplier.Type type, Optional<ResourceLocation
 		return this.type.criteria;
 	}
 	
-	public List<ServerPlayer> getPlayers(TriggerContext context)
+	public List<LivingEntity> getPlayers(TriggerContext context)
 	{
 		return this.getPlayers(context, true);
 	}
 	
-	public List<ServerPlayer> getPlayers(TriggerContext context, boolean activePlayers)
+	public List<LivingEntity> getPlayers(TriggerContext context, boolean activePlayers)
 	{
 		var players = this.type.getPlayers(this, context, activePlayers);
 		this.and().ifPresent(and -> players.addAll(and.getPlayers(context, activePlayers)));
@@ -70,7 +71,7 @@ public record TargetSupplier(TargetSupplier.Type type, Optional<ResourceLocation
 		SELF("self", Trigger.criteria().player()) 
 		{
 			@Override
-			protected List<ServerPlayer> getPlayers(TargetSupplier target, TriggerContext context, boolean activePlayers)
+			protected List<LivingEntity> getPlayers(TargetSupplier target, TriggerContext context, boolean activePlayers)
 			{
 				return Lists.newArrayList(context.player());
 			}
@@ -78,7 +79,7 @@ public record TargetSupplier(TargetSupplier.Type type, Optional<ResourceLocation
 		TARGET("target", Trigger.criteria().target()) 
 		{
 			@Override
-			protected List<ServerPlayer> getPlayers(TargetSupplier target, TriggerContext context, boolean activePlayers)
+			protected List<LivingEntity> getPlayers(TargetSupplier target, TriggerContext context, boolean activePlayers)
 			{
 				return Lists.newArrayList(context.target());
 			}
@@ -94,9 +95,9 @@ public record TargetSupplier(TargetSupplier.Type type, Optional<ResourceLocation
 			}
 			
 			@Override
-			protected List<ServerPlayer> getPlayers(TargetSupplier target, TriggerContext context, boolean activePlayers)
+			protected List<LivingEntity> getPlayers(TargetSupplier target, TriggerContext context, boolean activePlayers)
 			{
-				List<ServerPlayer> players = activePlayers ? context.getGame().getActive() : context.getGame().getPlayers();
+				List<LivingEntity> players = activePlayers ? context.getGame().getActive() : context.getGame().getPlayers();
 				return players.stream().filter(s -> context.getHuntedClass(s).id().equals(target.huntedClass().get())).collect(Collectors.toList());
 			}
 		},
@@ -111,7 +112,7 @@ public record TargetSupplier(TargetSupplier.Type type, Optional<ResourceLocation
 			}
 			
 			@Override
-			protected List<ServerPlayer> getPlayers(TargetSupplier target, TriggerContext context, boolean activePlayers)
+			protected List<LivingEntity> getPlayers(TargetSupplier target, TriggerContext context, boolean activePlayers)
 			{
 				return activePlayers ? context.getGame().getActiveBy(target.huntedClassType().get().getClass()) : context.getGame().getPlayersBy(target.huntedClassType().get().getClass());
 			}
@@ -119,17 +120,17 @@ public record TargetSupplier(TargetSupplier.Type type, Optional<ResourceLocation
 		ALL("all", Trigger.criteria())
 		{
 			@Override
-			protected List<ServerPlayer> getPlayers(TargetSupplier target, TriggerContext context, boolean activePlayers)
+			protected List<LivingEntity> getPlayers(TargetSupplier target, TriggerContext context, boolean activePlayers)
 			{
-				return activePlayers ? context.getGame().getActive() : context.getGame().getPlayers();
+				return Lists.newArrayList(activePlayers ? context.getGame().getActive() : context.getGame().getPlayers());
 			}
 		},
 		RANDOM("random", Trigger.criteria())
 		{
 			@Override
-			protected List<ServerPlayer> getPlayers(TargetSupplier target, TriggerContext context, boolean activePlayers)
+			protected List<LivingEntity> getPlayers(TargetSupplier target, TriggerContext context, boolean activePlayers)
 			{
-				List<ServerPlayer> players = activePlayers ? context.getGame().getActive() : context.getGame().getPlayers();
+				List<LivingEntity> players = activePlayers ? context.getGame().getActive() : context.getGame().getPlayers();
 				if (target.huntedClass().isPresent())
 					players = players.stream().filter(p -> context.getHuntedClass(p).id().equals(target.huntedClass().get())).toList();
 				if (target.huntedClassType().isPresent())
@@ -152,7 +153,7 @@ public record TargetSupplier(TargetSupplier.Type type, Optional<ResourceLocation
 			this.criteria = criteria;
 		}
 		
-		protected abstract List<ServerPlayer> getPlayers(TargetSupplier target, TriggerContext context, boolean activePlayers);
+		protected abstract List<LivingEntity> getPlayers(TargetSupplier target, TriggerContext context, boolean activePlayers);
 		
 		protected TargetSupplier make(Optional<ResourceLocation> huntedClass, Optional<HuntedClassType> type, Optional<TargetSupplier> and)
 		{

@@ -41,7 +41,7 @@ public class EliminatedTrigger extends Trigger<EliminatedTrigger.Settings>
 					HuntedClass huntedClass = serverManager.getCurrentClass().orElse(null);
 					if (huntedClass != null)
 					{
-						for (Ability ability : huntedClass.getAbilities())
+						for (Ability ability : huntedClass.getAllAbilities())
 						{
 							CompoundTag tag = serverManager.getOrCreateTagElement(ability.id().toString());
 							if (tag.contains(Bind.BINDED))

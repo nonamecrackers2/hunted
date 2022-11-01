@@ -10,6 +10,10 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.npc.InventoryCarrier;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.PacketDistributor;
 import nonamecrackers2.hunted.game.HuntedGame;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
@@ -36,31 +40,44 @@ public class GenericDeathSequence extends DeathSequence<GenericDeathSequence.Set
 	}
 
 	@Override
-	protected void runSequence(Settings settings, ServerLevel level, ServerPlayer player, HuntedClass huntedClass, HuntedGame game, CompoundTag tag)
+	protected void runSequence(Settings settings, ServerLevel level, LivingEntity player, HuntedClass huntedClass, HuntedGame game, CompoundTag tag)
 	{
 		game.removePlayer(player);
-		HuntedUtil.showTitle(player, settings.title, 20, 60, 20);
-		HuntedUtil.showSubtitle(player, settings.subtitle, 20, 60, 20);
-		List<ServerPlayer> players = game.getPlayers();
-		players.forEach(p -> p.playNotifySound(settings.sound.event(), SoundSource.PLAYERS, settings.sound.volume(), settings.sound.pitch()));
-		List<ServerPlayer> active = game.getActiveBy(PreyClassType.class);
-		if (active.size() > 0)
+		List<LivingEntity> players = game.getPlayers();
+		players.forEach(p -> 
 		{
-			ServerPlayer toAward = active.get(player.getRandom().nextInt(active.size()));
-			player.getInventory().items.forEach(item -> 
+			if (p instanceof ServerPlayer sp)
+				sp.playNotifySound(settings.sound.event(), SoundSource.PLAYERS, settings.sound.volume(), settings.sound.pitch());
+		});
+		List<LivingEntity> active = game.getActiveBy(PreyClassType.class);
+		List<LivingEntity> awardable = active.stream().filter(p -> HuntedUtil.getInventoryFor(p) != null).toList();
+		if (awardable.size() > 0)
+		{
+			LivingEntity toAward = awardable.get(player.getRandom().nextInt(active.size()));
+			Container inv = HuntedUtil.getInventoryFor(player);
+			if (inv != null)
 			{
-				if (item.getOrCreateTag().contains("HuntedGameData"))
+				for (int i = 0; i < inv.getContainerSize(); i++)
 				{
-					CompoundTag extra = item.getTagElement("HuntedGameData");
-					if (extra.getBoolean("IsRewardItem"))
+					ItemStack item = inv.getItem(i);
+					if (item.getOrCreateTag().contains("HuntedGameData"))
 					{
-						toAward.addItem(item);
-						player.getInventory().removeItem(item);
+						CompoundTag extra = item.getTagElement("HuntedGameData");
+						if (extra.getBoolean("IsRewardItem"))
+						{
+							HuntedUtil.addItem(HuntedUtil.getInventoryFor(toAward), item);
+							HuntedUtil.removeItem(inv, item);
+						}
 					}
 				}
-			});
+			}
 		}
-		HuntedPacketHandlers.MAIN.send(PacketDistributor.PLAYER.with(() -> player), new DoJumpscarePacket(HuntedSoundEvents.JUMPSCARE.get(), 50));
+		if (player instanceof ServerPlayer serverPlayer)
+		{
+			HuntedUtil.showTitle(serverPlayer, settings.title, 20, 60, 20);
+			HuntedUtil.showSubtitle(serverPlayer, settings.subtitle, 20, 60, 20);
+			HuntedPacketHandlers.MAIN.send(PacketDistributor.PLAYER.with(() -> serverPlayer), new DoJumpscarePacket(HuntedSoundEvents.JUMPSCARE.get(), 50));
+		}
 	}
 	
 	public static record Settings(MutableComponent title, MutableComponent subtitle, SoundEventHolder sound) {}

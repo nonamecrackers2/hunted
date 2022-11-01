@@ -82,13 +82,17 @@ public class HuntedClassDataManager extends SimpleDataManager<HuntedClass>
 		
 		List<Ability> abilities = getAbilities(GsonHelper.getAsJsonArray(object, "abilities"));
 
+		List<Ability> passiveAbilities = ImmutableList.of();
+		if (object.has("passive_abilities"))
+			passiveAbilities = getAbilities(GsonHelper.getAsJsonArray(object, "passive_abilities"));
+		
 		Map<EquipmentSlot, Item> outfit = getOutfitFromJson(object);
 
 		DeathSequence.ConfiguredDeathSequence<?> sequence = null;
 		if (type.requiresDeathSequence())
 			sequence = getConfiguredDeathSequence(object.get("death_sequence"));
 		
-		HuntedClass huntedClass = new HuntedClass(fileName, name, description, type, Optional.ofNullable(loopSound), supportsMask, icon, abilities, outfit, sequence);
+		HuntedClass huntedClass = new HuntedClass(fileName, name, description, type, Optional.ofNullable(loopSound), supportsMask, icon, abilities, passiveAbilities, outfit, sequence);
 		return huntedClass;
 	}
 	

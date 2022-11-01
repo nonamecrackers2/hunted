@@ -4,7 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import nonamecrackers2.hunted.ability.Ability;
 import nonamecrackers2.hunted.ability.type.ModifyCooldown;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
@@ -24,10 +24,10 @@ public class ModifyAbilityCooldownsEvent extends MapEvent<ModifyAbilityCooldowns
 	@Override
 	public void activate(ModifyAbilityCooldownsEvent.Settings settings, TriggerContext context, CompoundTag data)
 	{
-		for (ServerPlayer player : settings.supplier().getPlayers(context))
+		for (LivingEntity player : settings.supplier().getPlayers(context))
 		{
 			HuntedClass huntedClass = context.getHuntedClass(player);
-			for (Ability ability : huntedClass.getAbilities())
+			for (Ability ability : huntedClass.getAllAbilities())
 			{
 				if (!settings.settings().allAbilities())
 				{

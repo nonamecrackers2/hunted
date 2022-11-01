@@ -7,8 +7,10 @@
 	},
 	"type": "hunted:prey",
 	"abilities": [
-		"#hunted:shaman",
 		"hunted:speed"
+	],
+	"passive_abilities": [
+		"#hunted:shaman"
 	],
 	"outfit": [],
 	"death_sequence": "hunted:revive",

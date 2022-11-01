@@ -6,31 +6,27 @@ import javax.annotation.Nullable;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import nonamecrackers2.hunted.HuntedMod;
+import net.minecraftforge.network.PacketDistributor;
 import nonamecrackers2.hunted.ability.Ability;
+import nonamecrackers2.hunted.entity.HunterEntity;
 import nonamecrackers2.hunted.game.HuntedGame;
 import nonamecrackers2.hunted.game.HuntedGameManager;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
 import nonamecrackers2.hunted.huntedclass.HuntedClassDataManager;
 import nonamecrackers2.hunted.init.HuntedCapabilities;
+import nonamecrackers2.hunted.init.HuntedPacketHandlers;
 import nonamecrackers2.hunted.map.HuntedMap;
+import nonamecrackers2.hunted.packet.UpdatePlayerClassManagerPacket;
 import nonamecrackers2.hunted.trigger.Trigger;
 import nonamecrackers2.hunted.trigger.TriggerContext;
 
 public class HuntedClassManager implements ServerPlayerClassManager
 {
-	public static final ResourceLocation[] MASKS = new ResourceLocation[] {
-			HuntedMod.resource("textures/mask/mask.png"),
-			HuntedMod.resource("textures/mask/mask2.png"),
-			HuntedMod.resource("textures/mask/mask3.png"),
-			HuntedMod.resource("textures/mask/mask4.png"),
-			HuntedMod.resource("textures/mask/mask5.png"),
-			HuntedMod.resource("textures/mask/mask6.png")
-	};
 	private final ServerPlayer player;
 	private Optional<HuntedClass> huntedClass = Optional.empty();
 	private boolean requestsUpdate;
@@ -43,9 +39,18 @@ public class HuntedClassManager implements ServerPlayerClassManager
 	}
 	
 	@Override
-	public ServerPlayer getPlayer()
+	public void update()
 	{
-		return this.player;
+		this.setUpdateRequest(false);
+		HuntedPacketHandlers.MAIN.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> this.player), new UpdatePlayerClassManagerPacket(this.player.getId(), this.isInGame(), this.hasEscaped(), this.getCurrentClass(), this.getMask()));
+		this.player.refreshDisplayName();
+		this.player.refreshTabListName();
+	}
+	
+	@Override
+	public void tick(ServerLevel level, HuntedGame game)
+	{
+		this.getCurrentClass().ifPresent(huntedClass -> huntedClass.tick(level, game, this.player, this.getOrCreateTag()));
 	}
 
 	@Override
@@ -77,14 +82,14 @@ public class HuntedClassManager implements ServerPlayerClassManager
 				this.player.moveTo(Vec3.atBottomCenterOf(map.defaultStartPos()));
 			}
 			
-			for (Ability ability : huntedClass.getAbilities())
+			for (Ability ability : huntedClass.getAllAbilities())
 			{
 				if (!ability.isDisabled())
 					ability.assign(this.player);
 			}
 			huntedClass.assignOutfit(this.player);
 			if (huntedClass.supportsMask())
-				this.mask = MASKS[this.player.getRandom().nextInt(MASKS.length)];
+				this.mask = HunterEntity.MASKS[this.player.getRandom().nextInt(HunterEntity.MASKS.length)];
 		});
 	}
 	
@@ -113,7 +118,7 @@ public class HuntedClassManager implements ServerPlayerClassManager
 		}
 		this.huntedClass.ifPresent(huntedClass ->
 		{
-			for (Ability ability : huntedClass.getAbilities())
+			for (Ability ability : huntedClass.getAllAbilities())
 				ability.clear(this.player);
 		});
 		for (ItemStack stack : this.player.getInventory().items)
@@ -152,11 +157,12 @@ public class HuntedClassManager implements ServerPlayerClassManager
 								}
 							}
 						}
-						else
-						{
-							ability.use(context, this.getOrCreateTagElement(ability.id().toString()));
-						}
 					}
+				}
+				for (Ability ability : huntedClass.getPassiveAbilities())
+				{
+					if (ability.triggerCriteria().matches(context) && ability.getTrigger().matches(context))
+						ability.use(context, this.getOrCreateTagElement(ability.id().toString()));
 				}
 			});
 		}
@@ -244,14 +250,14 @@ public class HuntedClassManager implements ServerPlayerClassManager
 		return this.mask;
 	}
 	
-	public static @Nullable HuntedClass getClassForPlayer(ServerPlayer player)
-	{
-		HuntedClass huntedClass = null;
-		PlayerClassManager manager = player.getCapability(HuntedCapabilities.PLAYER_CLASS_MANAGER).orElse(null);
-		if (manager != null)
-			huntedClass = manager.getCurrentClass().orElse(null);
-		return huntedClass;
-	}
+//	public static @Nullable HuntedClass getClassForPlayer(ServerPlayer player)
+//	{
+//		HuntedClass huntedClass = null;
+//		PlayerClassManager manager = player.getCapability(HuntedCapabilities.PLAYER_CLASS_MANAGER).orElse(null);
+//		if (manager != null)
+//			huntedClass = manager.getCurrentClass().orElse(null);
+//		return huntedClass;
+//	}
 	
 	@Override
 	public CompoundTag getTag()

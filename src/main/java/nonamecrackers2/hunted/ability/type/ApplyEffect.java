@@ -11,6 +11,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.LivingEntity;
 import nonamecrackers2.hunted.game.HuntedGame;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
 import nonamecrackers2.hunted.trigger.Trigger;
@@ -40,7 +41,7 @@ public class ApplyEffect extends AbilityType<ApplyEffect.Settings>
 	}
 	
 	@Override
-	public void tick(ApplyEffect.Settings settings, ServerLevel level, HuntedGame game, ServerPlayer player, HuntedClass huntedClass, CompoundTag tag, TargetSupplier supplier)
+	public void tick(ApplyEffect.Settings settings, ServerLevel level, HuntedGame game, LivingEntity player, HuntedClass huntedClass, CompoundTag tag, TargetSupplier supplier)
 	{
 		settings.type.tick(settings, level, game, player, huntedClass, tag, supplier);
 	}
@@ -61,7 +62,7 @@ public class ApplyEffect extends AbilityType<ApplyEffect.Settings>
 			public AbilityType.Result use(Settings settings, TriggerContext context, CompoundTag tag, TargetSupplier supplier)
 			{
 				AbilityType.Result result = AbilityType.Result.FAIL;
-				for (ServerPlayer player : supplier.getPlayers(context))
+				for (LivingEntity player : supplier.getPlayers(context))
 				{
 					for (MobEffectHolder holder : settings.effects())
 					{
@@ -81,7 +82,7 @@ public class ApplyEffect extends AbilityType<ApplyEffect.Settings>
 				AbilityType.Result result = AbilityType.Result.FAIL;
 				if (tag.getInt(EFFECT_INDEX) < settings.effects().size())
 				{
-					for (ServerPlayer player : supplier.getPlayers(context))
+					for (LivingEntity player : supplier.getPlayers(context))
 					{
 						MobEffectInstance effect = settings.effects().get(tag.getInt(EFFECT_INDEX)).createInstance();
 						if (player.addEffect(effect))
@@ -103,7 +104,7 @@ public class ApplyEffect extends AbilityType<ApplyEffect.Settings>
 				AbilityType.Result result = AbilityType.Result.FAIL;
 				if (tag.getInt(EFFECT_INDEX) < settings.effects().size())
 				{
-					for (ServerPlayer player : supplier.getPlayers(context))
+					for (LivingEntity player : supplier.getPlayers(context))
 					{
 						MobEffectInstance effect = settings.effects().get(tag.getInt(EFFECT_INDEX)).createInstance();
 						if (player.addEffect(effect))
@@ -115,7 +116,7 @@ public class ApplyEffect extends AbilityType<ApplyEffect.Settings>
 			}
 			
 			@Override
-			public void tick(ApplyEffect.Settings settings, ServerLevel level, HuntedGame game, ServerPlayer player, HuntedClass huntedClass, CompoundTag tag, TargetSupplier supplier)
+			public void tick(ApplyEffect.Settings settings, ServerLevel level, HuntedGame game, LivingEntity player, HuntedClass huntedClass, CompoundTag tag, TargetSupplier supplier)
 			{
 				if (tag.getInt(EFFECT_INDEX) > 0 && tag.getInt(EFFECT_INDEX) < settings.effects().size())
 				{
@@ -144,6 +145,6 @@ public class ApplyEffect extends AbilityType<ApplyEffect.Settings>
 		
 		public abstract AbilityType.Result use(ApplyEffect.Settings settings, TriggerContext context, CompoundTag tag, TargetSupplier supplier);
 		
-		public void tick(ApplyEffect.Settings settings, ServerLevel level, HuntedGame game, ServerPlayer player, HuntedClass huntedClass, CompoundTag tag, TargetSupplier supplier) {}
+		public void tick(ApplyEffect.Settings settings, ServerLevel level, HuntedGame game, LivingEntity player, HuntedClass huntedClass, CompoundTag tag, TargetSupplier supplier) {}
 	}
 }

@@ -13,12 +13,7 @@ import nonamecrackers2.hunted.util.DataHolder;
 
 public interface ServerPlayerClassManager extends PlayerClassManager, Triggerable, DataHolder
 {
-	default void tick(ServerLevel level, HuntedGame game)
-	{
-		this.getCurrentClass().ifPresent(huntedClass -> huntedClass.tick(level, game, this.getPlayer(), this.getOrCreateTag()));
-	}
-	
-	ServerPlayer getPlayer();
+	void tick(ServerLevel level, HuntedGame game);
 	
 	void begin(HuntedMap map);
 	
@@ -30,13 +25,7 @@ public interface ServerPlayerClassManager extends PlayerClassManager, Triggerabl
 	
 	void setUpdateRequest(boolean flag);
 	
-	default void update()
-	{
-		this.setUpdateRequest(false);
-		HuntedPacketHandlers.MAIN.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(this::getPlayer), new UpdatePlayerClassManagerPacket(this.getPlayer().getId(), this.isInGame(), this.hasEscaped(), this.getCurrentClass(), this.getMask()));
-		this.getPlayer().refreshDisplayName();
-		this.getPlayer().refreshTabListName();
-	}
+	void update();
 	
 	void use(TriggerContext context);
 }

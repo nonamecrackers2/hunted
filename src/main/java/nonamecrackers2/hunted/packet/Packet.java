@@ -33,7 +33,8 @@ public abstract class Packet
 		}
 		catch (IllegalArgumentException | IndexOutOfBoundsException e)
 		{
-			LOGGER.warn("Exception while reading " + message.toString() + "; " + e);
+			LOGGER.warn("Exception while reading " + message.toString());
+			e.printStackTrace();
 			return message;
 		}
 		message.isMessageValid = true;

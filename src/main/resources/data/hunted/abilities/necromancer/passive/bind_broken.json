@@ -17,7 +17,7 @@
 			"type": "hunted:toggle_abilities",
 			"settings": {
 				"abilities": [
-					"hunted:necromancer/warp"
+					"hunted:necromancer/normal/warp"
 				]
 			}
 		}

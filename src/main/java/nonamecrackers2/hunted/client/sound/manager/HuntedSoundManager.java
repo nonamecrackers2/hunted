@@ -3,8 +3,9 @@ package nonamecrackers2.hunted.client.sound.manager;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import nonamecrackers2.hunted.client.init.HuntedClientCapabilities;
@@ -32,21 +33,21 @@ public class HuntedSoundManager
 				iterator.remove();
 		}
 		
-		for (AbstractClientPlayer player : this.mc.level.players())
+		for (Entity entity : this.mc.level.entitiesForRendering())
 		{
-			if (!player.equals(this.mc.player))
+			if (!entity.equals(this.mc.player) && entity instanceof LivingEntity living)
 			{
-				player.getCapability(HuntedCapabilities.PLAYER_CLASS_MANAGER).ifPresent(manager -> 
+				entity.getCapability(HuntedCapabilities.PLAYER_CLASS_MANAGER).ifPresent(manager -> 
 				{
 					if (manager.isInGame())
 					{
 						manager.getCurrentClass().ifPresent(huntedClass -> 
 						{
 							SoundEvent event = huntedClass.getLoopSound().orElse(null);
-							if (event != null && !this.classLoops.containsKey(player.getId()))
+							if (event != null && !this.classLoops.containsKey(entity.getId()))
 							{
-								HuntedClassLoop loop = new HuntedClassLoop(player, event);
-								this.classLoops.put(player.getId(), loop);
+								HuntedClassLoop loop = new HuntedClassLoop(living, event);
+								this.classLoops.put(entity.getId(), loop);
 								this.mc.getSoundManager().queueTickingSound(loop);
 							}
 						});

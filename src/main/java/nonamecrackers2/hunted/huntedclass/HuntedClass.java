@@ -12,6 +12,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import net.minecraft.nbt.CompoundTag;
@@ -20,9 +21,10 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -47,10 +49,11 @@ public class HuntedClass
 	private final @Nullable ResourceLocation icon;
 	
 	private List<Ability> abilities;
+	private List<Ability> passiveAbilities;
 	private final Map<EquipmentSlot, Item> outfit;
 	private final @Nullable DeathSequence.ConfiguredDeathSequence<?> death;
 	
-	private HuntedClass(ResourceLocation id, Component name, Component description, HuntedClassType type, boolean mutable, Optional<SoundEvent> loopSound, boolean supportsMask, @Nullable ResourceLocation icon, List<Ability> abilities, Map<EquipmentSlot, Item> outfit, DeathSequence.ConfiguredDeathSequence<?> death)
+	private HuntedClass(ResourceLocation id, Component name, Component description, HuntedClassType type, boolean mutable, Optional<SoundEvent> loopSound, boolean supportsMask, @Nullable ResourceLocation icon, List<Ability> abilities, List<Ability> passiveAbilities, Map<EquipmentSlot, Item> outfit, DeathSequence.ConfiguredDeathSequence<?> death)
 	{
 		this.id = id;
 		this.name = name;
@@ -61,13 +64,14 @@ public class HuntedClass
 		this.supportsMask = supportsMask;
 		this.icon = icon;
 		this.abilities = abilities;
+		this.passiveAbilities = passiveAbilities;
 		this.outfit = outfit;
 		this.death = death;
 	}
 		
-	public HuntedClass(ResourceLocation id, Component name, Component description, HuntedClassType type, Optional<SoundEvent> loopSound, boolean supportsMask, @Nullable ResourceLocation icon, List<Ability> abilities, Map<EquipmentSlot, Item> outfit, DeathSequence.ConfiguredDeathSequence<?> death)
+	public HuntedClass(ResourceLocation id, Component name, Component description, HuntedClassType type, Optional<SoundEvent> loopSound, boolean supportsMask, @Nullable ResourceLocation icon, List<Ability> abilities, List<Ability> passiveAbilities, Map<EquipmentSlot, Item> outfit, DeathSequence.ConfiguredDeathSequence<?> death)
 	{
-		this(id, name, description, type, false, loopSound, supportsMask, icon, abilities, outfit, death);
+		this(id, name, description, type, false, loopSound, supportsMask, icon, abilities, passiveAbilities, outfit, death);
 	}
 	
 	public void toPacket(FriendlyByteBuf buffer)
@@ -107,7 +111,7 @@ public class HuntedClass
 		ResourceLocation icon = null;
 		if (buffer.readBoolean())
 			icon = buffer.readResourceLocation();
-		return new HuntedClass(id, name, description, type, loopSound, supportsMask, icon, ImmutableList.of(), slots, null);
+		return new HuntedClass(id, name, description, type, loopSound, supportsMask, icon, ImmutableList.of(), ImmutableList.of(), slots, null);
 	}
  	
 	public ResourceLocation id()
@@ -130,13 +134,13 @@ public class HuntedClass
 		return this.type;
 	}
 	
-	public void tick(ServerLevel level, HuntedGame game, ServerPlayer player, CompoundTag tag)
+	public void tick(ServerLevel level, HuntedGame game, LivingEntity player, CompoundTag tag)
 	{
 		if (this.isMutable())
 		{
 			this.assignOutfit(player);
 			this.removePotentialDuplicates(player);
-			this.getAbilities().forEach(ability -> ability.tick(level, game, player, this, HuntedUtil.getOrCreateTagElement(tag, ability.id().toString())));
+			this.getAllAbilities().forEach(ability -> ability.tick(level, game, player, this, HuntedUtil.getOrCreateTagElement(tag, ability.id().toString())));
 			if (this.death != null)
 				this.death.tick(level, player, this, game, tag);
 		}
@@ -149,13 +153,25 @@ public class HuntedClass
 	public HuntedClass copy()
 	{
 		ImmutableList.Builder<Ability> abilitiesCopy = ImmutableList.builder();
-		this.abilities.forEach((ability) -> abilitiesCopy.add(ability.copy()));
-		return new HuntedClass(this.id, this.name, this.description, this.type, true, this.loopSound, this.supportsMask, this.icon, abilitiesCopy.build(), this.outfit, this.death);
+		this.abilities.forEach(ability -> abilitiesCopy.add(ability.copy()));
+		ImmutableList.Builder<Ability> passivesCopy = ImmutableList.builder();
+		this.passiveAbilities.forEach(ability -> passivesCopy.add(ability.copy()));
+		return new HuntedClass(this.id, this.name, this.description, this.type, true, this.loopSound, this.supportsMask, this.icon, abilitiesCopy.build(), passivesCopy.build(), this.outfit, this.death);
 	}
 	
 	public boolean isMutable()
 	{
 		return this.mutable;
+	}
+	
+	public List<Ability> getAllAbilities()
+	{
+		List<Ability> abilities = Lists.newArrayList(this.abilities);
+		abilities.addAll(this.passiveAbilities);
+		if (this.isMutable())
+			return abilities;
+		else
+			return ImmutableList.copyOf(abilities);
 	}
 	
 	public List<Ability> getAbilities()
@@ -166,6 +182,14 @@ public class HuntedClass
 			return ImmutableList.copyOf(this.abilities);
 	}
 	
+	public List<Ability> getPassiveAbilities()
+	{
+		if (this.isMutable())
+			return this.passiveAbilities;
+		else
+			return ImmutableList.copyOf(this.passiveAbilities);
+	}
+	
 	public Map<EquipmentSlot, Item> getOutfit()
 	{
 		if (this.isMutable())
@@ -174,7 +198,7 @@ public class HuntedClass
 			return ImmutableMap.copyOf(this.outfit);
 	}
 	
-	public void assignOutfit(ServerPlayer player)
+	public void assignOutfit(LivingEntity player)
 	{
 		if (this.isMutable())
 		{
@@ -199,17 +223,35 @@ public class HuntedClass
 		}
 	}
 	
-	public void removePotentialDuplicates(ServerPlayer player)
+	public void removePotentialDuplicates(LivingEntity player)
 	{
 		if (this.isMutable())
 		{
-			for (ItemStack stack : player.getInventory().items)
+			Container inv = HuntedUtil.getInventoryFor(player);
+			if (inv != null)
 			{
-				if (stack.getOrCreateTag().contains("HuntedGameData"))
+				for (int i = 0; i < inv.getContainerSize(); i++)
 				{
-					CompoundTag extra = stack.getTagElement("HuntedGameData");
-					if (extra.contains("IsOutfitItem"))
-						player.getInventory().removeItem(stack);
+					ItemStack stack = inv.getItem(i);
+					if (stack.getOrCreateTag().contains("HuntedGameData"))
+					{
+						CompoundTag extra = stack.getTagElement("HuntedGameData");
+						if (extra.contains("IsOutfitItem"))
+						{
+							for (EquipmentSlot slot : EquipmentSlot.values())
+							{
+								if (slot.getType() == EquipmentSlot.Type.ARMOR)
+								{
+									ItemStack itemInSlot = player.getItemBySlot(slot);
+									if (itemInSlot.equals(stack, false) && !itemInSlot.equals(stack))
+									{
+										HuntedUtil.removeItem(inv, stack);
+										break;
+									}
+								}
+							}
+						}
+					}
 				}
 			}
 		}
@@ -222,6 +264,11 @@ public class HuntedClass
 	public void setAbilities(ImmutableList<Ability> abilities)
 	{
 		this.abilities = abilities;
+	}
+	
+	public void setPassiveAbilities(ImmutableList<Ability> abilities)
+	{
+		this.passiveAbilities = abilities;
 	}
 	
 	public Optional<SoundEvent> getLoopSound()
@@ -243,14 +290,8 @@ public class HuntedClass
 	{
 		if (this.isMutable())
 		{
-			ListTag list = new ListTag();
-			this.abilities.forEach(ability -> 
-			{
-				CompoundTag abilityTag = new CompoundTag();
-				ability.save(abilityTag);
-				list.add(abilityTag);
-			});
-			tag.put("Abilities", list);
+			tag.put("Abilities", saveAbilityList(this.abilities));
+			tag.put("PassiveAbilities", saveAbilityList(this.passiveAbilities));
 		}
 		else
 		{
@@ -258,27 +299,44 @@ public class HuntedClass
 		}
 	}
 	
+	private static ListTag saveAbilityList(List<Ability> abilities)
+	{
+		ListTag list = new ListTag();
+		abilities.forEach(ability -> 
+		{
+			CompoundTag abilityTag = new CompoundTag();
+			ability.save(abilityTag);
+			list.add(abilityTag);
+		});
+		return list;
+	}
+	
 	public void read(CompoundTag tag)
 	{
 		if (this.isMutable())
 		{
-			ListTag list = tag.getList("Abilities", 10);
-			if (this.abilities.size() == list.size())
-			{
-				for (int i = 0; i < list.size(); i++)
-				{
-					CompoundTag abilityTag = list.getCompound(i);
-					this.abilities.get(i).read(abilityTag);
-				}
-			}
-			else
-			{
-				LOGGER.error("Saved ability data and current abilities do not match!");
-			}
+			readAbilityList(this.abilities, tag.getList("Abilities", 10));
+			readAbilityList(this.passiveAbilities, tag.getList("PassiveAbilities", 10));
 		}
 		else
 		{
 			LOGGER.warn("Cannot read immutable ability!");
+		}
+	}
+	
+	private static void readAbilityList(List<Ability> abilities, ListTag list)
+	{
+		if (abilities.size() == list.size())
+		{
+			for (int i = 0; i < list.size(); i++)
+			{
+				CompoundTag abilityTag = list.getCompound(i);
+				abilities.get(i).read(abilityTag);
+			}
+		}
+		else
+		{
+			LOGGER.error("Saved ability data and current abilities do not match!");
 		}
 	}
 	
@@ -294,10 +352,10 @@ public class HuntedClass
 		return id.getNamespace() + ".class_type." + id.getPath();
 	}
 	
-	public void runDeathSequence(ServerPlayer player, HuntedGame game, CompoundTag tag)
+	public void runDeathSequence(LivingEntity player, HuntedGame game, CompoundTag tag)
 	{
 		if (this.death != null)
-			this.death.runSequence(player.getLevel(), player, this, game, tag);
+			this.death.runSequence((ServerLevel)player.getLevel(), player, this, game, tag);
 	}
 	
 	@Override

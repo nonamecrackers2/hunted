@@ -1,6 +1,9 @@
 package nonamecrackers2.hunted.util;
 
 import java.util.Optional;
+import java.util.function.Consumer;
+
+import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -20,6 +23,10 @@ import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
+import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.npc.InventoryCarrier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import nonamecrackers2.hunted.ability.Ability;
@@ -108,7 +115,7 @@ public class HuntedUtil
 						return false;
 					if (extra.getBoolean("IsOutfitItem"))
 						return false;
-					for (Ability ability : huntedClass.getAbilities())
+					for (Ability ability : huntedClass.getAllAbilities())
 					{
 						if (!item.isEmpty())
 						{
@@ -144,5 +151,84 @@ public class HuntedUtil
 		ListTag list = new ListTag();
 		list.add(StringTag.valueOf(Component.Serializer.toJson(component)));
 		display.put(ItemStack.TAG_LORE, list);
+	}
+	
+	public static @Nullable Container getInventoryFor(LivingEntity entity)
+	{
+		if (entity instanceof InventoryCarrier carrier)
+			return carrier.getInventory();
+		else if (entity instanceof Player player)
+			return player.getInventory();
+		else
+			return null;
+			
+	}
+	
+	public static ItemStack addItem(Container inv, ItemStack stack)
+	{
+		ItemStack copy = stack.copy();
+		moveItemToOccupiedSlotsWithSameType(inv, copy);
+		if (copy.isEdible())
+		{
+			return ItemStack.EMPTY;
+		}
+		else
+		{
+			moveItemToEmptySlots(inv, stack);
+			return copy.isEmpty() ? ItemStack.EMPTY : copy;
+		}
+	}
+	
+	private static void moveItemToOccupiedSlotsWithSameType(Container inv, ItemStack stack)
+	{
+		for (int i = 0; i < inv.getContainerSize(); i++)
+		{
+			ItemStack present = inv.getItem(i);
+			if (ItemStack.isSameItemSameTags(stack, present))
+			{
+				moveItemsBetweenStacks(inv, stack, present);
+				if (stack.isEmpty())
+					return;
+			}
+		}
+	}
+	
+	private static void moveItemToEmptySlots(Container inv, ItemStack stack)
+	{
+		for (int i = 0; i < inv.getContainerSize(); i++)
+		{
+			ItemStack present = inv.getItem(i);
+			if (present.isEmpty())
+			{
+				inv.setItem(i, stack.copy());
+				stack.setCount(0);
+				return;
+			}
+		}
+	}
+	
+	private static void moveItemsBetweenStacks(Container inv, ItemStack s, ItemStack s2)
+	{
+		int i = Math.min(inv.getMaxStackSize(), s2.getMaxStackSize());
+		int j = Math.min(s.getCount(), i - s2.getCount());
+		if (j > 0)
+		{
+			s2.grow(j);
+			s.shrink(j);
+			inv.setChanged();
+		}
+	}
+	
+	public static void removeItem(Container inv, ItemStack item)
+	{
+		for (int i = 0; i < inv.getContainerSize(); i++)
+		{
+			ItemStack present = inv.getItem(i);
+			if (present == item)
+			{
+				inv.setItem(i, ItemStack.EMPTY);
+				break;
+			}
+		}
 	}
 }

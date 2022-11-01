@@ -7,8 +7,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerPlayer;
-import nonamecrackers2.hunted.capability.HuntedClassManager;
+import net.minecraft.world.entity.LivingEntity;
+import nonamecrackers2.hunted.capability.PlayerClassManager;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
 import nonamecrackers2.hunted.huntedclass.type.HuntedClassType;
 import nonamecrackers2.hunted.registry.HuntedRegistries;
@@ -31,8 +31,8 @@ public class TargetTeleport extends AbilityType<TargetTeleport.Settings>
 	@Override
 	public AbilityType.Result use(TargetTeleport.Settings settings, TriggerContext context, CompoundTag tag, TargetSupplier supplier)
 	{
-		ServerPlayer player = context.target();
-		HuntedClass huntedClass = HuntedClassManager.getClassForPlayer(player);
+		LivingEntity player = context.target();
+		HuntedClass huntedClass = PlayerClassManager.getClassFor(player);
 		if (huntedClass != null && settings.type.isPresent() ? huntedClass.getType().equals(settings.type.get()) : true && !context.getGame().isPlayerEliminated(player) && !context.getGame().hasPlayerEscaped(player))
 		{
 			BlockPos pos = player.blockPosition();

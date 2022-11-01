@@ -35,6 +35,8 @@ import nonamecrackers2.hunted.init.HuntedBlockEntityTypes;
 import nonamecrackers2.hunted.init.HuntedBlocks;
 import nonamecrackers2.hunted.init.HuntedCapabilities;
 import nonamecrackers2.hunted.init.HuntedClassTypes;
+import nonamecrackers2.hunted.init.HuntedDataSerializers;
+import nonamecrackers2.hunted.init.HuntedEntityTypes;
 import nonamecrackers2.hunted.init.HuntedItems;
 import nonamecrackers2.hunted.init.HuntedMenuTypes;
 import nonamecrackers2.hunted.init.HuntedOverlayTypes;
@@ -57,6 +59,7 @@ public class HuntedMod
 		modBus.addListener(HuntedCapabilities::registerCapabilities);
 		modBus.addListener(this::onCommonInit);
 		modBus.addListener(this::onClientInit);
+		modBus.addListener(HuntedEntityTypes::addEntityAttributes);
 		HuntedClassTypes.register(modBus);
 		AbilityTypes.register(modBus);
 		HuntedArgumentTypes.register(modBus);
@@ -70,6 +73,8 @@ public class HuntedMod
 		HuntedSoundEvents.register(modBus);
 		HuntedMenuTypes.register(modBus);
 		HuntedParticleTypes.register(modBus);
+		HuntedEntityTypes.register(modBus);
+		HuntedDataSerializers.register(modBus);
 		IEventBus forgeBus = MinecraftForge.EVENT_BUS;
 		forgeBus.register(HuntedCapabilities.class);
 		forgeBus.addListener(HuntedMod::registerCommands);

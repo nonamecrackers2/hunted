@@ -11,6 +11,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.entity.LivingEntity;
 import nonamecrackers2.hunted.ability.Ability;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
 import nonamecrackers2.hunted.trigger.Trigger;
@@ -37,10 +38,10 @@ public class ModifyCooldown extends AbilityType<ModifyCooldown.Settings>
 	public AbilityType.Result use(ModifyCooldown.Settings settings, TriggerContext context, CompoundTag tag, TargetSupplier supplier)
 	{
 		var result = AbilityType.Result.FAIL;
-		for (ServerPlayer player : supplier.getPlayers(context))
+		for (LivingEntity player : supplier.getPlayers(context))
 		{
 			HuntedClass huntedClass = context.getHuntedClass(player);
-			for (Ability ability : huntedClass.getAbilities())
+			for (Ability ability : huntedClass.getAllAbilities())
 			{
 				if (!settings.allAbilities())
 				{
@@ -56,7 +57,7 @@ public class ModifyCooldown extends AbilityType<ModifyCooldown.Settings>
 		return result;
 	}
 	
-	public static AbilityType.Result apply(ModifyCooldown.Settings settings, ServerPlayer player, Ability ability)
+	public static AbilityType.Result apply(ModifyCooldown.Settings settings, LivingEntity player, Ability ability)
 	{
 		if (!settings.modifyTime())
 		{
@@ -66,7 +67,8 @@ public class ModifyCooldown extends AbilityType<ModifyCooldown.Settings>
 		{
 			int time = settings.operation().operate(ability.getTimer(), settings.cooldown(), ability.getCooldown());
 			ability.setTime(time);
-			player.getCooldowns().addCooldown(ability.getItem(), time);
+			if (player instanceof ServerPlayer serverPlayer)
+				serverPlayer.getCooldowns().addCooldown(ability.getItem(), time);
 		}
 		return AbilityType.Result.PASS;
 	}

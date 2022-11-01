@@ -3,7 +3,7 @@ package nonamecrackers2.hunted.huntedclass.type;
 import java.util.Optional;
 
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import nonamecrackers2.hunted.game.HuntedGame;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
 
@@ -51,9 +51,9 @@ public abstract class HuntedClassType
 		return this.isDangerous;
 	}
 	
-	public abstract boolean checkObjective(ServerLevel level, HuntedGame game, ServerPlayer player, HuntedClass huntedClass);
+	public abstract boolean checkObjective(ServerLevel level, HuntedGame game, LivingEntity player, HuntedClass huntedClass);
 	
-	public boolean checkPartialObjective(ServerLevel level, HuntedGame game, ServerPlayer player, HuntedClass huntedClass)
+	public boolean checkPartialObjective(ServerLevel level, HuntedGame game, LivingEntity player, HuntedClass huntedClass)
 	{
 		return false;
 	}

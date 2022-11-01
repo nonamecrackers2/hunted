@@ -8,6 +8,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.LivingEntity;
 import nonamecrackers2.hunted.trigger.Trigger;
 import nonamecrackers2.hunted.trigger.TriggerContext;
 import nonamecrackers2.hunted.util.SoundEventHolder;
@@ -30,8 +31,11 @@ public class PlaySoundEvent extends MapEvent<PlaySoundEvent.Settings>
 	@Override
 	public void activate(PlaySoundEvent.Settings settings, TriggerContext context, CompoundTag tag)
 	{
-		for (ServerPlayer player : settings.supplier().getPlayers(context))
-			player.playNotifySound(settings.sound().event(), SoundSource.PLAYERS, settings.sound().volume(), settings.sound().pitch());
+		for (LivingEntity player : settings.supplier().getPlayers(context))
+		{
+			if (player instanceof ServerPlayer serverPlayer)
+				serverPlayer.playNotifySound(settings.sound().event(), SoundSource.PLAYERS, settings.sound().volume(), settings.sound().pitch());
+		}
 	}
 	
 	@Override

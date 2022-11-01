@@ -11,6 +11,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.entity.LivingEntity;
 import nonamecrackers2.hunted.game.HuntedGame;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
 import nonamecrackers2.hunted.huntedclass.type.HuntedClassType;
@@ -39,11 +40,12 @@ public class TeleportEvent extends MapEvent<TeleportEvent.Settings>
 	@Override
 	public void activate(TeleportEvent.Settings settings, TriggerContext context, CompoundTag tag)
 	{
-		for (ServerPlayer player : settings.supplier().getPlayers(context))
+		for (LivingEntity player : settings.supplier().getPlayers(context))
 		{
 			BlockPos pos = settings.position().getPos(context.getGame(), context.getHuntedClass(player), player, settings.classType());
 			player.teleportTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D);
-			settings.sound.ifPresent(sound -> player.playNotifySound(sound.event(), SoundSource.PLAYERS, sound.volume(), sound.pitch()));
+			if (player instanceof ServerPlayer serverPlayer)
+				settings.sound.ifPresent(sound -> serverPlayer.playNotifySound(sound.event(), SoundSource.PLAYERS, sound.volume(), sound.pitch()));
 		}
 	}
 	
@@ -60,7 +62,7 @@ public class TeleportEvent extends MapEvent<TeleportEvent.Settings>
 		START("start")
 		{
 			@Override
-			public BlockPos getPos(HuntedGame game, HuntedClass playerClass, ServerPlayer player, Optional<HuntedClassType> type)
+			public BlockPos getPos(HuntedGame game, HuntedClass playerClass, LivingEntity player, Optional<HuntedClassType> type)
 			{
 				return game.getMap().startForTypes().getOrDefault(type.orElse(playerClass.getType()), game.getMap().defaultStartPos());
 			}
@@ -68,7 +70,7 @@ public class TeleportEvent extends MapEvent<TeleportEvent.Settings>
 		DEFAULT_START("default_start")
 		{
 			@Override
-			public BlockPos getPos(HuntedGame game, HuntedClass playerClass, ServerPlayer player, Optional<HuntedClassType> type)
+			public BlockPos getPos(HuntedGame game, HuntedClass playerClass, LivingEntity player, Optional<HuntedClassType> type)
 			{
 				return game.getMap().defaultStartPos();
 			}
@@ -76,7 +78,7 @@ public class TeleportEvent extends MapEvent<TeleportEvent.Settings>
 		RANDOM("random")
 		{
 			@Override
-			public BlockPos getPos(HuntedGame game, HuntedClass playerClass, ServerPlayer player, Optional<HuntedClassType> type)
+			public BlockPos getPos(HuntedGame game, HuntedClass playerClass, LivingEntity player, Optional<HuntedClassType> type)
 			{
 				List<BlockPos> positions = game.getMap().revivalPositions();
 				if (positions.size() > 0)
@@ -99,6 +101,6 @@ public class TeleportEvent extends MapEvent<TeleportEvent.Settings>
 			return this.id;
 		}
 		
-		public abstract BlockPos getPos(HuntedGame game, HuntedClass playerClass, ServerPlayer player, Optional<HuntedClassType> type);
+		public abstract BlockPos getPos(HuntedGame game, HuntedClass playerClass, LivingEntity player, Optional<HuntedClassType> type);
 	}
 }

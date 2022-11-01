@@ -13,6 +13,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -195,8 +196,8 @@ public class HuntedEvents
 				gameManager.getCurrentGame().ifPresent(game ->
 				{
 					TriggerContext.Builder builder = TriggerContext.builder().player((ServerPlayer)player).hand(InteractionHand.MAIN_HAND);
-					if (entity instanceof ServerPlayer serverPlayer)
-							builder.target(serverPlayer);
+					if (entity instanceof LivingEntity living && game.isActive(living))
+							builder.target(living);
 					game.trigger(TriggerTypes.MELEE.get(), builder);
 //					player.getCapability(HuntedCapabilities.PLAYER_CLASS_MANAGER).ifPresent(manager ->
 //					{
@@ -271,7 +272,7 @@ public class HuntedEvents
 								{
 									List<ServerPlayer> players = level.players().stream().filter(EntitySelector.NO_SPECTATORS).filter(p -> 
 									{
-										HuntedClass huntedClass = HuntedClassManager.getClassForPlayer(p);
+										HuntedClass huntedClass = PlayerClassManager.getClassFor(p);
 										if (huntedClass != null && huntedClass.getType().canCollectRewards())
 											return true;
 										else

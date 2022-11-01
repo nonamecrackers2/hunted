@@ -5,12 +5,12 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec2;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -216,14 +216,14 @@ public class HuntedEffectsManager
 	
 	public static Optional<Double> distanceFromNearestDanger(Minecraft mc)
 	{
-		for (AbstractClientPlayer player : mc.level.players())
+		for (Entity entity : mc.level.entitiesForRendering())
 		{
-			var manager = player.getCapability(HuntedCapabilities.PLAYER_CLASS_MANAGER).orElse(null);
-			if (manager != null)
+			var manager = entity.getCapability(HuntedCapabilities.PLAYER_CLASS_MANAGER).orElse(null);
+			if (manager != null && manager.isInGame())
 			{
 				HuntedClass huntedClass = manager.getCurrentClass().orElse(null);
-				if (huntedClass != null && huntedClass.getType().isDangerous() && !mc.player.equals(player))
-					return Optional.of(mc.gameRenderer.getMainCamera().getPosition().distanceTo(player.getEyePosition()));
+				if (huntedClass != null && huntedClass.getType().isDangerous() && !mc.player.equals(entity))
+					return Optional.of(mc.gameRenderer.getMainCamera().getPosition().distanceTo(entity.getEyePosition()));
 			}
 		}
 		return Optional.empty();

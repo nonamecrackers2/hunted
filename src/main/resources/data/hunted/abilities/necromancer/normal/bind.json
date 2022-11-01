@@ -6,8 +6,8 @@
 				"masked": "hunted:toggle_abilities",
 				"settings": {
 					"abilities": [
-						"hunted:necromancer/bind",
-						"hunted:necromancer/warp"
+						"hunted:necromancer/normal/bind",
+						"hunted:necromancer/normal/warp"
 					]
 				},
 				"result_criteria": "pass",

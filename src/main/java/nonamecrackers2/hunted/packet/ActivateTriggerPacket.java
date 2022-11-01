@@ -7,6 +7,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.network.NetworkEvent;
 import nonamecrackers2.hunted.init.HuntedCapabilities;
 import nonamecrackers2.hunted.registry.HuntedRegistries;
@@ -63,7 +64,7 @@ public class ActivateTriggerPacket extends Packet
 				{
 					TriggerContext.Builder triggerContext = TriggerContext.builder().player(player).hand(this.hand);
 					Entity entity = player.getLevel().getEntity(this.pickId);
-					if (entity instanceof ServerPlayer target)
+					if (entity instanceof LivingEntity target && game.isActive(target))
 						triggerContext.target(target);
 					try 
 					{

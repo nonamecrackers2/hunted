@@ -629,7 +629,7 @@ public class HuntedGameMenuScreen extends Screen
 			this.textList.line(huntedClass.getDescription());
 			this.textList.blank();
 			this.textList.line(Component.translatable("hunted.menu.abilities").withStyle(Style.EMPTY.withBold(true).withUnderlined(true)));
-			for (Ability ability : huntedClass.getAbilities())
+			for (Ability ability : huntedClass.getAllAbilities())
 			{
 				if (!ability.getItem().equals(Items.AIR))
 				{

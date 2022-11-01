@@ -3,8 +3,8 @@ package nonamecrackers2.hunted.map.event;
 import com.google.gson.JsonElement;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.entity.LivingEntity;
 import nonamecrackers2.hunted.ability.type.TextDisplay;
 import nonamecrackers2.hunted.trigger.Trigger;
 import nonamecrackers2.hunted.trigger.TriggerContext;
@@ -19,7 +19,7 @@ public class TextDisplayEvent extends MapEvent<TextDisplay.Settings>
 	@Override
 	public void activate(TextDisplay.Settings settings, TriggerContext context, CompoundTag data)
 	{
-		for (ServerPlayer player : settings.supplier().getPlayers(context, false))
+		for (LivingEntity player : settings.supplier().getPlayers(context, false))
 			player.sendSystemMessage(settings.text());
 	}
 

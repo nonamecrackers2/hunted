@@ -54,6 +54,7 @@ public class HuntedGameManager
 	public static final GameType DEFAULT_GAME_MODE = GameType.SURVIVAL;
 	public static final int MINIMUM_PLAYERS = 2;
 	private final ServerLevel level;
+	private HuntedGame.GameMode mode = HuntedGame.GameMode.MULTIPLAYER;
 	private Optional<HuntedGame> currentGame = Optional.empty();
 	private final Map<ServerPlayer, HuntedClassSelector> players = Maps.newLinkedHashMap();
 	private @Nullable HuntedMap map;
@@ -330,11 +331,9 @@ public class HuntedGameManager
 		{
 			List<ServerPlayer> players = this.players.keySet().stream().collect(Collectors.toList());
 			
-			HuntedGame game = new HuntedGame(this.level, players.stream().collect(Collectors.mapping(ServerPlayer::getUUID, Collectors.toList())), this.map, HuntedConfig.SERVER.buttonHighlighting.get());
+			HuntedGame game = new HuntedGame(this.mode, this.level, players.stream().collect(Collectors.mapping(ServerPlayer::getUUID, Collectors.toList())), this.map, HuntedConfig.SERVER.buttonHighlighting.get());
 			
-			List<ServerPlayer> hunterApplicable = players.stream().filter(p -> !p.getUUID().equals(this.previousHunter)).toList();
-			int index = this.random.nextInt(hunterApplicable.size());
-			ServerPlayer hunter = hunterApplicable.get(index);
+			ServerPlayer hunter = this.mode.pickHunter(players, this.previousHunter, this.random);
 			
 			this.players.forEach((player, holder) -> 
 			{
@@ -345,7 +344,8 @@ public class HuntedGameManager
 				player.closeContainer();
 			});
 			
-			this.previousHunter = hunter.getUUID();
+			if (hunter != null)
+				this.previousHunter = hunter.getUUID();
 			
 			this.currentGame = Optional.of(game);
 			game.begin();
@@ -361,7 +361,7 @@ public class HuntedGameManager
 	{
 		if (!this.isGameRunning())
 		{
-			if (this.players.size() >= MINIMUM_PLAYERS)
+			if (this.players.size() >= this.mode.getMinimumPlayerCount())
 			{
 				if (this.map != null)
 					return HuntedGameManager.GameStartStatus.SUCCESS;
@@ -459,6 +459,16 @@ public class HuntedGameManager
 	public @Nullable HuntedMap getMap()
 	{
 		return this.map;
+	}
+	
+	public void setMode(HuntedGame.GameMode mode)
+	{
+		this.mode = mode;
+	}
+	
+	public HuntedGame.GameMode getMode()
+	{
+		return this.mode;
 	}
 	
 	private List<Component> createStatsOverlay()

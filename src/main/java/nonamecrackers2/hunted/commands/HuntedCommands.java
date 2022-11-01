@@ -15,10 +15,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.server.command.EnumArgument;
 import nonamecrackers2.hunted.commands.argument.HuntedClassArgument;
 import nonamecrackers2.hunted.commands.argument.HuntedClassTypeArgument;
 import nonamecrackers2.hunted.commands.argument.HuntedMapArgument;
 import nonamecrackers2.hunted.game.GameWinContext;
+import nonamecrackers2.hunted.game.HuntedGame;
 import nonamecrackers2.hunted.game.HuntedGameManager;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
 import nonamecrackers2.hunted.huntedclass.HuntedClassDataManager;
@@ -69,8 +71,13 @@ public class HuntedCommands
 									)
 							)
 							.then(Commands.literal("begin")
-									.then(Commands.argument("map", HuntedMapArgument.id())
-									.executes(HuntedCommands::startGame))
+									.then(
+											Commands.argument("map", HuntedMapArgument.id())
+											.then(
+													Commands.argument("mode", EnumArgument.enumArgument(HuntedGame.GameMode.class))
+													.executes(HuntedCommands::startGame)
+											)
+									)
 							)
 							.then(Commands.literal("stop")
 									.executes(HuntedCommands::stopGame)
@@ -148,9 +155,11 @@ public class HuntedCommands
 		ServerLevel level = source.getLevel();
 		ResourceLocation id = HuntedMapArgument.getMapId(context, "map");
 		HuntedMap map = HuntedMapDataManager.INSTANCE.get(id);
+		HuntedGame.GameMode mode = context.getArgument("mode", HuntedGame.GameMode.class);
 		level.getCapability(HuntedCapabilities.GAME_MANAGER).ifPresent(manager -> 
 		{
 			manager.setMap(map);
+			manager.setMode(mode);
 			HuntedGameManager.GameStartStatus status = manager.startGame();
 			switch (status)
 			{

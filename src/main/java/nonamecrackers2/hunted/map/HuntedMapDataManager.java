@@ -85,7 +85,10 @@ public class HuntedMapDataManager extends SimpleDataManager<HuntedMap>
 		AmbienceSettings ambience = null;
 		if (object.has("ambience"))
 			ambience = AmbienceSettings.fromJson(GsonHelper.getAsJsonObject(object, "ambience"));
-		return new HuntedMap(id, name, startPositions, defaultStartPos, buttons, rewards, boundary, preyExits, events, keyholes, overlay, revivalPositions, buttonPressingDelay, Optional.ofNullable(ambience));
+		MapNavigation nav = null;
+		if (object.has("navigation"))
+			nav = MapNavigation.fromJson(GsonHelper.getAsJsonObject(object, "navigation"));
+		return new HuntedMap(id, name, startPositions, defaultStartPos, buttons, rewards, boundary, preyExits, events, keyholes, overlay, revivalPositions, buttonPressingDelay, Optional.ofNullable(ambience), Optional.ofNullable(nav));
 	}
 	
 	private static Map<HuntedClassType, BlockPos> getStartPositions(JsonArray array)

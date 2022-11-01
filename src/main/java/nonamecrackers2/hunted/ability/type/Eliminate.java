@@ -1,7 +1,7 @@
 package nonamecrackers2.hunted.ability.type;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.AABB;
 import nonamecrackers2.hunted.trigger.Trigger;
 import nonamecrackers2.hunted.trigger.TriggerContext;
@@ -28,7 +28,7 @@ public class Eliminate extends NoSettingsAbilityType
 			}
 		}
 		AbilityType.Result result = AbilityType.Result.FAIL;
-		for (ServerPlayer player : supplier.getPlayers(context))
+		for (LivingEntity player : supplier.getPlayers(context))
 		{
 			if (!context.getGame().isPlayerEliminated(player))
 			{

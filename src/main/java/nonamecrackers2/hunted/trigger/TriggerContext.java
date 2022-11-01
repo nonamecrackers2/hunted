@@ -3,11 +3,12 @@ package nonamecrackers2.hunted.trigger;
 import javax.annotation.Nullable;
 
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.BlockHitResult;
 import nonamecrackers2.hunted.ability.Ability;
+import nonamecrackers2.hunted.capability.PlayerClassManager;
 import nonamecrackers2.hunted.capability.ServerPlayerClassManager;
 import nonamecrackers2.hunted.game.HuntedGame;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
@@ -15,24 +16,24 @@ import nonamecrackers2.hunted.init.HuntedCapabilities;
 import nonamecrackers2.hunted.map.event.MapEventHolder;
 import nonamecrackers2.hunted.rewards.ButtonReward;
 
-public record TriggerContext(Trigger<?> trigger, ServerLevel level, @Nullable ServerPlayer player, @Nullable InteractionHand hand, ItemStack stack, @Nullable BlockHitResult result, @Nullable ServerPlayer target, @Nullable Ability ability, @Nullable MapEventHolder event, @Nullable ButtonReward reward)
+public record TriggerContext(Trigger<?> trigger, ServerLevel level, @Nullable LivingEntity player, @Nullable InteractionHand hand, ItemStack stack, @Nullable BlockHitResult result, @Nullable LivingEntity target, @Nullable Ability ability, @Nullable MapEventHolder event, @Nullable ButtonReward reward)
 {
 	public HuntedGame getGame()
 	{
 		return this.level.getCapability(HuntedCapabilities.GAME_MANAGER).orElse(null).getCurrentGame().orElse(null);
 	}
 	
-	public ServerPlayerClassManager getClassManager(ServerPlayer player)
+	public PlayerClassManager getClassManager(LivingEntity player)
 	{
-		return (ServerPlayerClassManager)player.getCapability(HuntedCapabilities.PLAYER_CLASS_MANAGER).orElse(null);
+		return player.getCapability(HuntedCapabilities.PLAYER_CLASS_MANAGER).orElse(null);
 	}
 	
-	public @Nullable HuntedClass getHuntedClass(ServerPlayer player)
+	public @Nullable HuntedClass getHuntedClass(LivingEntity player)
 	{
 		return this.getClassManager(player).getCurrentClass().orElse(null);
 	}
 	
-	public ServerPlayerClassManager getClassManager()
+	public PlayerClassManager getClassManager()
 	{
 		return this.getClassManager(this.player);
 	}
@@ -42,15 +43,15 @@ public record TriggerContext(Trigger<?> trigger, ServerLevel level, @Nullable Se
 		return this.getHuntedClass(this.player);
 	}
 	
-	public ServerPlayerClassManager getTargetClassManager()
-	{
-		return this.getClassManager(this.target);
-	}
-	
-	public @Nullable HuntedClass getTargetHuntedClass()
-	{
-		return this.getHuntedClass(this.target);
-	}
+//	public ServerPlayerClassManager getTargetClassManager()
+//	{
+//		return this.getClassManager(this.getTargetServerPlayer());
+//	}
+//	
+//	public @Nullable HuntedClass getTargetHuntedClass()
+//	{
+//		return this.getHuntedClass(this.getTargetServerPlayer());
+//	}
 	
 	public static TriggerContext.Builder builder()
 	{
@@ -59,16 +60,16 @@ public record TriggerContext(Trigger<?> trigger, ServerLevel level, @Nullable Se
 	
 	public static class Builder
 	{
-		private @Nullable ServerPlayer player;
+		private @Nullable LivingEntity player;
 		private @Nullable InteractionHand hand;
 		private ItemStack item = ItemStack.EMPTY;
 		private @Nullable BlockHitResult result;
-		private @Nullable ServerPlayer target;
+		private @Nullable LivingEntity target;
 		private @Nullable Ability ability;
 		private @Nullable MapEventHolder event;
 		private @Nullable ButtonReward reward;
 		
-		public Builder player(ServerPlayer player)
+		public Builder player(LivingEntity player)
 		{
 			this.player = player;
 			return this;
@@ -92,7 +93,7 @@ public record TriggerContext(Trigger<?> trigger, ServerLevel level, @Nullable Se
 			return this;
 		}
 		
-		public Builder target(ServerPlayer player)
+		public Builder target(LivingEntity player)
 		{
 			this.target = player;
 			return this;
