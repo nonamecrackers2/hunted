@@ -382,9 +382,9 @@ public class HunterEntity extends Monster
 	public boolean doHurtTarget(Entity entity)
 	{
 		//float angle = (float)(Mth.atan2(pos.x() - this.getX(), pos.z() - this.getZ()) * (180.0D / Math.PI));
-		float angleDiff = (Mth.wrapDegrees(-this.yBodyRot) + entity.getYHeadRot() + 360) % 360 - 180;
-		if (angleDiff <= 45 && angleDiff >= -45)
-		{
+//		float angleDiff = (Mth.wrapDegrees(-this.yBodyRot) + entity.getYHeadRot() + 360) % 360 - 180;
+//		if (angleDiff <= 45 && angleDiff >= -45)
+//		{
 			if (entity instanceof LivingEntity living)
 			{
 				HuntedGameManager manager = this.level.getCapability(HuntedCapabilities.GAME_MANAGER).orElse(null);
@@ -401,7 +401,7 @@ public class HunterEntity extends Monster
 					}
 				}
 			}
-		}
+//		}
 		return super.doHurtTarget(entity);
 	}
 	
