@@ -15,6 +15,7 @@ public class HuntedSoundEvents
 	public static final RegistryObject<SoundEvent> JUMPSCARE = create("jumpscare");
 	public static final RegistryObject<SoundEvent> CREAK = create("creak");
 	public static final RegistryObject<SoundEvent> MANSION_AMBIENCE = create("mansion_ambience");
+	public static final RegistryObject<SoundEvent> HUNTER_AMBIENCE = create("hunter_ambience");
 	
 	private static RegistryObject<SoundEvent> create(String id)
 	{

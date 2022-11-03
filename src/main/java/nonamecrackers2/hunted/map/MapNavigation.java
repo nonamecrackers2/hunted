@@ -12,14 +12,14 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
 import nonamecrackers2.hunted.util.HuntedUtil;
 
-public record MapNavigation(List<BlockPos> path)
+public record MapNavigation(List<BlockPos> nodes)
 {
 	public static MapNavigation fromJson(JsonObject object)
 	{
 		ImmutableList.Builder<BlockPos> positions = ImmutableList.builder();
-		if (object.has("path"))
+		if (object.has("nodes"))
 		{
-			JsonArray array = GsonHelper.getAsJsonArray(object, "path");
+			JsonArray array = GsonHelper.getAsJsonArray(object, "nodes");
 			for (int i = 0; i < array.size(); i++)
 				positions.add(BlockPos.CODEC.parse(JsonOps.INSTANCE, array.get(i)).resultOrPartial(HuntedUtil::throwJSE).get());
 		}
@@ -28,7 +28,7 @@ public record MapNavigation(List<BlockPos> path)
 	
 	public void toPacket(FriendlyByteBuf buffer)
 	{
-		buffer.writeCollection(this.path, FriendlyByteBuf::writeBlockPos);
+		buffer.writeCollection(this.nodes, FriendlyByteBuf::writeBlockPos);
 	}
 	
 	public static MapNavigation fromPacket(FriendlyByteBuf buffer)

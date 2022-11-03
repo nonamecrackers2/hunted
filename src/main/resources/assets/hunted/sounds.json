@@ -72,5 +72,15 @@
     			"volume": 2.0
     		}
     	]
+	},
+	"hunter_ambience": {
+    	"category": "hostile",
+    	"subtitle": "hunted.subtitle.hunter.ambience",
+    	"sounds": [
+    		"hunted:hunter_loud",
+    		"hunted:hunter_loud_2",
+    		"hunted:hunter_quiet",
+    		"hunted:hunter_quiet_2"
+    	]
 	}
 }
