@@ -12,7 +12,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
@@ -54,14 +54,16 @@ public class HuntedRenderEvents
 		}
 	}
 	
-	private static void renderMask(Entity entity, PoseStack stack, MultiBufferSource source, float partialTicks, Camera camera)
+	private static void renderMask(LivingEntity entity, PoseStack stack, MultiBufferSource source, float partialTicks, Camera camera)
 	{
 		entity.getCapability(HuntedCapabilities.PLAYER_CLASS_MANAGER).ifPresent(manager -> 
 		{
 			if (manager.getMask() != null)
 			{
 				VertexConsumer consumer = source.getBuffer(RenderType.entityCutout(manager.getMask()));
-				double distanceToGround = Math.max(0.0D, Mth.lerp(partialTicks, entity.yo, entity.getY()) - entity.level.getHeight(Heightmap.Types.MOTION_BLOCKING, Mth.floor(entity.getX()), Mth.floor(entity.getZ())));
+				double distanceToGround = 0.0D;
+				if (!entity.onClimbable())
+					distanceToGround = Math.max(0.0D, Mth.lerp(partialTicks, entity.yo, entity.getY()) - entity.level.getHeight(Heightmap.Types.MOTION_BLOCKING, Mth.floor(entity.getX()), Mth.floor(entity.getZ())));
 				stack.pushPose();
 				stack.mulPose(Vector3f.YP.rotationDegrees(-camera.getYRot()));
 				stack.translate(0.0D, -distanceToGround, 0.0D);

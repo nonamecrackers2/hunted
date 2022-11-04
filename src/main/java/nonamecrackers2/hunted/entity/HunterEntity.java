@@ -27,13 +27,13 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.util.Mth;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -45,14 +45,18 @@ import net.minecraft.world.entity.ai.behavior.RunIf;
 import net.minecraft.world.entity.ai.behavior.SetWalkTargetFromAttackTargetIfTargetOutOfReach;
 import net.minecraft.world.entity.ai.behavior.StartAttacking;
 import net.minecraft.world.entity.ai.behavior.StopAttackingIfTargetInvalid;
+import net.minecraft.world.entity.ai.behavior.Swim;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.sensing.Sensor;
 import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.LadderBlock;
 import net.minecraft.world.level.gameevent.DynamicGameEventListener;
 import net.minecraft.world.level.gameevent.EntityPositionSource;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -60,6 +64,10 @@ import net.minecraft.world.level.gameevent.GameEvent.Context;
 import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.level.gameevent.PositionSource;
 import net.minecraft.world.level.gameevent.vibrations.VibrationListener;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.Node;
+import net.minecraft.world.level.pathfinder.PathFinder;
+import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import nonamecrackers2.hunted.HuntedMod;
@@ -124,6 +132,7 @@ public class HunterEntity extends Monster
 		PositionSource positionSource = new EntityPositionSource(this, this.getEyeHeight());
 		this.vibrationListener = new DynamicGameEventListener<>(new VibrationListener(positionSource, 16, this.vibrationListenerConfig, null, 0.0F, 20));
 		this.setInvulnerable(true);
+		this.getNavigation().setCanFloat(true);
 	}
 	
 	public static AttributeSupplier.Builder createAttributes()
@@ -198,7 +207,7 @@ public class HunterEntity extends Monster
 	protected Brain<?> makeBrain(Dynamic<?> dynamic)
 	{
 		Brain<HunterEntity> brain = this.brainProvider().makeBrain(dynamic);
-		brain.addActivity(Activity.CORE, 0, ImmutableList.of(new LookAtTargetSink(45, 90), new MoveToTargetSink(400, 650)));
+		brain.addActivity(Activity.CORE, 0, ImmutableList.of(new Swim(0.8F), new LookAtTargetSink(45, 90), new MoveToTargetSink(400, 650)));
 		brain.addActivity(Activity.IDLE, 0, ImmutableList.of(
 			new StartAttacking<>(HunterEntity::findNearestValidTarget),
 			new RunIf<>(e -> !this.getNodes().isEmpty(), new RandomNodeStroll<>(HunterEntity::getNodes)),
@@ -405,6 +414,18 @@ public class HunterEntity extends Monster
 		return super.doHurtTarget(entity);
 	}
 	
+	@Override
+	protected int calculateFallDamage(float p_21237_, float p_21238_)
+	{
+		return 0;
+	}
+	
+	@Override
+	protected PathNavigation createNavigation(Level level)
+	{
+		return new HunterEntity.HunterNavigation(this, level);
+	}
+
 	private class HunterVibrationListenerConfig implements VibrationListener.VibrationListenerConfig
 	{
 		@Override
@@ -451,6 +472,70 @@ public class HunterEntity extends Monster
 		{
 			HunterEntity.this.getBrain().setMemory(MemoryModuleType.WALK_TARGET, new WalkTarget(pos, 1.0F, 1));
 			HunterEntity.this.makeAggravated();
+		}
+	}
+	
+	private static class HunterNavigation extends GroundPathNavigation
+	{
+		public HunterNavigation(Mob mob, Level level)
+		{
+			super(mob, level);
+		}
+		
+		@Override
+		protected PathFinder createPathFinder(int maxVisitedNodes)
+		{
+			this.nodeEvaluator = new HunterEntity.HunterNodeEvaluator();
+			return new PathFinder(this.nodeEvaluator, maxVisitedNodes);
+		}
+	}
+	
+	private static class HunterNodeEvaluator extends WalkNodeEvaluator
+	{
+		@Override
+		public int getNeighbors(Node[] nodes, Node origin)
+		{
+			int i = super.getNeighbors(nodes, origin);
+			BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(origin.x, origin.y + 1, origin.z);
+			if (this.level.getBlockState(pos).is(BlockTags.CLIMBABLE))
+			{
+				Node node = this.getNode(pos);
+				if (node != null && !node.closed)
+				{
+					node.type = BlockPathTypes.WALKABLE;
+					node.costMalus = 0.0F;
+					if (i + 1 < nodes.length)
+						nodes[i++] = node;
+				}
+			}
+			pos.set(pos.getX(), pos.getY() - 2, pos.getZ());
+			if (this.level.getBlockState(pos).is(BlockTags.CLIMBABLE))
+			{
+				Node node = this.getNode(pos);
+				if (node != null && !node.closed)
+				{
+					node.type = BlockPathTypes.WALKABLE;
+					node.costMalus = 0.0F;
+					if (i + 1 < nodes.length)
+						nodes[i++] = node;
+				}
+			}
+			return i;
+		}
+		
+		private void computeLadderNode(BlockPos pos, Node[] nodes, int nodesSize)
+		{
+			if (this.level.getBlockState(pos).is(BlockTags.CLIMBABLE))
+			{
+				Node node = this.getNode(pos);
+				if (node != null && !node.closed)
+				{
+					node.type = BlockPathTypes.WALKABLE;
+					node.costMalus = 0.0F;
+					if (nodesSize + 1 < nodes.length)
+						nodes[nodesSize++] = node;
+				}
+			}
 		}
 	}
 }
