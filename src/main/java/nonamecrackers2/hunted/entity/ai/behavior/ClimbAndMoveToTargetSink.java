@@ -27,23 +27,26 @@ public class ClimbAndMoveToTargetSink extends MoveToTargetSink
 		Path path = mob.getNavigation().getPath();
 		if (path != null && mob.onClimbable())
 		{
-			boolean flag = true;
-			BlockState state = level.getBlockState(mob.blockPosition());
-			Direction direction = getDirection(state);
-			if (direction != null)
+			if (path.getNextNode().asBlockPos().equals(mob.blockPosition()))
 			{
-				direction = direction.getOpposite();
-				if (!level.getBlockState(new BlockPos(direction.getStepX(), 0, direction.getStepZ()).offset(mob.blockPosition())).isAir())
+				boolean flag = true;
+				BlockState state = level.getBlockState(mob.blockPosition());
+				Direction direction = getDirection(state);
+				if (direction != null)
 				{
-					mob.setDeltaMovement((double)direction.getStepX(), mob.getDeltaMovement().y, (double)direction.getStepZ());
-					flag = false;
+					direction = direction.getOpposite();
+					if (!level.getBlockState(new BlockPos(direction.getStepX(), 0, direction.getStepZ()).offset(mob.blockPosition())).isAir())
+					{
+						mob.setDeltaMovement((double)direction.getStepX(), mob.getDeltaMovement().y, (double)direction.getStepZ());
+						flag = false;
+					}
 				}
-			}
-			
-			if (flag)
-			{
-				mob.getJumpControl().jump();
-				mob.setDeltaMovement(mob.getDeltaMovement().x * 0.1D, mob.getDeltaMovement().y, mob.getDeltaMovement().z * 0.1D);
+				
+				if (flag)
+				{
+					mob.getJumpControl().jump();
+					mob.setDeltaMovement(mob.getDeltaMovement().x * 0.1D, mob.getDeltaMovement().y, mob.getDeltaMovement().z * 0.1D);
+				}
 			}
 		}
 	}
