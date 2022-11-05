@@ -1,5 +1,7 @@
 package nonamecrackers2.hunted.block;
 
+import org.jetbrains.annotations.Nullable;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -9,6 +11,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -18,11 +21,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition.Builder;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class BearTrapBlock extends Block
 {
+	public static final BlockPathTypes BEARTRAP = BlockPathTypes.create("beartrap", 16.0F);
 	public static final BooleanProperty TRIGGERED = BlockStateProperties.TRIGGERED;
 	private static final VoxelShape SHAPE = Block.box(1.0D, 0.0D, 1.0D, 15.0D, 6.0D, 15.0D);
 	private static final VoxelShape SHAPE_CLOSED = Block.box(1.0D, 0.0D, 1.0D, 15.0D, 9.0D, 15.0D);
@@ -77,5 +82,11 @@ public class BearTrapBlock extends Block
 	protected void createBlockStateDefinition(Builder<Block, BlockState> builder)
 	{
 		builder.add(TRIGGERED);
+	}
+	
+	@Override
+	public @Nullable BlockPathTypes getBlockPathType(BlockState state, BlockGetter level, BlockPos pos, @Nullable Mob mob)
+	{
+		return BEARTRAP;
 	}
 }

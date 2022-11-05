@@ -27,12 +27,8 @@ public class HunterRenderer extends EntityRenderer<HunterEntity>
 	{
 		Minecraft mc = Minecraft.getInstance();
 		VertexConsumer consumer = buffer.getBuffer(RenderType.entityCutout(this.getTextureLocation(entity)));
-		double distanceToGround = 0.0D;
-		if (!entity.onClimbable())
-			distanceToGround = Math.max(0.0D, Mth.lerp(partialTicks, entity.yo, entity.getY()) - entity.level.getHeight(Heightmap.Types.MOTION_BLOCKING, Mth.floor(entity.getX()), Mth.floor(entity.getZ())));
 		stack.pushPose();
 		stack.mulPose(Vector3f.YP.rotationDegrees(-mc.gameRenderer.getMainCamera().getYRot()));
-		stack.translate(0.0D, -distanceToGround, 0.0D);
 		PoseStack.Pose pose = stack.last();
 		consumer.vertex(pose.pose(), 1.0F, 0.0F, 0.0F).color(255, 255, 255, 255).uv(1.0F, 1.0F).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(240).normal(pose.normal(), 0.0F, 1.0F, 0.0F).endVertex();
 		consumer.vertex(pose.pose(), -1.0F, 0.0F, 0.0F).color(255, 255, 255, 255).uv(0.0F, 1.0F).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(240).normal(pose.normal(), 0.0F, 1.0F, 0.0F).endVertex();

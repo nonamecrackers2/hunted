@@ -56,6 +56,7 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LadderBlock;
 import net.minecraft.world.level.gameevent.DynamicGameEventListener;
 import net.minecraft.world.level.gameevent.EntityPositionSource;
@@ -71,7 +72,9 @@ import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import nonamecrackers2.hunted.HuntedMod;
+import nonamecrackers2.hunted.block.BearTrapBlock;
 import nonamecrackers2.hunted.capability.HunterEntityClassManager;
+import nonamecrackers2.hunted.entity.ai.behavior.ClimbAndMoveToTargetSink;
 import nonamecrackers2.hunted.entity.ai.behavior.RandomNodeStroll;
 import nonamecrackers2.hunted.entity.ai.behavior.SetWalkTargetFrom;
 import nonamecrackers2.hunted.game.HuntedGame;
@@ -86,6 +89,8 @@ import nonamecrackers2.hunted.init.HuntedSensorTypes;
 import nonamecrackers2.hunted.init.HuntedSoundEvents;
 import nonamecrackers2.hunted.map.HuntedMap;
 import nonamecrackers2.hunted.map.MapNavigation;
+import nonamecrackers2.hunted.util.ClimbableNodeEvaluator;
+import nonamecrackers2.hunted.util.LadderPathFinder;
 import nonamecrackers2.hunted.util.MobEffectHolder;
 
 public class HunterEntity extends Monster
@@ -137,7 +142,7 @@ public class HunterEntity extends Monster
 	
 	public static AttributeSupplier.Builder createAttributes()
 	{
-		return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH, 64.0D).add(Attributes.MOVEMENT_SPEED, 0.3D).add(Attributes.FOLLOW_RANGE, 128.0D);
+		return Monster.createMonsterAttributes().add(Attributes.MAX_HEALTH, 64.0D).add(Attributes.MOVEMENT_SPEED, 0.4D).add(Attributes.FOLLOW_RANGE, 128.0D);
 	}
 	
 	@Override
@@ -207,7 +212,7 @@ public class HunterEntity extends Monster
 	protected Brain<?> makeBrain(Dynamic<?> dynamic)
 	{
 		Brain<HunterEntity> brain = this.brainProvider().makeBrain(dynamic);
-		brain.addActivity(Activity.CORE, 0, ImmutableList.of(new Swim(0.8F), new LookAtTargetSink(45, 90), new MoveToTargetSink(400, 650)));
+		brain.addActivity(Activity.CORE, 0, ImmutableList.of(new Swim(0.8F), new LookAtTargetSink(45, 90), new ClimbAndMoveToTargetSink(400, 650)));
 		brain.addActivity(Activity.IDLE, 0, ImmutableList.of(
 			new StartAttacking<>(HunterEntity::findNearestValidTarget),
 			new RunIf<>(e -> !this.getNodes().isEmpty(), new RandomNodeStroll<>(HunterEntity::getNodes)),
@@ -382,35 +387,24 @@ public class HunterEntity extends Monster
 	}
 	
 	@Override
-	protected float getSoundVolume()
-	{
-		return 2.5F;
-	}
-	
-	@Override
 	public boolean doHurtTarget(Entity entity)
 	{
-		//float angle = (float)(Mth.atan2(pos.x() - this.getX(), pos.z() - this.getZ()) * (180.0D / Math.PI));
-//		float angleDiff = (Mth.wrapDegrees(-this.yBodyRot) + entity.getYHeadRot() + 360) % 360 - 180;
-//		if (angleDiff <= 45 && angleDiff >= -45)
-//		{
-			if (entity instanceof LivingEntity living)
+		if (entity instanceof LivingEntity living && !living.hasEffect(MobEffects.DAMAGE_RESISTANCE))
+		{
+			HuntedGameManager manager = this.level.getCapability(HuntedCapabilities.GAME_MANAGER).orElse(null);
+			if (manager != null)
 			{
-				HuntedGameManager manager = this.level.getCapability(HuntedCapabilities.GAME_MANAGER).orElse(null);
-				if (manager != null)
+				HuntedGame game = manager.getCurrentGame().orElse(null);
+				if (game != null)
 				{
-					HuntedGame game = manager.getCurrentGame().orElse(null);
-					if (game != null)
+					if (game.isActive(living))
 					{
-						if (game.isActive(living))
-						{
-							game.eliminate(living);
-							return true;
-						}
+						game.eliminate(living);
+						return true;
 					}
 				}
 			}
-//		}
+		}
 		return super.doHurtTarget(entity);
 	}
 	
@@ -475,6 +469,18 @@ public class HunterEntity extends Monster
 		}
 	}
 	
+	@Override
+	public int getMaxFallDistance()
+	{
+		return 32;
+	}
+	
+	@Override
+	public float getStepHeight()
+	{
+		return 1.0F;
+	}
+	
 	private static class HunterNavigation extends GroundPathNavigation
 	{
 		public HunterNavigation(Mob mob, Level level)
@@ -485,57 +491,8 @@ public class HunterEntity extends Monster
 		@Override
 		protected PathFinder createPathFinder(int maxVisitedNodes)
 		{
-			this.nodeEvaluator = new HunterEntity.HunterNodeEvaluator();
-			return new PathFinder(this.nodeEvaluator, maxVisitedNodes);
-		}
-	}
-	
-	private static class HunterNodeEvaluator extends WalkNodeEvaluator
-	{
-		@Override
-		public int getNeighbors(Node[] nodes, Node origin)
-		{
-			int i = super.getNeighbors(nodes, origin);
-			BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(origin.x, origin.y + 1, origin.z);
-			if (this.level.getBlockState(pos).is(BlockTags.CLIMBABLE))
-			{
-				Node node = this.getNode(pos);
-				if (node != null && !node.closed)
-				{
-					node.type = BlockPathTypes.WALKABLE;
-					node.costMalus = 0.0F;
-					if (i + 1 < nodes.length)
-						nodes[i++] = node;
-				}
-			}
-			pos.set(pos.getX(), pos.getY() - 2, pos.getZ());
-			if (this.level.getBlockState(pos).is(BlockTags.CLIMBABLE))
-			{
-				Node node = this.getNode(pos);
-				if (node != null && !node.closed)
-				{
-					node.type = BlockPathTypes.WALKABLE;
-					node.costMalus = 0.0F;
-					if (i + 1 < nodes.length)
-						nodes[i++] = node;
-				}
-			}
-			return i;
-		}
-		
-		private void computeLadderNode(BlockPos pos, Node[] nodes, int nodesSize)
-		{
-			if (this.level.getBlockState(pos).is(BlockTags.CLIMBABLE))
-			{
-				Node node = this.getNode(pos);
-				if (node != null && !node.closed)
-				{
-					node.type = BlockPathTypes.WALKABLE;
-					node.costMalus = 0.0F;
-					if (nodesSize + 1 < nodes.length)
-						nodes[nodesSize++] = node;
-				}
-			}
+			this.nodeEvaluator = new ClimbableNodeEvaluator();
+			return new LadderPathFinder(this.nodeEvaluator, maxVisitedNodes);
 		}
 	}
 }
