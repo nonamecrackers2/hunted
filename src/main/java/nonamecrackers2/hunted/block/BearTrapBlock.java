@@ -24,6 +24,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import nonamecrackers2.hunted.entity.HunterEntity;
 
 public class BearTrapBlock extends Block
 {
@@ -51,7 +52,7 @@ public class BearTrapBlock extends Block
 	@Override
 	public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity)
 	{
-		if (!state.getValue(TRIGGERED))
+		if (!state.getValue(TRIGGERED) && !(entity instanceof HunterEntity))
 		{
 			level.setBlock(pos, state.setValue(TRIGGERED, true), 3);
 			level.updateNeighborsAt(pos, this);

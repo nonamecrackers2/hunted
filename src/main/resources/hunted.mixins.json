@@ -5,12 +5,16 @@
 	"refmap": "hunted.refmap.json",
 	"mixins": [
 		"MixinPlayer",
-		"MixinItem"
+		"MixinItem",
+		"MixinPath",
+		"MixinVibrationListener",
+		"MixinTrapDoorBlock"
 	],
 	"client": [
 		"MixinLocalPlayer",
 		"MixinAbstractContainerScreen",
-		"MixinGameRenderer"
+		"MixinGameRenderer",
+//		"MixinDebugRenderer"
 	],
 	"minVersion": "0.8"
 }

@@ -5,12 +5,14 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.PipeBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.Path;
+import net.minecraft.world.phys.Vec3;
 
 public class ClimbAndMoveToTargetSink extends MoveToTargetSink
 {
@@ -25,29 +27,68 @@ public class ClimbAndMoveToTargetSink extends MoveToTargetSink
 		super.tick(level, mob, p_23619_);
 		
 		Path path = mob.getNavigation().getPath();
-		if (path != null && mob.onClimbable())
+		if (mob.onClimbable())
 		{
-			if (path.getNextNode().asBlockPos().equals(mob.blockPosition()))
+			if (path != null && !path.isDone())
 			{
-				boolean flag = true;
-				BlockState state = level.getBlockState(mob.blockPosition());
-				Direction direction = getDirection(state);
-				if (direction != null)
+				BlockPos current = mob.blockPosition();
+				BlockPos next = path.getNextNodePos();
+				if (current.getY() - next.getY() <= 0)
 				{
-					direction = direction.getOpposite();
-					if (!level.getBlockState(new BlockPos(direction.getStepX(), 0, direction.getStepZ()).offset(mob.blockPosition())).isAir())
+					if (mob.getBoundingBox().inflate(0.0D, 1.0D, 0.0D).contains(Vec3.atCenterOf(next)))
 					{
-						mob.setDeltaMovement((double)direction.getStepX(), mob.getDeltaMovement().y, (double)direction.getStepZ());
-						flag = false;
+						boolean flag = true;
+						BlockState state = level.getBlockState(current);
+						Direction direction = getDirection(state);
+						if (direction != null)
+						{
+							direction = direction.getOpposite();
+							if (!level.getBlockState(new BlockPos(direction.getNormal()).offset(mob.blockPosition())).isAir())
+							{
+								mob.setDeltaMovement((double)direction.getStepX(), mob.getDeltaMovement().y, (double)direction.getStepZ());
+								flag = false;
+							}
+						}
+						
+						if (flag)
+						{
+							mob.getJumpControl().jump();
+							Vec3 center = Vec3.atBottomCenterOf(current).subtract(mob.position());
+							mob.setDeltaMovement(center.x, mob.getDeltaMovement().y, center.z);
+						}
 					}
 				}
-				
-				if (flag)
+				else
 				{
-					mob.getJumpControl().jump();
-					mob.setDeltaMovement(mob.getDeltaMovement().x * 0.1D, mob.getDeltaMovement().y, mob.getDeltaMovement().z * 0.1D);
+					this.descendClimbable(level, mob);
 				}
 			}
+			else
+			{
+				this.descendClimbable(level, mob);
+			}
+		}
+	}
+
+	private void descendClimbable(ServerLevel level, Mob mob)
+	{
+		boolean flag = true;
+		BlockState state = level.getBlockState(mob.blockPosition());
+		Direction direction = getDirection(state);
+		BlockPos pos = mob.blockPosition();
+		if (direction != null)
+		{
+			if (level.getBlockState(pos.above(1)).is(BlockTags.CLIMBABLE) && level.getBlockState(new BlockPos(direction.getNormal()).offset(pos)).isAir())
+			{
+				mob.setDeltaMovement(direction.getStepX(), mob.getDeltaMovement().y, direction.getStepY());
+				flag = false;
+			}
+		}
+		
+		if (flag)
+		{
+			Vec3 center = Vec3.atBottomCenterOf(pos).subtract(mob.position());
+			mob.setDeltaMovement(center.x, mob.getDeltaMovement().y, center.z);
 		}
 	}
 	
@@ -59,25 +100,25 @@ public class ClimbAndMoveToTargetSink extends MoveToTargetSink
 			if (direction != Direction.UP && direction != Direction.DOWN)
 				return state.getValue(HorizontalDirectionalBlock.FACING);
 		}
-		else if (state.hasProperty(PipeBlock.NORTH))
+		if (state.hasProperty(PipeBlock.NORTH))
 		{
 			if (state.getValue(PipeBlock.NORTH))
-				return Direction.NORTH;
-		}
-		else if (state.hasProperty(PipeBlock.EAST))
-		{
-			if (state.getValue(PipeBlock.EAST))
-				return Direction.EAST;
-		}
-		else if (state.hasProperty(PipeBlock.SOUTH))
-		{
-			if (state.getValue(PipeBlock.SOUTH))
 				return Direction.SOUTH;
 		}
-		else if (state.hasProperty(PipeBlock.WEST))
+		if (state.hasProperty(PipeBlock.EAST))
+		{
+			if (state.getValue(PipeBlock.EAST))
+				return Direction.WEST;
+		}
+		if (state.hasProperty(PipeBlock.SOUTH))
+		{
+			if (state.getValue(PipeBlock.SOUTH))
+				return Direction.NORTH;
+		}
+		if (state.hasProperty(PipeBlock.WEST))
 		{
 			if (state.getValue(PipeBlock.WEST))
-				return Direction.WEST;
+				return Direction.EAST;
 		}
 		return null;
 	}

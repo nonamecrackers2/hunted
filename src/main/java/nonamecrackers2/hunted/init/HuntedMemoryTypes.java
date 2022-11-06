@@ -2,6 +2,7 @@ package nonamecrackers2.hunted.init;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import net.minecraft.core.GlobalPos;
 import net.minecraft.world.entity.LivingEntity;
@@ -20,7 +21,8 @@ public class HuntedMemoryTypes
 	public static final RegistryObject<MemoryModuleType<LivingEntity>> NEAREST_GLOWING_ENTITY = MEMORY_MODULE_TYPES.register("nearest_glowing_entity", () -> new MemoryModuleType<>(Optional.empty()));
 	public static final RegistryObject<MemoryModuleType<LivingEntity>> NEAREST_ATTACKABLE_GLOWING_ENTITY = MEMORY_MODULE_TYPES.register("nearest_attackable_glowing_entity", () -> new MemoryModuleType<>(Optional.empty()));
 	public static final RegistryObject<MemoryModuleType<GlobalPos>> CURRENT_NODE = MEMORY_MODULE_TYPES.register("current_node", () -> new MemoryModuleType<>(Optional.of(GlobalPos.CODEC)));
-	
+	public static final RegistryObject<MemoryModuleType<Set<GlobalPos>>> TRAP_DOORS_TO_CLOSE = MEMORY_MODULE_TYPES.register("trap_doors_to_close", () -> new MemoryModuleType<>(Optional.empty()));
+
 	public static void register(IEventBus modBus)
 	{
 		MEMORY_MODULE_TYPES.register(modBus);

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 
+import org.apache.commons.compress.utils.Sets;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -15,20 +16,23 @@ import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Dynamic;
 
+import io.netty.buffer.Unpooled;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.tags.BlockTags;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -37,9 +41,9 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.behavior.InteractWithDoor;
 import net.minecraft.world.entity.ai.behavior.LookAtTargetSink;
 import net.minecraft.world.entity.ai.behavior.MeleeAttack;
-import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
 import net.minecraft.world.entity.ai.behavior.RandomStroll;
 import net.minecraft.world.entity.ai.behavior.RunIf;
 import net.minecraft.world.entity.ai.behavior.SetWalkTargetFromAttackTargetIfTargetOutOfReach;
@@ -56,8 +60,6 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.LadderBlock;
 import net.minecraft.world.level.gameevent.DynamicGameEventListener;
 import net.minecraft.world.level.gameevent.EntityPositionSource;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -65,16 +67,15 @@ import net.minecraft.world.level.gameevent.GameEvent.Context;
 import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.level.gameevent.PositionSource;
 import net.minecraft.world.level.gameevent.vibrations.VibrationListener;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
-import net.minecraft.world.level.pathfinder.Node;
+import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.pathfinder.PathFinder;
-import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
+import net.minecraft.world.level.pathfinder.Target;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import nonamecrackers2.hunted.HuntedMod;
-import nonamecrackers2.hunted.block.BearTrapBlock;
 import nonamecrackers2.hunted.capability.HunterEntityClassManager;
 import nonamecrackers2.hunted.entity.ai.behavior.ClimbAndMoveToTargetSink;
+import nonamecrackers2.hunted.entity.ai.behavior.InteractWithTrapdoor;
 import nonamecrackers2.hunted.entity.ai.behavior.RandomNodeStroll;
 import nonamecrackers2.hunted.entity.ai.behavior.SetWalkTargetFrom;
 import nonamecrackers2.hunted.game.HuntedGame;
@@ -89,9 +90,11 @@ import nonamecrackers2.hunted.init.HuntedSensorTypes;
 import nonamecrackers2.hunted.init.HuntedSoundEvents;
 import nonamecrackers2.hunted.map.HuntedMap;
 import nonamecrackers2.hunted.map.MapNavigation;
+import nonamecrackers2.hunted.mixin.MixinPath;
 import nonamecrackers2.hunted.util.ClimbableNodeEvaluator;
 import nonamecrackers2.hunted.util.LadderPathFinder;
 import nonamecrackers2.hunted.util.MobEffectHolder;
+import nonamecrackers2.hunted.util.NoVibrationSignal;
 
 public class HunterEntity extends Monster
 {
@@ -121,7 +124,7 @@ public class HunterEntity extends Monster
 	private static final EntityDataAccessor<Boolean> IS_IN_GAME = SynchedEntityData.defineId(HunterEntity.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> HAS_ESCAPED = SynchedEntityData.defineId(HunterEntity.class, EntityDataSerializers.BOOLEAN);
 	protected static final ImmutableList<SensorType<? extends Sensor<? super HunterEntity>>> SENSOR_TYPES = ImmutableList.of(HuntedSensorTypes.HUNTER_ENTITY_SENSOR.get(), HuntedSensorTypes.NEAREST_GLOWING_ENTITY.get());
-	protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.PATH, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.WALK_TARGET, MemoryModuleType.LOOK_TARGET, MemoryModuleType.NEAREST_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.NEAREST_ATTACKABLE, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.ATTACK_COOLING_DOWN, HuntedMemoryTypes.NEAREST_GLOWING_ENTITIES.get(), HuntedMemoryTypes.NEAREST_GLOWING_ENTITY.get(), HuntedMemoryTypes.NEAREST_ATTACKABLE_GLOWING_ENTITY.get(), HuntedMemoryTypes.CURRENT_NODE.get());
+	protected static final ImmutableList<MemoryModuleType<?>> MEMORY_TYPES = ImmutableList.of(MemoryModuleType.PATH, MemoryModuleType.CANT_REACH_WALK_TARGET_SINCE, MemoryModuleType.WALK_TARGET, MemoryModuleType.LOOK_TARGET, MemoryModuleType.NEAREST_LIVING_ENTITIES, MemoryModuleType.NEAREST_VISIBLE_LIVING_ENTITIES, MemoryModuleType.NEAREST_ATTACKABLE, MemoryModuleType.ATTACK_TARGET, MemoryModuleType.ATTACK_COOLING_DOWN, HuntedMemoryTypes.NEAREST_GLOWING_ENTITIES.get(), HuntedMemoryTypes.NEAREST_GLOWING_ENTITY.get(), HuntedMemoryTypes.NEAREST_ATTACKABLE_GLOWING_ENTITY.get(), HuntedMemoryTypes.CURRENT_NODE.get(), MemoryModuleType.DOORS_TO_CLOSE, HuntedMemoryTypes.TRAP_DOORS_TO_CLOSE.get());
 	private static final MobEffectHolder PREY_GLOWING = new MobEffectHolder(MobEffects.GLOWING, 60, 0, true);
 	private final HunterEntityClassManager classManager = new HunterEntityClassManager(this, HUNTER_ENTITY_CLASS.copy());
 	private final DynamicGameEventListener<VibrationListener> vibrationListener;
@@ -137,7 +140,6 @@ public class HunterEntity extends Monster
 		PositionSource positionSource = new EntityPositionSource(this, this.getEyeHeight());
 		this.vibrationListener = new DynamicGameEventListener<>(new VibrationListener(positionSource, 16, this.vibrationListenerConfig, null, 0.0F, 20));
 		this.setInvulnerable(true);
-		this.getNavigation().setCanFloat(true);
 	}
 	
 	public static AttributeSupplier.Builder createAttributes()
@@ -212,13 +214,17 @@ public class HunterEntity extends Monster
 	protected Brain<?> makeBrain(Dynamic<?> dynamic)
 	{
 		Brain<HunterEntity> brain = this.brainProvider().makeBrain(dynamic);
-		brain.addActivity(Activity.CORE, 0, ImmutableList.of(new Swim(0.8F), new LookAtTargetSink(45, 90), new ClimbAndMoveToTargetSink(400, 650)));
-		brain.addActivity(Activity.IDLE, 0, ImmutableList.of(
-			new StartAttacking<>(HunterEntity::findNearestValidTarget),
-			new RunIf<>(e -> !this.getNodes().isEmpty(), new RandomNodeStroll<>(HunterEntity::getNodes)),
-			new RunIf<>(e -> this.getNodes().isEmpty(), new RandomStroll(1.0F, 50, 50))
-		));
-		brain.addActivityAndRemoveMemoryWhenStopped(Activity.FIGHT, 0, ImmutableList.of(
+		brain.addActivity(Activity.CORE, 0, ImmutableList.of(new Swim(0.8F), new InteractWithDoor(), new InteractWithTrapdoor(), new LookAtTargetSink(45, 90), new ClimbAndMoveToTargetSink(600, 850)));
+		brain.addActivityAndRemoveMemoriesWhenStopped(Activity.IDLE, 
+			ImmutableList.of(
+				Pair.of(0, new StartAttacking<>(e -> true, HunterEntity::findNearestValidTarget, 0)),
+				Pair.of(1, new RunIf<>(e -> !this.getNodes().isEmpty(), new RandomNodeStroll<>(HunterEntity::getNodes))),
+				Pair.of(2, new RunIf<>(e -> this.getNodes().isEmpty(), new RandomStroll(1.0F, 50, 50)))
+			), 
+			ImmutableSet.of(), ImmutableSet.of(MemoryModuleType.WALK_TARGET)
+		);
+		brain.addActivityAndRemoveMemoryWhenStopped(Activity.FIGHT, 0, 
+			ImmutableList.of(
 				new SetWalkTargetFromAttackTargetIfTargetOutOfReach(1.25F),
 				new MeleeAttack(0),
 				new StopAttackingIfTargetInvalid<>(e -> !this.hasLineOfSight(e))
@@ -229,7 +235,7 @@ public class HunterEntity extends Monster
 			ImmutableList.of(
 				Pair.of(0, new SetWalkTargetFrom(HuntedMemoryTypes.NEAREST_ATTACKABLE_GLOWING_ENTITY.get(), 1.0F, 1, false))
 			),
-			ImmutableSet.of(Pair.of(HuntedMemoryTypes.NEAREST_ATTACKABLE_GLOWING_ENTITY.get(), MemoryStatus.VALUE_PRESENT), Pair.of(MemoryModuleType.ATTACK_TARGET, MemoryStatus.VALUE_ABSENT))
+			ImmutableSet.of(Pair.of(HuntedMemoryTypes.NEAREST_ATTACKABLE_GLOWING_ENTITY.get(), MemoryStatus.VALUE_PRESENT), Pair.of(MemoryModuleType.ATTACK_TARGET, MemoryStatus.VALUE_ABSENT), Pair.of(MemoryModuleType.NEAREST_ATTACKABLE, MemoryStatus.VALUE_ABSENT))
 		);
 		brain.setCoreActivities(ImmutableSet.of(Activity.CORE));
 		brain.setDefaultActivity(Activity.IDLE);
@@ -239,7 +245,7 @@ public class HunterEntity extends Monster
 	
 	private static Optional<? extends LivingEntity> findNearestValidTarget(HunterEntity entity)
 	{
-		return entity.getBrain().getMemory(MemoryModuleType.NEAREST_ATTACKABLE).map(e -> entity.hasLineOfSight(e) ? e : null);
+		return entity.getBrain().getMemory(MemoryModuleType.NEAREST_ATTACKABLE);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -305,6 +311,19 @@ public class HunterEntity extends Monster
 		this.level.getProfiler().pop();
 		this.getBrain().setActiveActivityToFirstValid(ImmutableList.of(Activity.FIGHT, Activity.INVESTIGATE, Activity.IDLE));
 		super.customServerAiStep();
+//		ServerLevel level = (ServerLevel)this.level;
+//		Path path = this.getNavigation().getPath();
+//		if (path != null && path.getEndNode() != null)
+//		{
+//			((MixinPath)path).callSetDebug(path.getOpenSet(), path.getClosedSet(), Sets.newHashSet(new Target(path.getEndNode())));
+//			FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
+//			buffer.writeInt(this.getId());
+//			buffer.writeFloat(0.5F);
+//			path.writeToStream(buffer);
+//			var packet = new ClientboundCustomPayloadPacket(ClientboundCustomPayloadPacket.DEBUG_PATHFINDING_PACKET, buffer);
+//			for (ServerPlayer player : level.players())
+//				player.connection.send(packet);
+//		}
 	}
 	
 	@Override
@@ -420,12 +439,12 @@ public class HunterEntity extends Monster
 		return new HunterEntity.HunterNavigation(this, level);
 	}
 
-	private class HunterVibrationListenerConfig implements VibrationListener.VibrationListenerConfig
+	private class HunterVibrationListenerConfig implements VibrationListener.VibrationListenerConfig, NoVibrationSignal
 	{
 		@Override
 		public boolean shouldListen(ServerLevel level, GameEventListener listener, BlockPos pos, GameEvent event, Context context)
 		{
-			if (HunterEntity.this.getLevel() == level && !HunterEntity.this.isRemoved() && !HunterEntity.this.isNoAi() && context.sourceEntity() != HunterEntity.this)
+			if (HunterEntity.this.getLevel() == level && !HunterEntity.this.isRemoved() && !HunterEntity.this.isNoAi() && context.sourceEntity() != null && context.sourceEntity() != HunterEntity.this)
 			{
 				Brain<HunterEntity> brain = HunterEntity.this.getBrain();
 				if (brain.getActiveNonCoreActivity().isPresent())
@@ -486,6 +505,10 @@ public class HunterEntity extends Monster
 		public HunterNavigation(Mob mob, Level level)
 		{
 			super(mob, level);
+			this.setMaxVisitedNodesMultiplier(16.0F);
+			this.setCanFloat(true);
+			this.setCanOpenDoors(true);
+			this.setCanPassDoors(true);
 		}
 		
 		@Override

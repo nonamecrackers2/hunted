@@ -9,11 +9,15 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
+import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.sensing.NearestLivingEntitySensor;
+import net.minecraft.world.entity.ai.sensing.Sensor;
+import net.minecraft.world.level.storage.loot.LootContext.EntityTarget;
 import nonamecrackers2.hunted.entity.HunterEntity;
 
 public class HunterEntitySensor extends NearestLivingEntitySensor<HunterEntity>
@@ -29,7 +33,7 @@ public class HunterEntitySensor extends NearestLivingEntitySensor<HunterEntity>
 	{
 		super.doTick(level, entity);
 		getClosest(entity, e -> {
-			return e.getType() == EntityType.PLAYER;
+			return e.getType() == EntityType.PLAYER && e.hasLineOfSight(entity) && !e.isInvisible() && EntitySelector.NO_CREATIVE_OR_SPECTATOR.test(e);
 		}).ifPresentOrElse(e -> {
 			entity.getBrain().setMemory(MemoryModuleType.NEAREST_ATTACKABLE, e);
 		}, () -> {

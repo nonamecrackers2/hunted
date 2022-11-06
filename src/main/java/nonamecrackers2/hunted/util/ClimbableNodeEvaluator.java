@@ -2,6 +2,8 @@ package nonamecrackers2.hunted.util;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.world.level.block.TrapDoorBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.WalkNodeEvaluator;
@@ -13,24 +15,45 @@ public class ClimbableNodeEvaluator extends WalkNodeEvaluator
 	{
 		int i = super.getNeighbors(nodes, origin);
 		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(origin.x, origin.y + 1, origin.z);
-		i = this.computeLadderNode(pos, nodes, i);
+		BlockState state = this.level.getBlockState(pos);
+		if (state.is(BlockTags.CLIMBABLE))
+			i = this.computeAcceptedNode(pos, nodes, i);
+		if (this.level.getBlockState(origin.asBlockPos()).is(BlockTags.CLIMBABLE) && state.is(BlockTags.WOODEN_TRAPDOORS))
+			i = this.computeAcceptedNode(pos, nodes, i);
+		
 		pos.set(pos.getX(), pos.getY() - 2, pos.getZ());
-		i = this.computeLadderNode(pos, nodes, i);
+		state = this.level.getBlockState(pos);
+		if (state.is(BlockTags.CLIMBABLE) || state.is(BlockTags.WOODEN_TRAPDOORS))
+			i = this.computeAcceptedNode(pos, nodes, i);
+		
+		pos.set(pos.getX(), origin.y, pos.getZ());
+		if (this.level.getBlockState(pos).is(BlockTags.CLIMBABLE))
+		{
+			pos.set(pos.getX(), pos.getY() + 1, pos.getZ());
+			if (this.mob.getPathfindingMalus(this.getCachedBlockType(this.mob, pos.getX(), pos.getY(), pos.getZ())) == 0.0F)
+			{
+				Node node = this.getNode(pos);
+				if (node != null && !node.closed)
+				{
+					node.type = BlockPathTypes.WALKABLE;
+					node.costMalus = 0.0F;
+					if (i + 1 < nodes.length)
+						nodes[i++] = node;
+				}
+			}
+		}
 		return i;
 	}
 	
-	private int computeLadderNode(BlockPos pos, Node[] nodes, int nodesSize)
+	private int computeAcceptedNode(BlockPos pos, Node[] nodes, int nodesSize)
 	{
-		if (this.level.getBlockState(pos).is(BlockTags.CLIMBABLE))
+		Node node = this.getNode(pos);
+		if (node != null && !node.closed)
 		{
-			Node node = this.getNode(pos);
-			if (node != null && !node.closed)
-			{
-				node.type = BlockPathTypes.WALKABLE;
-				node.costMalus = 0.0F;
-				if (nodesSize + 1 < nodes.length)
-					nodes[nodesSize++] = node;
-			}
+			node.type = BlockPathTypes.WALKABLE;
+			node.costMalus = 0.0F;
+			if (nodesSize + 1 < nodes.length)
+				nodes[nodesSize++] = node;
 		}
 		return nodesSize;
 	}
