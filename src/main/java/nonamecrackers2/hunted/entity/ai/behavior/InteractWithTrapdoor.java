@@ -3,11 +3,8 @@ package nonamecrackers2.hunted.entity.ai.behavior;
 import java.util.Iterator;
 import java.util.Objects;
 
-import javax.annotation.Nullable;
-
-import org.apache.commons.compress.utils.Sets;
-
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
