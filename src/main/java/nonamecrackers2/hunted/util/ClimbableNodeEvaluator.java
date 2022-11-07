@@ -18,8 +18,6 @@ public class ClimbableNodeEvaluator extends WalkNodeEvaluator
 		BlockState state = this.level.getBlockState(pos);
 		if (state.is(BlockTags.CLIMBABLE))
 			i = this.computeAcceptedNode(pos, nodes, i);
-		if (this.level.getBlockState(origin.asBlockPos()).is(BlockTags.CLIMBABLE) && state.is(BlockTags.WOODEN_TRAPDOORS))
-			i = this.computeAcceptedNode(pos, nodes, i);
 		
 		pos.set(pos.getX(), pos.getY() - 2, pos.getZ());
 		state = this.level.getBlockState(pos);
@@ -31,16 +29,7 @@ public class ClimbableNodeEvaluator extends WalkNodeEvaluator
 		{
 			pos.set(pos.getX(), pos.getY() + 1, pos.getZ());
 			if (this.mob.getPathfindingMalus(this.getCachedBlockType(this.mob, pos.getX(), pos.getY(), pos.getZ())) == 0.0F)
-			{
-				Node node = this.getNode(pos);
-				if (node != null && !node.closed)
-				{
-					node.type = BlockPathTypes.WALKABLE;
-					node.costMalus = 0.0F;
-					if (i + 1 < nodes.length)
-						nodes[i++] = node;
-				}
-			}
+				i = this.computeAcceptedNode(pos, nodes, i);
 		}
 		return i;
 	}
@@ -61,7 +50,7 @@ public class ClimbableNodeEvaluator extends WalkNodeEvaluator
 	@Override
 	protected Node getStartNode(BlockPos pos)
 	{
-		Node node = super.getStartNode(pos);
+		Node node = super.getStartNode(this.mob.blockPosition());
 		if (node == null || node.costMalus > 0.0F)
 		{
 			if (this.level.getBlockState(pos).is(BlockTags.CLIMBABLE))

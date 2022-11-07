@@ -8,9 +8,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.PipeBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
 
@@ -26,25 +28,28 @@ public class ClimbAndMoveToTargetSink extends MoveToTargetSink
 	{
 		super.tick(level, mob, p_23619_);
 		
-		Path path = mob.getNavigation().getPath();
+		Path path = mob.getBrain().getMemory(MemoryModuleType.PATH).get();
+		
+		BlockPos pos = mob.blockPosition();
+		BlockState state = level.getBlockState(pos);
 		if (mob.onClimbable())
 		{
-			if (path != null && !path.isDone())
+			if (!path.isDone())
 			{
-				BlockPos current = mob.blockPosition();
-				BlockPos next = path.getNextNodePos();
-				if (current.getY() - next.getY() <= 0)
+				Node next = path.getNextNode();
+				BlockPos nextPos = next.asBlockPos();
+				if (pos.getY() - nextPos.getY() < 0)
 				{
-					if (mob.getBoundingBox().inflate(0.0D, 1.0D, 0.0D).contains(Vec3.atCenterOf(next)))
+					if ((nextPos.getX() == pos.getX() && nextPos.getZ() == pos.getZ()) || mob.getBoundingBox().inflate(1.0D).contains(next.asVec3()))
 					{
 						boolean flag = true;
-						BlockState state = level.getBlockState(current);
 						Direction direction = getDirection(state);
 						if (direction != null)
 						{
 							direction = direction.getOpposite();
-							if (!level.getBlockState(new BlockPos(direction.getNormal()).offset(mob.blockPosition())).isAir())
+							if (!level.getBlockState(new BlockPos(direction.getNormal().offset(mob.blockPosition()))).isAir())
 							{
+//								System.out.println("climbing; pushing up to wall");
 								mob.setDeltaMovement((double)direction.getStepX(), mob.getDeltaMovement().y, (double)direction.getStepZ());
 								flag = false;
 							}
@@ -52,43 +57,80 @@ public class ClimbAndMoveToTargetSink extends MoveToTargetSink
 						
 						if (flag)
 						{
+//							System.out.println("jump climbing");
 							mob.getJumpControl().jump();
-							Vec3 center = Vec3.atBottomCenterOf(current).subtract(mob.position());
-							mob.setDeltaMovement(center.x, mob.getDeltaMovement().y, center.z);
+							//Vec3 center = Vec3.atBottomCenterOf(pos).subtract(mob.position());
+							mob.setDeltaMovement(mob.getDeltaMovement().x * 0.1D, mob.getDeltaMovement().y, mob.getDeltaMovement().z * 0.1D);
 						}
 					}
 				}
 				else
 				{
-					this.descendClimbable(level, mob);
+					boolean flag = true;
+					Direction direction = getDirection(state);
+					boolean flag2 = !level.getBlockState(pos.below()).is(BlockTags.CLIMBABLE);
+					if (direction != null && level.getBlockState(pos.above(1)).is(BlockTags.CLIMBABLE) && level.getBlockState(new BlockPos(direction.getNormal()).above(Math.round(mob.getBbHeight())).offset(pos)).isAir() || flag2)
+					{
+//						System.out.println("descending; pushing off ladder");
+						double strength = flag2 ? 0.01D : 1.0D;
+						mob.setDeltaMovement((double)direction.getStepX()*strength, mob.getDeltaMovement().y, (double)direction.getStepZ()*strength);
+						flag = false;
+					}
+					
+					if (flag)
+					{
+//						System.out.println("descending gracefully");
+						Vec3 center = Vec3.atBottomCenterOf(pos).subtract(mob.position());
+						mob.setDeltaMovement(center.x, mob.getDeltaMovement().y, center.z);
+//						mob.setDeltaMovement(mob.getDeltaMovement().x * 0.1D, mob.getDeltaMovement().y, mob.getDeltaMovement().z * 0.1D);
+					}
 				}
-			}
-			else
-			{
-				this.descendClimbable(level, mob);
+				
+//				if (pos.getY() - nextPos.getY() <= 0)
+//				{
+//					if ((nextPos.getX() == pos.getX() && nextPos.getZ() == pos.getZ()) || mob.getBoundingBox().inflate(1.0D).contains(next.asVec3()))
+//					{
+//						boolean flag = true;
+//						BlockState state = level.getBlockState(pos);
+//						Direction direction = getDirection(state);
+//						if (direction != null)
+//						{
+//							direction = direction.getOpposite();
+//							if (!level.getBlockState(new BlockPos(direction.getNormal().offset(mob.blockPosition()))).isAir())
+//							{
+//								System.out.println("climbing; pushing up to wall");
+//								mob.setDeltaMovement((double)direction.getStepX(), mob.getDeltaMovement().y, (double)direction.getStepZ());
+//								flag = false;
+//							}
+//						}
+//						
+//						if (flag)
+//						{
+//							System.out.println("jump climbing");
+//							mob.getJumpControl().jump();
+//							//Vec3 center = Vec3.atBottomCenterOf(pos).subtract(mob.position());
+//							mob.setDeltaMovement(mob.getDeltaMovement().x * 0.1D, mob.getDeltaMovement().y, mob.getDeltaMovement().z * 0.1D);
+//						}
+//					}
+//				}
+//				else
+//				{
+//					this.descendClimbable(level, mob, pos, next);
+//				}
 			}
 		}
-	}
-
-	private void descendClimbable(ServerLevel level, Mob mob)
-	{
-		boolean flag = true;
-		BlockState state = level.getBlockState(mob.blockPosition());
-		Direction direction = getDirection(state);
-		BlockPos pos = mob.blockPosition();
-		if (direction != null)
+		else if (!level.getBlockState(pos).is(BlockTags.CLIMBABLE))
 		{
-			if (level.getBlockState(pos.above(1)).is(BlockTags.CLIMBABLE) && level.getBlockState(new BlockPos(direction.getNormal()).offset(pos)).isAir())
+			if (level.getBlockState(pos.above()).is(BlockTags.CLIMBABLE))
 			{
-				mob.setDeltaMovement(direction.getStepX(), mob.getDeltaMovement().y, direction.getStepY());
-				flag = false;
+//				System.out.println("trying to jump up to climbable");
+				mob.getJumpControl().jump();
+				mob.setDeltaMovement(mob.getDeltaMovement().x * 0.1D, mob.getDeltaMovement().y, mob.getDeltaMovement().z * 0.1D);
 			}
-		}
-		
-		if (flag)
-		{
-			Vec3 center = Vec3.atBottomCenterOf(pos).subtract(mob.position());
-			mob.setDeltaMovement(center.x, mob.getDeltaMovement().y, center.z);
+			else if (level.getBlockState(pos.below()).is(BlockTags.CLIMBABLE))
+			{
+				mob.setDeltaMovement(mob.getDeltaMovement().x * 0.1D, mob.getDeltaMovement().y, mob.getDeltaMovement().z * 0.1D);
+			}
 		}
 	}
 	

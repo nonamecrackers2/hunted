@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
@@ -149,12 +150,11 @@ public class InteractWithTrapdoor extends Behavior<LivingEntity>
 	
 	protected boolean isTrapdoorObstructing(ServerLevel level, LivingEntity entity, BlockState state, BlockPos pos)
 	{
-		if ((double)pos.getY() - entity.getY() < -0.2D)
-			return !state.getValue(TrapDoorBlock.OPEN);
-		else if ((double)pos.getY() - (double)entity.getBbHeight() > 0.2D)
-			return !state.getValue(TrapDoorBlock.OPEN);
-		else
+		Direction direction = state.getValue(TrapDoorBlock.FACING).getOpposite();
+		if (entity.getY() <= (double)pos.getY() && entity.getY() + entity.getBbHeight() >= (double)pos.getY() && level.getBlockState(pos.relative(direction)).isAir())
 			return state.getValue(TrapDoorBlock.OPEN);
+		else
+			return !state.getValue(TrapDoorBlock.OPEN);
 	}
 	
 	private static void cycleTrapdoor(ServerLevel level, TrapDoorBlock block, BlockState state, BlockPos pos)

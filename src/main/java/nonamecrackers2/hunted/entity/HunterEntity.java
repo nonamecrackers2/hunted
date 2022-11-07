@@ -18,6 +18,7 @@ import com.mojang.serialization.Dynamic;
 
 import io.netty.buffer.Unpooled;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
@@ -26,6 +27,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -33,6 +35,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -50,6 +53,7 @@ import net.minecraft.world.entity.ai.behavior.SetWalkTargetFromAttackTargetIfTar
 import net.minecraft.world.entity.ai.behavior.StartAttacking;
 import net.minecraft.world.entity.ai.behavior.StopAttackingIfTargetInvalid;
 import net.minecraft.world.entity.ai.behavior.Swim;
+import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.ai.memory.WalkTarget;
@@ -70,6 +74,8 @@ import net.minecraft.world.level.gameevent.vibrations.VibrationListener;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.level.pathfinder.PathFinder;
 import net.minecraft.world.level.pathfinder.Target;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import nonamecrackers2.hunted.HuntedMod;
@@ -140,6 +146,7 @@ public class HunterEntity extends Monster
 		PositionSource positionSource = new EntityPositionSource(this, this.getEyeHeight());
 		this.vibrationListener = new DynamicGameEventListener<>(new VibrationListener(positionSource, 16, this.vibrationListenerConfig, null, 0.0F, 20));
 		this.setInvulnerable(true);
+		this.moveControl = new HunterEntity.HunterMoveControl(this);
 	}
 	
 	public static AttributeSupplier.Builder createAttributes()
@@ -311,19 +318,19 @@ public class HunterEntity extends Monster
 		this.level.getProfiler().pop();
 		this.getBrain().setActiveActivityToFirstValid(ImmutableList.of(Activity.FIGHT, Activity.INVESTIGATE, Activity.IDLE));
 		super.customServerAiStep();
-//		ServerLevel level = (ServerLevel)this.level;
-//		Path path = this.getNavigation().getPath();
-//		if (path != null && path.getEndNode() != null)
-//		{
-//			((MixinPath)path).callSetDebug(path.getOpenSet(), path.getClosedSet(), Sets.newHashSet(new Target(path.getEndNode())));
-//			FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
-//			buffer.writeInt(this.getId());
-//			buffer.writeFloat(0.5F);
-//			path.writeToStream(buffer);
-//			var packet = new ClientboundCustomPayloadPacket(ClientboundCustomPayloadPacket.DEBUG_PATHFINDING_PACKET, buffer);
-//			for (ServerPlayer player : level.players())
-//				player.connection.send(packet);
-//		}
+		ServerLevel level = (ServerLevel)this.level;
+		Path path = this.getNavigation().getPath();
+		if (path != null && path.getEndNode() != null)
+		{
+			((MixinPath)path).callSetDebug(path.getOpenSet(), path.getClosedSet(), Sets.newHashSet(new Target(path.getEndNode())));
+			FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
+			buffer.writeInt(this.getId());
+			buffer.writeFloat(0.5F);
+			path.writeToStream(buffer);
+			var packet = new ClientboundCustomPayloadPacket(ClientboundCustomPayloadPacket.DEBUG_PATHFINDING_PACKET, buffer);
+			for (ServerPlayer player : level.players())
+				player.connection.send(packet);
+		}
 	}
 	
 	@Override
@@ -500,7 +507,7 @@ public class HunterEntity extends Monster
 		return 1.0F;
 	}
 	
-	private static class HunterNavigation extends GroundPathNavigation
+	private class HunterNavigation extends GroundPathNavigation
 	{
 		public HunterNavigation(Mob mob, Level level)
 		{
@@ -512,10 +519,51 @@ public class HunterEntity extends Monster
 		}
 		
 		@Override
+		protected boolean canUpdatePath()
+		{
+			return super.canUpdatePath() || this.mob.onClimbable();
+		}
+		
+		@Override
 		protected PathFinder createPathFinder(int maxVisitedNodes)
 		{
 			this.nodeEvaluator = new ClimbableNodeEvaluator();
 			return new LadderPathFinder(this.nodeEvaluator, maxVisitedNodes);
+		}
+		
+		@Override
+		protected void followThePath()
+		{
+			this.maxDistanceToWaypoint = 0.0F;
+			AABB box = this.mob.getBoundingBox().inflate((double)this.maxDistanceToWaypoint);
+			if (box.contains(Vec3.atCenterOf(this.path.getNextNodePos())))
+				this.path.advance();
+			this.doStuckDetection(this.getTempMobPos());
+		}
+	}
+	
+	private static class HunterMoveControl extends MoveControl
+	{
+		public HunterMoveControl(Mob mob)
+		{
+			super(mob);
+		}
+
+		@Override
+		public void tick()
+		{
+			super.tick();
+			
+			Path path = this.mob.getNavigation().getPath();
+			
+			if (path != null && !path.isDone())
+			{
+				if (path.getNextNodePos().getY() >= this.mob.getBlockY() && this.operation == MoveControl.Operation.JUMPING)
+				{
+					if (this.mob.onClimbable() && this.mob.level.getBlockState(this.mob.blockPosition().above()).isAir())
+						this.operation = MoveControl.Operation.WAIT;
+				}
+			}
 		}
 	}
 }
