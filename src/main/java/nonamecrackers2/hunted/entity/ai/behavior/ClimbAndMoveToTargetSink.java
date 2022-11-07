@@ -69,7 +69,7 @@ public class ClimbAndMoveToTargetSink extends MoveToTargetSink
 					boolean flag = true;
 					Direction direction = getDirection(state);
 					boolean flag2 = !level.getBlockState(pos.below()).is(BlockTags.CLIMBABLE);
-					if (direction != null && level.getBlockState(pos.above(1)).is(BlockTags.CLIMBABLE) && level.getBlockState(new BlockPos(direction.getNormal()).above(Math.round(mob.getBbHeight())).offset(pos)).isAir() || flag2)
+					if (direction != null && (level.getBlockState(pos.above(1)).is(BlockTags.CLIMBABLE) && level.getBlockState(new BlockPos(direction.getNormal()).above(Math.round(mob.getBbHeight())).offset(pos)).isAir() || flag2))
 					{
 //						System.out.println("descending; pushing off ladder");
 						double strength = flag2 ? 0.01D : 1.0D;
