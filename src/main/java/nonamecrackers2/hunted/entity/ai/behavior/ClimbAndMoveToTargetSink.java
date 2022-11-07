@@ -32,12 +32,12 @@ public class ClimbAndMoveToTargetSink extends MoveToTargetSink
 		
 		BlockPos pos = mob.blockPosition();
 		BlockState state = level.getBlockState(pos);
-		if (mob.onClimbable())
+		Node next = path.getNextNode();
+		BlockPos nextPos = next.asBlockPos();
+		if (!path.isDone())
 		{
-			if (!path.isDone())
+			if (mob.onClimbable())
 			{
-				Node next = path.getNextNode();
-				BlockPos nextPos = next.asBlockPos();
 				if (pos.getY() - nextPos.getY() < 0)
 				{
 					if ((nextPos.getX() == pos.getX() && nextPos.getZ() == pos.getZ()) || mob.getBoundingBox().inflate(1.0D).contains(next.asVec3()))
@@ -118,18 +118,18 @@ public class ClimbAndMoveToTargetSink extends MoveToTargetSink
 //					this.descendClimbable(level, mob, pos, next);
 //				}
 			}
-		}
-		else if (!level.getBlockState(pos).is(BlockTags.CLIMBABLE))
-		{
-			if (level.getBlockState(pos.above()).is(BlockTags.CLIMBABLE))
+			else if (!level.getBlockState(pos).is(BlockTags.CLIMBABLE))
 			{
-//				System.out.println("trying to jump up to climbable");
-				mob.getJumpControl().jump();
-				mob.setDeltaMovement(mob.getDeltaMovement().x * 0.1D, mob.getDeltaMovement().y, mob.getDeltaMovement().z * 0.1D);
-			}
-			else if (level.getBlockState(pos.below()).is(BlockTags.CLIMBABLE))
-			{
-				mob.setDeltaMovement(mob.getDeltaMovement().x * 0.1D, mob.getDeltaMovement().y, mob.getDeltaMovement().z * 0.1D);
+				if (pos.getY() - nextPos.getY() < 0 && level.getBlockState(pos.above()).is(BlockTags.CLIMBABLE))
+				{
+//					System.out.println("trying to jump up to climbable");
+					mob.getJumpControl().jump();
+					mob.setDeltaMovement(mob.getDeltaMovement().x * 0.1D, mob.getDeltaMovement().y, mob.getDeltaMovement().z * 0.1D);
+				}
+				else if (level.getBlockState(pos.below()).is(BlockTags.CLIMBABLE))
+				{
+					mob.setDeltaMovement(mob.getDeltaMovement().x * 0.1D, mob.getDeltaMovement().y, mob.getDeltaMovement().z * 0.1D);
+				}
 			}
 		}
 	}

@@ -1,8 +1,9 @@
 package nonamecrackers2.hunted.util;
 
+import javax.annotation.Nullable;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.level.pathfinder.Node;
@@ -61,6 +62,17 @@ public class ClimbableNodeEvaluator extends WalkNodeEvaluator
 			}
 		}
 		return node;
+	}
+	
+	@Override
+	protected boolean isDiagonalValid(Node node, @Nullable Node node1, @Nullable Node node2, @Nullable Node node3)
+	{
+		if (node1 != null && node2 != null && node3 != null)
+		{
+			if (node.y != node1.y || node.y != node2.y || node.y != node3.y)
+				return false;
+		}
+		return super.isDiagonalValid(node, node1, node2, node3);
 	}
 //	
 //	@Override

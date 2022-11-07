@@ -527,16 +527,16 @@ public class HunterEntity extends Monster
 			this.nodeEvaluator = new ClimbableNodeEvaluator();
 			return new LadderPathFinder(this.nodeEvaluator, maxVisitedNodes);
 		}
-		
-		@Override
-		protected void followThePath()
-		{
-			this.maxDistanceToWaypoint = 0.0F;
-			AABB box = this.mob.getBoundingBox().inflate((double)this.maxDistanceToWaypoint);
-			if (box.contains(Vec3.atCenterOf(this.path.getNextNodePos())))
-				this.path.advance();
-			this.doStuckDetection(this.getTempMobPos());
-		}
+//		
+//		@Override
+//		protected void followThePath()
+//		{
+//			this.maxDistanceToWaypoint = 0.0F;
+//			AABB box = this.mob.getBoundingBox().inflate((double)this.maxDistanceToWaypoint);
+//			if (box.contains(Vec3.atCenterOf(this.path.getNextNodePos())))
+//				this.path.advance();
+//			this.doStuckDetection(this.getTempMobPos());
+//		}
 	}
 	
 	private static class HunterMoveControl extends MoveControl
