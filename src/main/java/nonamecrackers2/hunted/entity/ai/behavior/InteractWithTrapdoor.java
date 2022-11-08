@@ -151,7 +151,7 @@ public class InteractWithTrapdoor extends Behavior<LivingEntity>
 	protected boolean isTrapdoorObstructing(ServerLevel level, LivingEntity entity, BlockState state, BlockPos pos)
 	{
 		Direction direction = state.getValue(TrapDoorBlock.FACING).getOpposite();
-		if (entity.getY() <= (double)pos.getY() && entity.getY() + entity.getBbHeight() >= (double)pos.getY() && level.getBlockState(pos.relative(direction)).isAir())
+		if (entity.getY() <= (double)pos.getY() + 0.5D && entity.getY() + entity.getBbHeight() >= (double)pos.getY() + 0.5D && level.getBlockState(pos.relative(direction)).isAir())
 			return state.getValue(TrapDoorBlock.OPEN);
 		else
 			return !state.getValue(TrapDoorBlock.OPEN);

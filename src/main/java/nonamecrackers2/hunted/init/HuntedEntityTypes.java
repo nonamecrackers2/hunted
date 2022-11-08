@@ -16,7 +16,7 @@ public class HuntedEntityTypes
 {
 	private static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, HuntedMod.MOD_ID);
 	
-	public static final RegistryObject<EntityType<HunterEntity>> HUNTER = register("hunter", EntityType.Builder.of(HunterEntity::new, MobCategory.MISC).clientTrackingRange(32).fireImmune().sized(0.6F, 0.8F));
+	public static final RegistryObject<EntityType<HunterEntity>> HUNTER = register("hunter", EntityType.Builder.of(HunterEntity::new, MobCategory.MISC).clientTrackingRange(32).fireImmune().sized(0.6F, 0.6F));
 	
 	private static <T extends Entity> RegistryObject<EntityType<T>> register(String id, EntityType.Builder<T> builder)
 	{

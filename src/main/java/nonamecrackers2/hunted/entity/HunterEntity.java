@@ -561,7 +561,7 @@ public class HunterEntity extends Monster
 			
 			Path path = this.mob.getNavigation().getPath();
 			
-			if (path != null && !path.isDone())
+			if (path != null && !path.isDone() && !path.notStarted())
 			{
 				if (path.getNextNodePos().getY() >= this.mob.getBlockY() && this.operation == MoveControl.Operation.JUMPING)
 				{

@@ -49,7 +49,7 @@ public class ClimbAndMoveToTargetSink extends MoveToTargetSink
 						if (direction != null)
 						{
 							direction = direction.getOpposite();
-							if (this.isCollidable(level, pos.offset(direction.getNormal())))
+							if (this.isCollidable(mob, pos.offset(direction.getNormal())))
 							{
 //								System.out.println("climbing; pushing up to wall");
 								mob.setDeltaMovement((double)direction.getStepX(), mob.getDeltaMovement().y, (double)direction.getStepZ());
@@ -69,7 +69,6 @@ public class ClimbAndMoveToTargetSink extends MoveToTargetSink
 				else
 				{
 //					boolean flag = true;
-//					Direction direction = getDirection(state);
 //					boolean flag2 = !level.getBlockState(pos.below()).is(BlockTags.CLIMBABLE);
 //					if (direction != null && (level.getBlockState(pos.above()).is(BlockTags.CLIMBABLE) && level.getBlockState(pos.offset(direction.getNormal()).above(Math.round(mob.getBbHeight()))).isAir() || flag2))
 //					{
@@ -82,12 +81,31 @@ public class ClimbAndMoveToTargetSink extends MoveToTargetSink
 //					if (flag)
 //					{
 						Vec3 delta = Vec3.atBottomCenterOf(pos).subtract(mob.position());
-						BlockPos normal = nextPos.subtract(pos);
-						if (!this.isOnSameVerticalColumn(pos, nextPos) && this.isOnSimiliarYLevelAs(mob, nextPos))
+						Vec3 normalVec = Vec3.atCenterOf(nextPos.subtract(pos)).normalize();
+						BlockPos normal = new BlockPos(Math.round(normalVec.x), Math.round(normalVec.y), Math.round(normalVec.z));
+						if (!this.isOnSameVerticalColumn(pos, nextPos))
 						{
-							System.out.println("working");
-							delta = this.getDeltaFrom(nextPos.subtract(pos));
+							if (!this.isCollidable(mob, new BlockPos(mob.getX(), mob.getY() + mob.getBbHeight(), mob.getZ()).offset(normal)))
+							{
+								delta = this.getDeltaFrom(normal).scale(0.5D);
+							}
+//							if (!this.isCollidable(level, pos.offset(normal)) && this.isOnSimiliarYLevelAs(mob, pos.offset(normal)))
+//							{
+//								System.out.println(normal);
+//								delta = mob.getDeltaMovement();
+//							}
 						}
+//						if (this.isClimbable(level, pos))
+//						{
+//							if (!this.isClimbable(level, pos.below()))
+//								delta = mob.getDeltaMovement();
+//						}
+//						else
+//						{
+//							if (this.isClimbable(level, pos.below()))
+//								delta = mob.getDeltaMovement().multiply(0.1D, 1.0D, 0.1D);
+//						}
+//						System.out.println("not");
 						mob.setDeltaMovement(delta.x, mob.getDeltaMovement().y, delta.z);
 ////						mob.setDeltaMovement(mob.getDeltaMovement().x * 0.1D, mob.getDeltaMovement().y, mob.getDeltaMovement().z * 0.1D);
 //					}
@@ -192,7 +210,7 @@ public class ClimbAndMoveToTargetSink extends MoveToTargetSink
 	
 	protected boolean isOnSimiliarYLevelAs(Mob mob, BlockPos pos)
 	{
-		return mob.getY() + (double)mob.getBbHeight() <= (double)pos.getY() || mob.getY() >= (double)pos.getY();
+		return mob.getY() <= pos.getY() + 0.5D && mob.getY() + mob.getBbHeight() >= pos.getY() + 0.5D; //mob.getY() + (double)mob.getBbHeight() <= (double)pos.getY() && mob.getY() >= (double)pos.getY();
 	}
 	
 	protected boolean isNearTo(Mob mob, Vec3 node)
@@ -215,9 +233,10 @@ public class ClimbAndMoveToTargetSink extends MoveToTargetSink
 		return current.getY() - next.getY() < 0;
 	}
 	
-	protected boolean isCollidable(Level level, BlockPos pos)
+	protected boolean isCollidable(Mob mob, BlockPos pos)
 	{
-		return !level.getBlockState(pos).isAir();
+		float malus = mob.getPathfindingMalus(mob.getNavigation().getNodeEvaluator().getBlockPathType(mob.level, pos.getX(), pos.getY(), pos.getZ()));
+		return malus > 0.0F || malus == -1.0F;
 	}
 	
 	protected boolean isClimbable(Level level, BlockPos pos)
