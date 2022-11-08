@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.Node;
 import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.phys.Vec3;
+import nonamecrackers2.hunted.util.HuntedUtil;
 
 public class ClimbAndMoveToTargetSink extends MoveToTargetSink
 {
@@ -47,7 +48,7 @@ public class ClimbAndMoveToTargetSink extends MoveToTargetSink
 						if (direction != null)
 						{
 							direction = direction.getOpposite();
-							if (!level.getBlockState(new BlockPos(direction.getNormal().offset(mob.blockPosition()))).isAir())
+							if (!level.getBlockState(pos.offset(direction.getNormal())).isAir())
 							{
 //								System.out.println("climbing; pushing up to wall");
 								mob.setDeltaMovement((double)direction.getStepX(), mob.getDeltaMovement().y, (double)direction.getStepZ());
@@ -69,11 +70,11 @@ public class ClimbAndMoveToTargetSink extends MoveToTargetSink
 					boolean flag = true;
 					Direction direction = getDirection(state);
 					boolean flag2 = !level.getBlockState(pos.below()).is(BlockTags.CLIMBABLE);
-					if (direction != null && (level.getBlockState(pos.above(1)).is(BlockTags.CLIMBABLE) && level.getBlockState(new BlockPos(direction.getNormal()).above(Math.round(mob.getBbHeight())).offset(pos)).isAir() || flag2))
+					if (direction != null && (level.getBlockState(pos.above()).is(BlockTags.CLIMBABLE) && level.getBlockState(pos.offset(direction.getNormal()).above(Math.round(mob.getBbHeight()))).isAir() || flag2))
 					{
 //						System.out.println("descending; pushing off ladder");
 						double strength = flag2 ? 0.01D : 1.0D;
-						mob.setDeltaMovement((double)direction.getStepX()*strength, mob.getDeltaMovement().y, (double)direction.getStepZ()*strength);
+						mob.setDeltaMovement((double)direction.getStepX() * strength, mob.getDeltaMovement().y, (double)direction.getStepZ() * strength);
 						flag = false;
 					}
 					
@@ -118,7 +119,7 @@ public class ClimbAndMoveToTargetSink extends MoveToTargetSink
 //					this.descendClimbable(level, mob, pos, next);
 //				}
 			}
-			else if (!level.getBlockState(pos).is(BlockTags.CLIMBABLE))
+			else if (!state.is(BlockTags.CLIMBABLE))
 			{
 				if (pos.getY() - nextPos.getY() < 0 && level.getBlockState(pos.above()).is(BlockTags.CLIMBABLE))
 				{

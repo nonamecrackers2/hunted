@@ -95,6 +95,7 @@ import nonamecrackers2.hunted.map.HuntedMap;
 import nonamecrackers2.hunted.map.MapNavigation;
 import nonamecrackers2.hunted.mixin.MixinPath;
 import nonamecrackers2.hunted.util.ClimbableNodeEvaluator;
+import nonamecrackers2.hunted.util.HuntedUtil;
 import nonamecrackers2.hunted.util.LadderPathFinder;
 import nonamecrackers2.hunted.util.MobEffectHolder;
 import nonamecrackers2.hunted.util.NoVibrationSignal;
@@ -527,16 +528,23 @@ public class HunterEntity extends Monster
 			this.nodeEvaluator = new ClimbableNodeEvaluator();
 			return new LadderPathFinder(this.nodeEvaluator, maxVisitedNodes);
 		}
-//		
-//		@Override
-//		protected void followThePath()
-//		{
-//			this.maxDistanceToWaypoint = 0.0F;
-//			AABB box = this.mob.getBoundingBox().inflate((double)this.maxDistanceToWaypoint);
-//			if (box.contains(Vec3.atCenterOf(this.path.getNextNodePos())))
-//				this.path.advance();
-//			this.doStuckDetection(this.getTempMobPos());
-//		}
+		
+		@Override
+		protected void followThePath()
+		{
+			if (this.mob.onClimbable())
+			{
+				this.maxDistanceToWaypoint = 0.0F;
+				AABB box = this.mob.getBoundingBox().inflate((double)this.maxDistanceToWaypoint);
+				if (box.contains(Vec3.atCenterOf(this.path.getNextNodePos())))
+					this.path.advance();
+				this.doStuckDetection(this.getTempMobPos());
+			}
+			else
+			{
+				super.followThePath();
+			}
+		}
 	}
 	
 	private static class HunterMoveControl extends MoveControl

@@ -49,9 +49,15 @@ public class ClimbableNodeEvaluator extends WalkNodeEvaluator
 	}
 	
 	@Override
+	public Node getStart()
+	{
+		return this.getStartNode(this.mob.blockPosition());
+	}
+	
+	@Override
 	protected Node getStartNode(BlockPos pos)
 	{
-		Node node = super.getStartNode(this.mob.blockPosition());
+		Node node = super.getStartNode(pos);
 		if (node == null || node.costMalus > 0.0F)
 		{
 			if (this.level.getBlockState(pos).is(BlockTags.CLIMBABLE))
@@ -62,17 +68,6 @@ public class ClimbableNodeEvaluator extends WalkNodeEvaluator
 			}
 		}
 		return node;
-	}
-	
-	@Override
-	protected boolean isDiagonalValid(Node node, @Nullable Node node1, @Nullable Node node2, @Nullable Node node3)
-	{
-		if (node1 != null && node2 != null && node3 != null)
-		{
-			if (node.y != node1.y || node.y != node2.y || node.y != node3.y)
-				return false;
-		}
-		return super.isDiagonalValid(node, node1, node2, node3);
 	}
 //	
 //	@Override
