@@ -946,6 +946,8 @@ public class HuntedGameMenuScreen extends Screen
 					this.mapInfo.line(1, Component.literal(i + 1 + ". ").withStyle(ChatFormatting.DARK_GRAY).append(reward.getName()));
 				}
 				this.mapInfo.line(Component.translatable("hunted.menu.map.info.keyholes", Component.literal(String.valueOf(map.keyholes().size())).withStyle(ChatFormatting.GREEN)).withStyle(ChatFormatting.GRAY));
+				Component nav = map.navigation().isPresent() && !map.navigation().get().nodes().isEmpty() ? Component.translatable("hunted.overlay.reward.collected").withStyle(Style.EMPTY.withBold(true).withColor(ChatFormatting.GREEN)) : Component.translatable("hunted.overlay.reward.uncollected").withStyle(Style.EMPTY.withBold(true).withColor(ChatFormatting.RED));
+				this.mapInfo.line(Component.translatable("hunted.menu.map.info.navigation", nav).withStyle(ChatFormatting.GRAY));
 			}
 		}
 		
