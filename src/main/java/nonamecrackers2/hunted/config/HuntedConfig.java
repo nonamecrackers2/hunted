@@ -1,24 +1,31 @@
 package nonamecrackers2.hunted.config;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.tuple.Pair;
 
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
 import net.minecraftforge.common.ForgeConfigSpec.EnumValue;
+import net.minecraftforge.fml.DistExecutor;
 import nonamecrackers2.hunted.client.gui.KioskTutorialStep;
 
 public class HuntedConfig
 {
-	public static final HuntedConfig.Client CLIENT;
-	public static final ForgeConfigSpec CLIENT_SPEC;
+	public static @Nullable HuntedConfig.Client CLIENT;
+	public static @Nullable ForgeConfigSpec CLIENT_SPEC;
 	public static final HuntedConfig.Server SERVER;
 	public static final ForgeConfigSpec SERVER_SPEC;
 	
 	static
 	{
-		final Pair<HuntedConfig.Client, ForgeConfigSpec> clientSpecPair = new ForgeConfigSpec.Builder().configure(HuntedConfig.Client::new);
-		CLIENT_SPEC = clientSpecPair.getRight();
-		CLIENT = clientSpecPair.getLeft();
+		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> 
+		{
+			final Pair<HuntedConfig.Client, ForgeConfigSpec> clientSpecPair = new ForgeConfigSpec.Builder().configure(HuntedConfig.Client::new);
+			CLIENT_SPEC = clientSpecPair.getRight();
+			CLIENT = clientSpecPair.getLeft();
+		});
 		final Pair<HuntedConfig.Server, ForgeConfigSpec> serverSpecPair = new ForgeConfigSpec.Builder().configure(HuntedConfig.Server::new);
 		SERVER_SPEC = serverSpecPair.getRight();
 		SERVER = serverSpecPair.getLeft();

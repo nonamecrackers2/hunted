@@ -89,8 +89,8 @@ public class HuntedMod
 			modBus.addListener(HuntedClientCapabilities::registerCapabilities);
 			modBus.register(HuntedRenderers.class);
 			modBus.addListener(HuntedParticleProviders::registerProviders);
+			ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, HuntedConfig.CLIENT_SPEC);
 		});
-		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, HuntedConfig.CLIENT_SPEC);
 		ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, HuntedConfig.SERVER_SPEC);
 	}
 	
