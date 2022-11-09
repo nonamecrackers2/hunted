@@ -167,6 +167,7 @@
 	"hunted.menu.game.begin.alreadyRunning": "Game is already running!",
 	"hunted.menu.game.begin.invalidPlayers": "Not enough players!",
 	"hunted.menu.game.begin.starting": "Game is already starting!",
+	"hunted.menu.game.begin.noMapSelected": "No map is selected!",
 	"hunted.menu.game.buttonHighlighting": "Specifies if buttons should be highlighted when nearby.",
 	"hunted.menu.map.info.buttons": "Total buttons: %s",
 	"hunted.menu.map.info.rewards": "Rewards:",
