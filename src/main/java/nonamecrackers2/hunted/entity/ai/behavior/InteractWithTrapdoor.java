@@ -79,9 +79,21 @@ public class InteractWithTrapdoor extends Behavior<LivingEntity>
 		BlockState state = level.getBlockState(pos);
 		if (state.is(BlockTags.WOODEN_TRAPDOORS, block -> block.getBlock() instanceof TrapDoorBlock))
 		{
+			
 			if (this.isTrapdoorObstructing(level, entity, state, pos))
 			{
-				cycleTrapdoor(level, (TrapDoorBlock)state.getBlock(), state, pos);
+//				Brain<?> brain = entity.getBrain();
+//				if (brain.getMemory(HuntedMemoryTypes.TRAP_DOORS_TO_CLOSE.get()).isPresent())
+//				{
+//					if (!brain.getMemory(HuntedMemoryTypes.TRAP_DOORS_TO_CLOSE.get()).get().stream().map(GlobalPos::pos).anyMatch(p -> p.equals(pos)))
+						cycleTrapdoor(level, (TrapDoorBlock)state.getBlock(), state, pos);
+//				}
+//				else
+//				{
+//					brain.setMemory(HuntedMemoryTypes.TRAP_DOORS_TO_CLOSE.get(), Sets.newHashSet());
+//					cycleTrapdoor(level, (TrapDoorBlock)state.getBlock(), state, pos);
+//				}
+				
 				if (rememberIfClosed)
 					this.rememberTrapDoor(level, entity, pos);
 			}
@@ -150,8 +162,11 @@ public class InteractWithTrapdoor extends Behavior<LivingEntity>
 	
 	protected boolean isTrapdoorObstructing(ServerLevel level, LivingEntity entity, BlockState state, BlockPos pos)
 	{
+		
+		Path path = entity.getBrain().getMemory(MemoryModuleType.PATH).get();
+		BlockPos next = path.getNextNodePos();
 		Direction direction = state.getValue(TrapDoorBlock.FACING).getOpposite();
-		if (entity.getY() <= (double)pos.getY() + 0.5D && entity.getY() + entity.getBbHeight() >= (double)pos.getY() + 0.5D && level.getBlockState(pos.relative(direction)).isAir())
+		if (next.getY() == pos.getY() && entity.getY() <= (double)pos.getY() && entity.getY() + entity.getBbHeight() >= (double)pos.getY() && level.getBlockState(pos.relative(direction)).isAir())
 			return state.getValue(TrapDoorBlock.OPEN);
 		else
 			return !state.getValue(TrapDoorBlock.OPEN);

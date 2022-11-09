@@ -49,7 +49,8 @@ public class ClimbAndMoveToTargetSink extends MoveToTargetSink
 						if (direction != null)
 						{
 							direction = direction.getOpposite();
-							if (this.isCollidable(mob, pos.offset(direction.getNormal())))
+							BlockPos offset = pos.offset(direction.getNormal());
+							if (this.isCollidable(mob, offset) && level.getBlockState(offset).isCollisionShapeFullBlock(level, offset))
 							{
 //								System.out.println("climbing; pushing up to wall");
 								mob.setDeltaMovement((double)direction.getStepX(), mob.getDeltaMovement().y, (double)direction.getStepZ());
