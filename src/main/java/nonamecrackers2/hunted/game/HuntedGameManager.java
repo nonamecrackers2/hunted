@@ -504,7 +504,13 @@ public class HuntedGameManager
 	
 	public @Nullable ServerPlayer getVip()
 	{
-		var queued = this.getQueued();
+		var queued = this.getQueued().stream().sorted((p, p1) -> 
+		{
+			if (this.level.getServer().getPlayerList().isOp(p.getGameProfile()))
+				return -1;
+			else
+				return 1;
+		}).collect(Collectors.toList());
 		if (queued.size() > 0)
 			return queued.get(0);
 		else
