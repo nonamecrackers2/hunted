@@ -12,7 +12,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringRepresentable;
 import nonamecrackers2.hunted.ability.Ability;
 import nonamecrackers2.hunted.ability.type.Bind;
-import nonamecrackers2.hunted.capability.HuntedClassManager;
 import nonamecrackers2.hunted.capability.PlayerClassManager;
 import nonamecrackers2.hunted.capability.ServerPlayerClassManager;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;

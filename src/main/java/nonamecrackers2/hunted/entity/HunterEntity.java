@@ -96,7 +96,6 @@ import nonamecrackers2.hunted.map.HuntedMap;
 import nonamecrackers2.hunted.map.MapNavigation;
 import nonamecrackers2.hunted.mixin.MixinPath;
 import nonamecrackers2.hunted.util.ClimbableNodeEvaluator;
-import nonamecrackers2.hunted.util.HuntedUtil;
 import nonamecrackers2.hunted.util.LadderPathFinder;
 import nonamecrackers2.hunted.util.MobEffectHolder;
 import nonamecrackers2.hunted.util.NoVibrationSignal;

@@ -9,7 +9,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.BlockHitResult;
 import nonamecrackers2.hunted.ability.Ability;
 import nonamecrackers2.hunted.capability.PlayerClassManager;
-import nonamecrackers2.hunted.capability.ServerPlayerClassManager;
 import nonamecrackers2.hunted.game.HuntedGame;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
 import nonamecrackers2.hunted.init.HuntedCapabilities;

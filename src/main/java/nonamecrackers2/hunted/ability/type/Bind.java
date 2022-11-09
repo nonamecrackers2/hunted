@@ -14,8 +14,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import nonamecrackers2.hunted.capability.PlayerClassManager;
 import nonamecrackers2.hunted.capability.ServerPlayerClassManager;

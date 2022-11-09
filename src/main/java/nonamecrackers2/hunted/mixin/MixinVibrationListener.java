@@ -10,7 +10,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.gameevent.vibrations.VibrationListener;
 import net.minecraft.world.phys.Vec3;
-import nonamecrackers2.hunted.entity.HunterEntity;
 import nonamecrackers2.hunted.util.NoVibrationSignal;
 
 @Mixin(VibrationListener.class)

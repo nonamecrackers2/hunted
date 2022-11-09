@@ -4,9 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
-import nonamecrackers2.hunted.capability.HuntedClassManager;
 import nonamecrackers2.hunted.capability.PlayerClassManager;
 import nonamecrackers2.hunted.game.HuntedGame;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;

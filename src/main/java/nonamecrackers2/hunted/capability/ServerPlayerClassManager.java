@@ -1,12 +1,8 @@
 package nonamecrackers2.hunted.capability;
 
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.network.PacketDistributor;
 import nonamecrackers2.hunted.game.HuntedGame;
-import nonamecrackers2.hunted.init.HuntedPacketHandlers;
 import nonamecrackers2.hunted.map.HuntedMap;
-import nonamecrackers2.hunted.packet.UpdatePlayerClassManagerPacket;
 import nonamecrackers2.hunted.trigger.TriggerContext;
 import nonamecrackers2.hunted.trigger.Triggerable;
 import nonamecrackers2.hunted.util.DataHolder;

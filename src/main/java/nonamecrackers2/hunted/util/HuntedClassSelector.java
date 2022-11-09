@@ -14,7 +14,6 @@ import com.google.common.collect.Maps;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
-import nonamecrackers2.hunted.huntedclass.HuntedClassDataManager;
 import nonamecrackers2.hunted.huntedclass.type.HuntedClassType;
 import nonamecrackers2.hunted.registry.HuntedRegistries;
 

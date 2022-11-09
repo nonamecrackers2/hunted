@@ -8,7 +8,6 @@ import com.mojang.serialization.JsonOps;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.LivingEntity;

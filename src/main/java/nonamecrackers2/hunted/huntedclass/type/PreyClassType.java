@@ -1,7 +1,6 @@
 package nonamecrackers2.hunted.huntedclass.type;
 
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import nonamecrackers2.hunted.game.HuntedGame;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;

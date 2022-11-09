@@ -12,7 +12,6 @@ import javax.annotation.Nullable;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.checkerframework.common.returnsreceiver.qual.This;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -45,7 +44,6 @@ import nonamecrackers2.hunted.client.gui.component.SimpleDataManagerList;
 import nonamecrackers2.hunted.client.gui.component.TextElementList;
 import nonamecrackers2.hunted.config.HuntedConfig;
 import nonamecrackers2.hunted.game.HuntedGame;
-import nonamecrackers2.hunted.game.HuntedGameManager;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
 import nonamecrackers2.hunted.huntedclass.HuntedClassDataManager;
 import nonamecrackers2.hunted.huntedclass.type.HuntedClassType;

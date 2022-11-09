@@ -39,15 +39,12 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import nonamecrackers2.hunted.ability.Ability;
 import nonamecrackers2.hunted.block.entity.KeyholeBlockEntity;
-import nonamecrackers2.hunted.capability.HuntedClassManager;
 import nonamecrackers2.hunted.capability.PlayerClassManager;
 import nonamecrackers2.hunted.capability.ServerPlayerClassManager;
 import nonamecrackers2.hunted.entity.HunterEntity;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
-import nonamecrackers2.hunted.huntedclass.HuntedClassDataManager;
 import nonamecrackers2.hunted.huntedclass.type.HuntedClassType;
 import nonamecrackers2.hunted.init.HuntedCapabilities;
-import nonamecrackers2.hunted.init.HuntedClassTypes;
 import nonamecrackers2.hunted.init.HuntedEntityTypes;
 import nonamecrackers2.hunted.init.TriggerTypes;
 import nonamecrackers2.hunted.map.HuntedMap;
@@ -59,7 +56,6 @@ import nonamecrackers2.hunted.rewards.ButtonRewardsDataManager;
 import nonamecrackers2.hunted.trigger.Trigger;
 import nonamecrackers2.hunted.trigger.TriggerContext;
 import nonamecrackers2.hunted.util.DataHolder;
-import nonamecrackers2.hunted.util.HuntedClassSelector;
 import nonamecrackers2.hunted.util.HuntedUtil;
 
 public class HuntedGame implements DataHolder
