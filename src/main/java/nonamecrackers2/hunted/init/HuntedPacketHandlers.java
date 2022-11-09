@@ -23,6 +23,7 @@ import nonamecrackers2.hunted.packet.HuntedMapManagerPacket;
 import nonamecrackers2.hunted.packet.JoinGamePacket;
 import nonamecrackers2.hunted.packet.LeaveGamePacket;
 import nonamecrackers2.hunted.packet.Packet;
+import nonamecrackers2.hunted.packet.PickGameModePacket;
 import nonamecrackers2.hunted.packet.RequestMenuUpdatePacket;
 import nonamecrackers2.hunted.packet.SelectMapPacket;
 import nonamecrackers2.hunted.packet.SetButtonHighlightingPacket;
@@ -57,6 +58,7 @@ public class HuntedPacketHandlers
 	public static final int BEGIN_GAME = 15;
 	public static final int STOP_COUNTDOWN = 16;
 	public static final int SET_BUTTON_HIGHLIGHTING = 17;
+	public static final int PICK_GAME_MODE = 18;
 	
 	public static void registerPackets()
 	{
@@ -185,6 +187,14 @@ public class HuntedPacketHandlers
 				SetButtonHighlightingPacket.class,
 				SetButtonHighlightingPacket::encode,
 				(buffer) -> Packet.decode(SetButtonHighlightingPacket::new, buffer),
+				HuntedPacketHandlers::receiveServerMessage,
+				Optional.of(NetworkDirection.PLAY_TO_SERVER)
+		);
+		MAIN.registerMessage(
+				PICK_GAME_MODE, 
+				PickGameModePacket.class,
+				PickGameModePacket::encode,
+				(buffer) -> Packet.decode(PickGameModePacket::new, buffer),
 				HuntedPacketHandlers::receiveServerMessage,
 				Optional.of(NetworkDirection.PLAY_TO_SERVER)
 		);

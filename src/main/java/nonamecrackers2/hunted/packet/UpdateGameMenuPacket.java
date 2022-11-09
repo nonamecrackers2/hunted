@@ -13,6 +13,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 import nonamecrackers2.hunted.client.packet.HuntedClientPacketProcessor;
+import nonamecrackers2.hunted.game.HuntedGame;
 import nonamecrackers2.hunted.huntedclass.HuntedClassDataManager;
 import nonamecrackers2.hunted.map.HuntedMap;
 import nonamecrackers2.hunted.util.EventType;
@@ -27,8 +28,9 @@ public class UpdateGameMenuPacket extends Packet
 	private boolean gameRunning;
 	private boolean gameStarting;
 	private boolean buttonHighlighting;
+	private HuntedGame.GameMode gameMode;
 	
-	public UpdateGameMenuPacket(@Nullable EventType processed, Map<UUID, HuntedClassSelector> queued, @Nullable HuntedMap selectedMap, @Nullable UUID vip, boolean gameRunning, boolean gameStarting, boolean buttonHighlighting)
+	public UpdateGameMenuPacket(@Nullable EventType processed, Map<UUID, HuntedClassSelector> queued, @Nullable HuntedMap selectedMap, @Nullable UUID vip, boolean gameRunning, boolean gameStarting, boolean buttonHighlighting, HuntedGame.GameMode mode)
 	{
 		super(true);
 		this.processed = processed;
@@ -39,6 +41,7 @@ public class UpdateGameMenuPacket extends Packet
 		this.gameRunning = gameRunning;
 		this.gameStarting = gameStarting;
 		this.buttonHighlighting = buttonHighlighting;
+		this.gameMode = mode;
 	}
 	
 	public UpdateGameMenuPacket()
@@ -81,6 +84,11 @@ public class UpdateGameMenuPacket extends Packet
 		return this.buttonHighlighting;
 	}
 	
+	public HuntedGame.GameMode getGameMode()
+	{
+		return this.gameMode;
+	}
+	
 	@Override
 	public void decode(FriendlyByteBuf buffer) throws IllegalArgumentException, IndexOutOfBoundsException
 	{
@@ -98,6 +106,7 @@ public class UpdateGameMenuPacket extends Packet
 		this.gameRunning = buffer.readBoolean();
 		this.gameStarting = buffer.readBoolean();
 		this.buttonHighlighting = buffer.readBoolean();
+		this.gameMode = buffer.readEnum(HuntedGame.GameMode.class);
 	}
 	
 	@Override
@@ -122,6 +131,7 @@ public class UpdateGameMenuPacket extends Packet
 		buffer.writeBoolean(this.gameRunning);
 		buffer.writeBoolean(this.gameStarting);
 		buffer.writeBoolean(this.buttonHighlighting);
+		buffer.writeEnum(this.gameMode);
 	}
 	
 	@Override
@@ -139,6 +149,7 @@ public class UpdateGameMenuPacket extends Packet
 				+ "vip=" + this.vip + ", "
 				+ "gameRunning=" + this.gameRunning + ", "
 				+ "gameStarting=" + this.gameStarting + ", "
-				+ "buttonHighlighting=" + this.buttonHighlighting + "]";
+				+ "buttonHighlighting=" + this.buttonHighlighting + ", "
+				+ "gameMode=" + this.gameMode + "]";
 	}
 }

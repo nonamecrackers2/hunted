@@ -519,7 +519,7 @@ public class HuntedGameManager
 	public void updateGameMenus(PacketTarget target, @Nullable EventType event)
 	{
 		var vip = this.getVip();
-		HuntedPacketHandlers.MAIN.send(target, new UpdateGameMenuPacket(event, this.players.entrySet().stream().collect(Collectors.toUnmodifiableMap(entry -> entry.getKey().getUUID(), Map.Entry::getValue)), this.getMap(), vip != null ? vip.getUUID() : null, this.isGameRunning(), this.gameStartDelay > 0, HuntedConfig.SERVER.buttonHighlighting.get()));
+		HuntedPacketHandlers.MAIN.send(target, new UpdateGameMenuPacket(event, this.players.entrySet().stream().collect(Collectors.toUnmodifiableMap(entry -> entry.getKey().getUUID(), Map.Entry::getValue)), this.getMap(), vip != null ? vip.getUUID() : null, this.isGameRunning(), this.gameStartDelay > 0, HuntedConfig.SERVER.buttonHighlighting.get(), this.mode));
 	}
 	
 	public void purgeRemovedPlayers(boolean updateMenus)

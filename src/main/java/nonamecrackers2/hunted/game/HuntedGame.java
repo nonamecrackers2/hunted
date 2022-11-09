@@ -691,8 +691,8 @@ public class HuntedGame implements DataHolder
 	
 	public static enum GameMode
 	{
-		MULTIPLAYER(2),
-		SINGLEPLAYER(1) 
+		MULTIPLAYER(2, "hunted.game.mode.multiplayer"),
+		SINGLEPLAYER(1, "hunted.game.mode.singleplayer") 
 		{
 			@Override
 			public void begin(ServerLevel level, HuntedGame game)
@@ -736,10 +736,12 @@ public class HuntedGame implements DataHolder
 		}; 
 		
 		private final int minimumPlayers;
+		private final String translation;
 		
-		private GameMode(int minimumPlayers)
+		private GameMode(int minimumPlayers, String translation)
 		{
 			this.minimumPlayers = minimumPlayers;
+			this.translation = translation;
 		}
 		
 		public int getMinimumPlayerCount()
@@ -756,6 +758,11 @@ public class HuntedGame implements DataHolder
 			List<ServerPlayer> hunterApplicable = players.stream().filter(p -> !p.getUUID().equals(previousHunter)).toList();
 			int index = random.nextInt(hunterApplicable.size());
 			return hunterApplicable.get(index);
+		}
+		
+		public String getTranslation()
+		{
+			return this.translation;
 		}
 	}
 }

@@ -43,6 +43,7 @@ import nonamecrackers2.hunted.client.gui.component.QueuedPlayerList;
 import nonamecrackers2.hunted.client.gui.component.SimpleDataManagerList;
 import nonamecrackers2.hunted.client.gui.component.TextElementList;
 import nonamecrackers2.hunted.config.HuntedConfig;
+import nonamecrackers2.hunted.game.HuntedGame;
 import nonamecrackers2.hunted.game.HuntedGameManager;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
 import nonamecrackers2.hunted.huntedclass.HuntedClassDataManager;
@@ -54,6 +55,7 @@ import nonamecrackers2.hunted.map.HuntedMapDataManager;
 import nonamecrackers2.hunted.packet.BeginGamePacket;
 import nonamecrackers2.hunted.packet.JoinGamePacket;
 import nonamecrackers2.hunted.packet.LeaveGamePacket;
+import nonamecrackers2.hunted.packet.PickGameModePacket;
 import nonamecrackers2.hunted.packet.RequestMenuUpdatePacket;
 import nonamecrackers2.hunted.packet.SelectMapPacket;
 import nonamecrackers2.hunted.packet.SetButtonHighlightingPacket;
@@ -73,6 +75,7 @@ public class HuntedGameMenuScreen extends Screen
 	public static final ResourceLocation TAB_ICONS = HuntedMod.resource("textures/gui/icons.png");
 	public static final ResourceLocation SCROLL_MENU_WINDOW = HuntedMod.resource("textures/gui/scroll_menu_window.png");
 	public static final ResourceLocation LOGO = HuntedMod.resource("textures/gui/logo.png");
+	public static final ResourceLocation ARROWS = HuntedMod.resource("textures/gui/arrows.png");
 	public static final int SIDE_TAB_DISABLED = 0;
 	public static final int SIDE_TAB_ENABLED = 32;
 	public static final int SIDE_TAB_TOP = 0;
@@ -94,7 +97,11 @@ public class HuntedGameMenuScreen extends Screen
 	public static final int BUTTON_WINDOW_END_WIDTH = 4;
 	public static final int LOGO_WIDTH = 200;
 	public static final int LOGO_HEIGHT = 96;
-	private final List<MenuTab> menus = Lists.newArrayList();
+	public static final int ARROW_WIDTH = 14;
+	public static final int ARROW_HEIGHT = 22;
+	public static final int ARROW_HIGHLIGHTED = ARROW_HEIGHT;
+	public static final int ARROW_LEFT = ARROW_WIDTH;
+	public final List<MenuTab> menus = Lists.newArrayList();
 	private @Nullable MenuTab menu;
 	private HuntedClassSelector.Builder selector = HuntedClassSelector.builder();
 	private @Nullable HuntedMap selectedMap;
@@ -104,6 +111,7 @@ public class HuntedGameMenuScreen extends Screen
 	private boolean gameRunning;
 	private boolean gameStarting;
 	private boolean buttonHighlighting;
+	private HuntedGame.GameMode gameMode = HuntedGame.GameMode.MULTIPLAYER;
 	
 	public HuntedGameMenuScreen()
 	{
@@ -256,6 +264,11 @@ public class HuntedGameMenuScreen extends Screen
 				HuntedPacketHandlers.MAIN.sendToServer(new SetButtonHighlightingPacket(!this.buttonHighlighting));
 				break;
 			}
+			case PICK_GAME_MODE:
+			{
+				HuntedPacketHandlers.MAIN.sendToServer(new PickGameModePacket(this.gameMode));
+				break;
+			}
 			}
 			this.processingEvent = event;
 		}
@@ -289,6 +302,8 @@ public class HuntedGameMenuScreen extends Screen
 		this.gameStarting = packet.gameStarting();
 		this.buttonHighlighting = packet.buttonHighlighting();
 		
+		this.gameMode = packet.getGameMode();
+		
 		this.menu.onUpdatePacketReceived();
 	}
 	
@@ -299,7 +314,7 @@ public class HuntedGameMenuScreen extends Screen
 	
 	private boolean canStartGame()
 	{
-		return this.isVip() && this.isQueued() && this.selectedMap != null && this.queuedPlayers.size() >= HuntedGameManager.MINIMUM_PLAYERS && !this.gameStarting && !this.gameRunning;
+		return this.isVip() && this.isQueued() && this.selectedMap != null && this.queuedPlayers.size() >= this.gameMode.getMinimumPlayerCount() && !this.gameStarting && !this.gameRunning;
 	}
 	
 	private boolean isQueued()
@@ -423,11 +438,6 @@ public class HuntedGameMenuScreen extends Screen
 	
 	public class ClassSelectMenu extends MenuTab
 	{
-		private static final ResourceLocation ARROWS = HuntedMod.resource("textures/gui/arrows.png");
-		private static final int ARROW_WIDTH = 14;
-		private static final int ARROW_HEIGHT = 22;
-		private static final int ARROW_HIGHLIGHTED = ARROW_HEIGHT;
-		private static final int ARROW_LEFT = ARROW_WIDTH;
 		private static final int ICON_SIZE = 32;
 		private static final int INFO_TOP_OFFSET = 50;
 		private final Map<HuntedClassType, SelectionList<HuntedClass>> lists = Maps.newLinkedHashMap();
@@ -658,6 +668,8 @@ public class HuntedGameMenuScreen extends Screen
 		private final FormattedTextList mapInfo;
 		private @Nullable SimpleDataManagerList.Entry<HuntedMap> prevEntry;
 		private final Button buttonHighlighting;
+		private final Button next;
+		private final Button prev;
 		
 		public GameMenu()
 		{
@@ -709,7 +721,7 @@ public class HuntedGameMenuScreen extends Screen
 					HuntedGameMenuScreen.this.renderTooltip(stack, Component.translatable("hunted.menu.game.begin.notVip"), mouseX, mouseY);
 				else if (HuntedGameMenuScreen.this.gameRunning)
 					HuntedGameMenuScreen.this.renderTooltip(stack, Component.translatable("hunted.menu.game.begin.alreadyRunning"), mouseX, mouseY);
-				else if (HuntedGameMenuScreen.this.queuedPlayers.size() < HuntedGameManager.MINIMUM_PLAYERS)
+				else if (HuntedGameMenuScreen.this.queuedPlayers.size() < HuntedGameMenuScreen.this.gameMode.getMinimumPlayerCount())
 					HuntedGameMenuScreen.this.renderTooltip(stack, Component.translatable("hunted.menu.game.begin.invalidPlayers"), mouseX, mouseY);
 				else if (HuntedGameMenuScreen.this.selectedMap == null)
 					HuntedGameMenuScreen.this.renderTooltip(stack, Component.translatable("hunted.menu.game.begin.noMapSelected"), mouseX, mouseY);
@@ -727,6 +739,38 @@ public class HuntedGameMenuScreen extends Screen
 					HuntedGameMenuScreen.this.renderTooltip(stack, Component.translatable("hunted.menu.select.button.notVip"), mouseX, mouseY);
 			}, CommonComponents.EMPTY);
 			this.buttonHighlighting.active = false;
+			this.next = new ImageButton(0, 0, ARROW_WIDTH, ARROW_HEIGHT, 0, 0, ARROW_HIGHLIGHTED, ARROWS, button -> 
+			{
+				HuntedGame.GameMode mode = HuntedGameMenuScreen.this.gameMode;
+				if (mode.ordinal() + 1 < HuntedGame.GameMode.values().length)
+				{
+					HuntedGameMenuScreen.this.gameMode = HuntedGame.GameMode.values()[mode.ordinal() + 1];
+					HuntedGameMenuScreen.this.doEvent(EventType.PICK_GAME_MODE);
+				}
+				else
+				{
+					HuntedGameMenuScreen.this.gameMode = HuntedGame.GameMode.values()[0];
+					HuntedGameMenuScreen.this.doEvent(EventType.PICK_GAME_MODE);
+				}
+				button.active = false;
+			});
+			this.prev = new ImageButton(0, 0, ARROW_WIDTH, ARROW_HEIGHT, ARROW_LEFT, 0, ARROW_HIGHLIGHTED, ARROWS, button -> 
+			{
+				HuntedGame.GameMode mode = HuntedGameMenuScreen.this.gameMode;
+				if (mode.ordinal() - 1 >= 0)
+				{
+					HuntedGameMenuScreen.this.gameMode = HuntedGame.GameMode.values()[mode.ordinal() - 1];
+					HuntedGameMenuScreen.this.doEvent(EventType.PICK_GAME_MODE);
+				}
+				else
+				{
+					HuntedGameMenuScreen.this.gameMode = HuntedGame.GameMode.values()[HuntedGame.GameMode.values().length - 1];
+					HuntedGameMenuScreen.this.doEvent(EventType.PICK_GAME_MODE);
+				}
+				button.active = false;
+			});
+			this.next.active = false;
+			this.prev.active = false;
 		}
 		
 		@Override
@@ -777,24 +821,16 @@ public class HuntedGameMenuScreen extends Screen
 				this.mc.font.drawWordWrap(Component.translatable("hunted.menu.game.noPlayers").withStyle(ChatFormatting.DARK_GRAY), this.playerList.getLeft() + 10, this.playerList.getTop() + this.playerList.getHeight() / 2 - this.mc.font.lineHeight / 2, this.playerList.getWidth(), 16777215);
 			HuntedMap highlighted = this.getHighlighted();
 			if (highlighted == null)
-//			{
 				this.mc.font.drawWordWrap(Component.translatable("hunted.menu.game.noMap").withStyle(ChatFormatting.DARK_GRAY), this.mapInfo.getLeft() + 10, this.mapInfo.getTop() + this.mapInfo.getHeight() / 2 - this.mc.font.lineHeight / 2, this.mapInfo.getWidth(), 16777215);
-//			}
-//			else
-//			{
-//				int infoX = x + width / 2 + 10;
-//				int infoY = y + 20;
-//				drawString(stack, this.mc.font, Component.translatable(highlighted.id().getNamespace() + ".map." + highlighted.id().getPath()), infoX, infoY, 16777215);
-//				infoY += this.mc.font.lineHeight + 4;
-//				drawString(stack, this.mc.font, Component.translatable("hunted.menu.map.info.buttons", Component.literal(String.valueOf(highlighted.buttons().size())).withStyle(ChatFormatting.GREEN)).withStyle(ChatFormatting.GRAY), infoX, infoY, 16777215);
-//				infoY += this.mc.font.lineHeight + 4;
-//				drawString(stack, this.mc.font, Component.translatable("hunted.menu.map.info.rewards").withStyle(ChatFormatting.GRAY), infoX, infoY, 16777215);
-//				for (ButtonReward reward : highlighted.rewards().stream().distinct().toList())
-//				{
-//					infoY += this.mc.font.lineHeight + 4;
-//					drawString(stack, this.mc.font, Component.translatable(reward.getId().getNamespace() + ".reward." + reward.getId().getPath()), infoX, infoY, 16777215);
-//				}
-//			}
+			int modeSelectX = x + width / 2 - BUTTON_BACKGROUND_WIDTH / 2;
+			int modeSelectY = y + height + WINDOW_BORDER / 2 - BUTTON_WINDOW_HEIGHT / 2 + BUTTON_WINDOW_HEIGHT + 2;
+			HuntedGameMenuScreen.this.renderButtonBackground(stack, modeSelectX, modeSelectY, BUTTON_BACKGROUND_WIDTH);
+			HuntedGame.GameMode mode = HuntedGameMenuScreen.this.gameMode;
+			drawCenteredString(stack, this.mc.font, Component.translatable(mode.getTranslation()).withStyle(Style.EMPTY.withBold(true)), modeSelectX + BUTTON_BACKGROUND_WIDTH / 2, modeSelectY - this.mc.font.lineHeight / 2 + BUTTON_WINDOW_HEIGHT / 2, 16777215);
+			this.prev.render(stack, mouseX, mouseY, partialTicks);
+			this.next.render(stack, mouseX, mouseY, partialTicks);
+			if (mouseX > modeSelectX + BUTTON_BACKGROUND_WIDTH / 2 - 70 && mouseX < modeSelectX + BUTTON_BACKGROUND_WIDTH / 2 + 70 && mouseY > modeSelectY && mouseY < modeSelectY + BUTTON_WINDOW_HEIGHT)
+				HuntedGameMenuScreen.this.renderTooltip(stack, Component.translatable(mode.getTranslation() + ".description"), mouseX, mouseY);
 		}
 		
 		@Override
@@ -829,6 +865,14 @@ public class HuntedGameMenuScreen extends Screen
 			this.mapInfo.updateSize(width / 2, height, y, y + height - 15);
 			this.mapInfo.setLeftPos(x + width / 2);
 			HuntedGameMenuScreen.this.addRenderableWidget(this.mapInfo);
+			int modeSelectX = x + width / 2 - BUTTON_BACKGROUND_WIDTH / 2;
+			int modeSelectY = y + height + WINDOW_BORDER / 2 - BUTTON_WINDOW_HEIGHT / 2 + BUTTON_WINDOW_HEIGHT + 2;
+			this.prev.x = modeSelectX + 5;
+			this.prev.y = modeSelectY - ARROW_HEIGHT / 2 + BUTTON_WINDOW_HEIGHT / 2;
+			this.next.x = modeSelectX + BUTTON_BACKGROUND_WIDTH - ARROW_WIDTH - 5;
+			this.next.y = modeSelectY - ARROW_HEIGHT / 2 + BUTTON_WINDOW_HEIGHT / 2;
+			HuntedGameMenuScreen.this.addWidget(this.prev);
+			HuntedGameMenuScreen.this.addWidget(this.next);
 		}
 		
 		@Override
@@ -859,6 +903,8 @@ public class HuntedGameMenuScreen extends Screen
 			}
 			this.buildMapDescription();
 			this.buttonHighlighting.active = HuntedGameMenuScreen.this.isVip();
+			this.next.active = HuntedGameMenuScreen.this.isVip();
+			this.prev.active = HuntedGameMenuScreen.this.isVip();
 		}
 		
 		@Override
