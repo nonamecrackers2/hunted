@@ -10,13 +10,18 @@
     	"category": "player",
     	"subtitle": "hunted.subtitle.jumpscare",
     	"sounds": [
-    		"hunted:jumpscare"
+    		"hunted:jumpscare",
+    		"hunted:jumpscare_2",
+    		"hunted:jumpscare_3"
     	]
 	},
 	"mansion_ambience": {
     	"category": "ambient",
     	"sounds": [
-    		"hunted:mansion_ambience"
+			{
+    			"name": "hunted:mansion_ambience",
+    			"volume": 0.5
+    		}
     	]
 	},
 	"creak": {
