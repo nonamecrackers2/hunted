@@ -33,6 +33,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -535,7 +536,7 @@ public class HunterEntity extends Monster
 			if (this.mob.onClimbable())
 			{
 				this.maxDistanceToWaypoint = 0.0F;
-				AABB box = this.mob.getBoundingBox().inflate((double)this.maxDistanceToWaypoint);
+				AABB box = this.mob.getBoundingBox().inflate((double)this.maxDistanceToWaypoint).inflate(0.0D, 0.5D, 0.0D);
 				if (box.contains(Vec3.atCenterOf(this.path.getNextNodePos())))
 					this.path.advance();
 				this.doStuckDetection(this.getTempMobPos());
@@ -565,7 +566,8 @@ public class HunterEntity extends Monster
 			{
 				if (path.getNextNodePos().getY() >= this.mob.getBlockY() && this.operation == MoveControl.Operation.JUMPING)
 				{
-					if (this.mob.onClimbable() && this.mob.level.getBlockState(this.mob.blockPosition().above()).isAir())
+					float malus = this.mob.getPathfindingMalus(this.mob.getNavigation().getNodeEvaluator().getBlockPathType(this.mob.level, this.mob.getBlockX(), this.mob.getBlockY() + 1, this.mob.getBlockZ()));
+					if (this.mob.onClimbable() && malus == 0.0F && !this.mob.level.getBlockState(this.mob.blockPosition().above()).is(BlockTags.CLIMBABLE))
 						this.operation = MoveControl.Operation.WAIT;
 				}
 			}

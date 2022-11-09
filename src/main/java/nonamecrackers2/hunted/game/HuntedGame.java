@@ -44,6 +44,7 @@ import nonamecrackers2.hunted.capability.PlayerClassManager;
 import nonamecrackers2.hunted.capability.ServerPlayerClassManager;
 import nonamecrackers2.hunted.entity.HunterEntity;
 import nonamecrackers2.hunted.huntedclass.HuntedClass;
+import nonamecrackers2.hunted.huntedclass.HuntedClassDataManager;
 import nonamecrackers2.hunted.huntedclass.type.HuntedClassType;
 import nonamecrackers2.hunted.init.HuntedCapabilities;
 import nonamecrackers2.hunted.init.HuntedClassTypes;

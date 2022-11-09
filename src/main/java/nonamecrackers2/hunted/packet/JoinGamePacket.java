@@ -7,6 +7,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
+import nonamecrackers2.hunted.huntedclass.HuntedClassDataManager;
 import nonamecrackers2.hunted.init.HuntedCapabilities;
 import nonamecrackers2.hunted.util.EventType;
 import nonamecrackers2.hunted.util.HuntedClassSelector;
@@ -35,7 +36,7 @@ public class JoinGamePacket extends Packet
 	@Override
 	public void decode(FriendlyByteBuf buffer) throws IllegalArgumentException, IndexOutOfBoundsException
 	{
-		this.selector = HuntedClassSelector.fromPacket(buffer);
+		this.selector = HuntedClassSelector.fromPacket(buffer, HuntedClassDataManager.INSTANCE::get);
 	}
 	
 	@Override

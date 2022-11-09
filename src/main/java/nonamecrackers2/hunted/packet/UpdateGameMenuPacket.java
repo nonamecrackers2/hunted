@@ -13,6 +13,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.network.NetworkEvent;
 import nonamecrackers2.hunted.client.packet.HuntedClientPacketProcessor;
+import nonamecrackers2.hunted.huntedclass.HuntedClassDataManager;
 import nonamecrackers2.hunted.map.HuntedMap;
 import nonamecrackers2.hunted.util.EventType;
 import nonamecrackers2.hunted.util.HuntedClassSelector;
@@ -88,7 +89,7 @@ public class UpdateGameMenuPacket extends Packet
 		int size = buffer.readVarInt();
 		Map<UUID, HuntedClassSelector> queued = Maps.newHashMap();
 		for (int i = 0; i < size; i++)
-			queued.put(buffer.readUUID(), HuntedClassSelector.fromPacket(buffer));
+			queued.put(buffer.readUUID(), HuntedClassSelector.fromPacket(buffer, HuntedClassDataManager.INSTANCE::getSynced));
 		this.queued = queued;
 		if (buffer.readBoolean())
 			this.map = buffer.readResourceLocation();

@@ -1,6 +1,7 @@
 package nonamecrackers2.hunted.util;
 
 import java.util.Map;
+import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
@@ -63,7 +64,7 @@ public class HuntedClassSelector
 		}
 	}
 	
-	public static HuntedClassSelector fromPacket(FriendlyByteBuf buffer)
+	public static HuntedClassSelector fromPacket(FriendlyByteBuf buffer, Function<ResourceLocation, HuntedClass> classGetter)
 	{
 		HuntedClassSelector.Builder builder = builder();
 		int size = buffer.readVarInt();
@@ -71,7 +72,7 @@ public class HuntedClassSelector
 		{
 			HuntedClassType type = buffer.readRegistryId();
 			ResourceLocation id = buffer.readResourceLocation();
-			HuntedClass huntedClass = HuntedClassDataManager.INSTANCE.getSynced(id);
+			HuntedClass huntedClass = classGetter.apply(id);
 			if (huntedClass != null)
 				builder.setSelected(type, huntedClass);
 			else
