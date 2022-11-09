@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.checkerframework.common.returnsreceiver.qual.This;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -410,6 +411,7 @@ public class HuntedGameMenuScreen extends Screen
 		{
 			RenderSystem.setShaderTexture(0, LOGO);
 			this.blit(stack, x + width / 2 - LOGO_WIDTH / 2, y - 20 - LOGO_HEIGHT, 0, 0, LOGO_WIDTH, LOGO_HEIGHT);
+			KioskTutorialStep.renderIfMatches(KioskTutorialStep.START, HuntedGameMenuScreen.this, stack, mouseX, mouseY, partialTicks, x, y, width, height);
 		}
 		
 		@Override
@@ -427,6 +429,7 @@ public class HuntedGameMenuScreen extends Screen
 		{
 			HuntedGameMenuScreen.this.removeWidget(this.textList);
 			this.textList.clear();
+			KioskTutorialStep.advanceIfMatches(KioskTutorialStep.START);
 		}
 		
 		@Override
@@ -557,6 +560,7 @@ public class HuntedGameMenuScreen extends Screen
 					this.textList.clear();
 			}
 			this.prevEntry = this.getListFromIndex(this.index).getValue().getSelected();
+			KioskTutorialStep.renderIfMatches(KioskTutorialStep.CLASS_SELECT, HuntedGameMenuScreen.this, stack, mouseX, mouseY, partialTicks, x, y, width, height);
 		}
 		
 		@Override
@@ -596,6 +600,7 @@ public class HuntedGameMenuScreen extends Screen
 			HuntedGameMenuScreen.this.removeWidget(this.prev);
 			HuntedGameMenuScreen.this.removeWidget(this.textList);
 			HuntedGameMenuScreen.this.removeWidget(this.select);
+			KioskTutorialStep.advanceIfMatches(KioskTutorialStep.CLASS_SELECT);
 		}
 		
 		protected void onUpdatePacketReceived() 
@@ -715,6 +720,7 @@ public class HuntedGameMenuScreen extends Screen
 					HuntedGameMenuScreen.this.doEvent(EventType.BEGIN);
 				else if (HuntedGameMenuScreen.this.gameStarting && HuntedGameMenuScreen.this.isVip())
 					HuntedGameMenuScreen.this.doEvent(EventType.STOP_COUNTDOWN);
+				KioskTutorialStep.advanceIfMatches(KioskTutorialStep.GAME_MENU);
 			}, (button, stack, mouseX, mouseY) -> 
 			{
 				if (!HuntedGameMenuScreen.this.isVip())
@@ -831,6 +837,7 @@ public class HuntedGameMenuScreen extends Screen
 			this.next.render(stack, mouseX, mouseY, partialTicks);
 			if (mouseX > modeSelectX + BUTTON_BACKGROUND_WIDTH / 2 - 70 && mouseX < modeSelectX + BUTTON_BACKGROUND_WIDTH / 2 + 70 && mouseY > modeSelectY && mouseY < modeSelectY + BUTTON_WINDOW_HEIGHT)
 				HuntedGameMenuScreen.this.renderTooltip(stack, Component.translatable(mode.getTranslation() + ".description"), mouseX, mouseY);
+			KioskTutorialStep.renderIfMatches(KioskTutorialStep.GAME_MENU, HuntedGameMenuScreen.this, stack, mouseX, mouseY, partialTicks, x, y, width, height);
 		}
 		
 		@Override
@@ -882,6 +889,7 @@ public class HuntedGameMenuScreen extends Screen
 			HuntedGameMenuScreen.this.removeWidget(this.select);
 			HuntedGameMenuScreen.this.removeWidget(this.playerList);
 			HuntedGameMenuScreen.this.removeWidget(this.mapInfo);
+			KioskTutorialStep.advanceIfMatches(KioskTutorialStep.GAME_MENU);
 		}
 		
 		@Override

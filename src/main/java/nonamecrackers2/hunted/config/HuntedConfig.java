@@ -4,6 +4,8 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
+import net.minecraftforge.common.ForgeConfigSpec.EnumValue;
+import nonamecrackers2.hunted.client.gui.KioskTutorialStep;
 
 public class HuntedConfig
 {
@@ -25,6 +27,7 @@ public class HuntedConfig
 	public static class Client
 	{
 		public final BooleanValue horrorElements;
+		public final EnumValue<KioskTutorialStep> tutorialStep;
 		
 		private Client(ForgeConfigSpec.Builder builder)
 		{
@@ -32,6 +35,9 @@ public class HuntedConfig
 					.comment("Specifies if horror elements (Hunter's mask, jumpscares, etc) should be active")
 					.translation("hunted.config.server.horrorElements")
 					.define("horrorElements", true);
+			
+			this.tutorialStep = builder
+					.defineEnum("tutorialStep", KioskTutorialStep.START);
 		}
 	}
 	
