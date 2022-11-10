@@ -316,19 +316,19 @@ public class HunterEntity extends Monster
 		this.level.getProfiler().pop();
 		this.getBrain().setActiveActivityToFirstValid(ImmutableList.of(Activity.FIGHT, Activity.INVESTIGATE, Activity.IDLE));
 		super.customServerAiStep();
-		ServerLevel level = (ServerLevel)this.level;
-		Path path = this.getNavigation().getPath();
-		if (path != null && path.getEndNode() != null)
-		{
-			((MixinPath)path).callSetDebug(path.getOpenSet(), path.getClosedSet(), Sets.newHashSet(new Target(path.getEndNode())));
-			FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
-			buffer.writeInt(this.getId());
-			buffer.writeFloat(0.5F);
-			path.writeToStream(buffer);
-			var packet = new ClientboundCustomPayloadPacket(ClientboundCustomPayloadPacket.DEBUG_PATHFINDING_PACKET, buffer);
-			for (ServerPlayer player : level.players())
-				player.connection.send(packet);
-		}
+//		ServerLevel level = (ServerLevel)this.level;
+//		Path path = this.getNavigation().getPath();
+//		if (path != null && path.getEndNode() != null)
+//		{
+//			((MixinPath)path).callSetDebug(path.getOpenSet(), path.getClosedSet(), Sets.newHashSet(new Target(path.getEndNode())));
+//			FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
+//			buffer.writeInt(this.getId());
+//			buffer.writeFloat(0.5F);
+//			path.writeToStream(buffer);
+//			var packet = new ClientboundCustomPayloadPacket(ClientboundCustomPayloadPacket.DEBUG_PATHFINDING_PACKET, buffer);
+//			for (ServerPlayer player : level.players())
+//				player.connection.send(packet);
+//		}
 	}
 	
 	@Override

@@ -14,7 +14,7 @@
 		"MixinLocalPlayer",
 		"MixinAbstractContainerScreen",
 		"MixinGameRenderer",
-		"MixinDebugRenderer"
+//		"MixinDebugRenderer"
 	],
 	"minVersion": "0.8"
 }
