@@ -27,6 +27,9 @@ public abstract class MixinDebugRenderer
 	{
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.getEntityRenderDispatcher().shouldRenderHitBoxes())
+		{
+			System.out.println("working");
 			this.pathfindingRenderer.render(stack, buffer, x, y, z);
+		}
 	}
 }

@@ -23,7 +23,7 @@ public enum KioskTutorialStep
 			Component text = Component.translatable("hunted.menu.tutorial.class.select").withStyle(ChatFormatting.GOLD);
 			int bound = 50;
 			int wordHeight = font.wordWrapHeight(text, bound);
-			font.drawWordWrap(text, x - font.width(text), y + 60 - wordHeight / 2, bound, 16777215);
+			font.drawWordWrap(stack, text, x - font.width(text), y + 60 - wordHeight / 2, bound, 16777215);
 			GuiComponent.drawString(stack, font, Component.literal(">").withStyle(Style.EMPTY.withBold(true).withColor(ChatFormatting.GOLD)), x - 60, y + 55, 16777215);
 		}
 	},
@@ -38,20 +38,20 @@ public enum KioskTutorialStep
 			Component one = Component.translatable("hunted.menu.tutorial.class.select.1").withStyle(ChatFormatting.GOLD);
 			int oneBound = HuntedGameMenuScreen.SCROLL_WINDOW_WIDTH - HuntedGameMenuScreen.WINDOW_BORDER * 2;
 			int oneHeight = font.wordWrapHeight(one, oneBound);
-			font.drawWordWrap(one, x + width + HuntedGameMenuScreen.WINDOW_BORDER + 20, y - HuntedGameMenuScreen.WINDOW_BORDER - oneHeight - 10, oneBound, 16777215);
+			font.drawWordWrap(stack, one, x + width + HuntedGameMenuScreen.WINDOW_BORDER + 20, y - HuntedGameMenuScreen.WINDOW_BORDER - oneHeight - 10, oneBound, 16777215);
 			
 			Component two = Component.translatable("hunted.menu.tutorial.class.select.2").withStyle(ChatFormatting.GOLD);
 			int twoBound = width;
 			int twoHeight = font.wordWrapHeight(two, twoBound);
-			font.drawWordWrap(two, x, y - HuntedGameMenuScreen.WINDOW_BORDER - 20 - twoHeight, twoBound, 16777215);
+			font.drawWordWrap(stack, two, x, y - HuntedGameMenuScreen.WINDOW_BORDER - 20 - twoHeight, twoBound, 16777215);
 			
 			Component three = Component.translatable("hunted.menu.tutorial.class.select.3").withStyle(ChatFormatting.GOLD);
-			font.drawWordWrap(three, x + width + HuntedGameMenuScreen.WINDOW_BORDER + 20, y + height + HuntedGameMenuScreen.WINDOW_BORDER + 10, oneBound, 16777215);
+			font.drawWordWrap(stack, three, x + width + HuntedGameMenuScreen.WINDOW_BORDER + 20, y + height + HuntedGameMenuScreen.WINDOW_BORDER + 10, oneBound, 16777215);
 			
 			Component text = Component.translatable("hunted.menu.tutorial.class.select.4").withStyle(ChatFormatting.GOLD);
 			int bound = 50;
 			int wordHeight = font.wordWrapHeight(text, bound);
-			font.drawWordWrap(text, x - font.width(text) - 40, y + 88 - wordHeight / 2, bound, 16777215);
+			font.drawWordWrap(stack, text, x - font.width(text) - 40, y + 88 - wordHeight / 2, bound, 16777215);
 			GuiComponent.drawString(stack, font, Component.literal(">").withStyle(Style.EMPTY.withBold(true).withColor(ChatFormatting.GOLD)), x - 60, y + 84, 16777215);
 			
 			Component keybind = Component.translatable("hunted.menu.tutorial.class.select.keybind", HuntedKeybinds.USE_ABILITY.getTranslatedKeyMessage().copy().withStyle(Style.EMPTY.withBold(true).withColor(ChatFormatting.BLUE))).withStyle(ChatFormatting.GOLD);
@@ -68,15 +68,15 @@ public enum KioskTutorialStep
 			
 			Component one = Component.translatable("hunted.menu.tutorial.game.menu.1").withStyle(ChatFormatting.GOLD);
 			int oneBound = 100;
-			font.drawWordWrap(one, x - oneBound, y + height + 20, oneBound, 16777215);
+			font.drawWordWrap(stack, one, x - oneBound, y + height + 20, oneBound, 16777215);
 			
 			Component two = Component.translatable("hunted.menu.tutorial.game.menu.2").withStyle(ChatFormatting.GOLD);
 			int twoBound = 90;
-			font.drawWordWrap(two, x + width + 10 + HuntedGameMenuScreen.WINDOW_BORDER, y, twoBound, 16777215);
+			font.drawWordWrap(stack, two, x + width + 10 + HuntedGameMenuScreen.WINDOW_BORDER, y, twoBound, 16777215);
 			
 			Component three = Component.translatable("hunted.menu.tutorial.game.menu.3").withStyle(ChatFormatting.GOLD);
 			int threeBound = 100;
-			font.drawWordWrap(three, x + width - 20 + HuntedGameMenuScreen.WINDOW_BORDER, y + height + 20, threeBound, 16777215);
+			font.drawWordWrap(stack, three, x + width - 20 + HuntedGameMenuScreen.WINDOW_BORDER, y + height + 20, threeBound, 16777215);
 		}
 	},
 	FINISHED 

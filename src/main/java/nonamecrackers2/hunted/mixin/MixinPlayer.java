@@ -36,7 +36,7 @@ public abstract class MixinPlayer extends LivingEntity
 		method = "<init>",
 		at = @At("TAIL")
 	)
-	public void constructorTail(Level level, BlockPos pos, float rot, GameProfile profile, @Nullable ProfilePublicKey key, CallbackInfo ci)
+	public void constructorTail(Level level, BlockPos pos, float rot, GameProfile profile, CallbackInfo ci)
 	{
 		this.setFoodData(new EmptyFoodData());
 	}

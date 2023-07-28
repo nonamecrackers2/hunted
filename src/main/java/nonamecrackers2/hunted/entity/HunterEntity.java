@@ -46,7 +46,7 @@ import net.minecraft.world.entity.ai.behavior.InteractWithDoor;
 import net.minecraft.world.entity.ai.behavior.LookAtTargetSink;
 import net.minecraft.world.entity.ai.behavior.MeleeAttack;
 import net.minecraft.world.entity.ai.behavior.RandomStroll;
-import net.minecraft.world.entity.ai.behavior.RunIf;
+import net.minecraft.world.entity.ai.behavior.RunOne;
 import net.minecraft.world.entity.ai.behavior.SetWalkTargetFromAttackTargetIfTargetOutOfReach;
 import net.minecraft.world.entity.ai.behavior.StartAttacking;
 import net.minecraft.world.entity.ai.behavior.StopAttackingIfTargetInvalid;
@@ -142,7 +142,7 @@ public class HunterEntity extends Monster
 		super(type, level);
 		this.vibrationListenerConfig = new HunterEntity.HunterVibrationListenerConfig();
 		PositionSource positionSource = new EntityPositionSource(this, this.getEyeHeight());
-		this.vibrationListener = new DynamicGameEventListener<>(new VibrationListener(positionSource, 16, this.vibrationListenerConfig, null, 0.0F, 20));
+		this.vibrationListener = new DynamicGameEventListener<>(new VibrationListener(positionSource, 16, this.vibrationListenerConfig));
 		this.setInvulnerable(true);
 		this.moveControl = new HunterEntity.HunterMoveControl(this);
 	}
@@ -219,20 +219,24 @@ public class HunterEntity extends Monster
 	protected Brain<?> makeBrain(Dynamic<?> dynamic)
 	{
 		Brain<HunterEntity> brain = this.brainProvider().makeBrain(dynamic);
-		brain.addActivity(Activity.CORE, 0, ImmutableList.of(new Swim(0.8F), new InteractWithDoor(), new InteractWithTrapdoor(), new LookAtTargetSink(45, 90), new ClimbAndMoveToTargetSink(600, 850)));
+		brain.addActivity(Activity.CORE, 0, ImmutableList.of(new Swim(0.8F), InteractWithDoor.create(), new InteractWithTrapdoor(), new LookAtTargetSink(45, 90), new ClimbAndMoveToTargetSink(600, 850)));
 		brain.addActivityAndRemoveMemoriesWhenStopped(Activity.IDLE, 
 			ImmutableList.of(
-				Pair.of(0, new StartAttacking<>(e -> true, HunterEntity::findNearestValidTarget, 0)),
-				Pair.of(1, new RunIf<>(e -> !this.getNodes().isEmpty(), new RandomNodeStroll<>(HunterEntity::getNodes))),
-				Pair.of(2, new RunIf<>(e -> this.getNodes().isEmpty(), new RandomStroll(1.0F, 50, 50)))
+				Pair.of(0, StartAttacking.create(e -> true, HunterEntity::findNearestValidTarget)),
+				Pair.of(1, new RunOne<>(
+						ImmutableList.of(
+								Pair.of(new RandomNodeStroll<>(HunterEntity::getNodes), 2),
+								Pair.of(RandomStroll.stroll(1.0F, 50, 50), 1)
+						)
+				))
 			), 
 			ImmutableSet.of(), ImmutableSet.of(MemoryModuleType.WALK_TARGET)
 		);
 		brain.addActivityAndRemoveMemoryWhenStopped(Activity.FIGHT, 0, 
 			ImmutableList.of(
-				new SetWalkTargetFromAttackTargetIfTargetOutOfReach(1.25F),
-				new MeleeAttack(0),
-				new StopAttackingIfTargetInvalid<>(e -> !this.hasLineOfSight(e))
+				SetWalkTargetFromAttackTargetIfTargetOutOfReach.create(1.25F),
+				MeleeAttack.create(0),
+				StopAttackingIfTargetInvalid.create(e -> !this.hasLineOfSight(e))
 			), 
 			MemoryModuleType.ATTACK_TARGET
 		);
@@ -316,19 +320,19 @@ public class HunterEntity extends Monster
 		this.level.getProfiler().pop();
 		this.getBrain().setActiveActivityToFirstValid(ImmutableList.of(Activity.FIGHT, Activity.INVESTIGATE, Activity.IDLE));
 		super.customServerAiStep();
-//		ServerLevel level = (ServerLevel)this.level;
-//		Path path = this.getNavigation().getPath();
-//		if (path != null && path.getEndNode() != null)
-//		{
-//			((MixinPath)path).callSetDebug(path.getOpenSet(), path.getClosedSet(), Sets.newHashSet(new Target(path.getEndNode())));
-//			FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
-//			buffer.writeInt(this.getId());
-//			buffer.writeFloat(0.5F);
-//			path.writeToStream(buffer);
-//			var packet = new ClientboundCustomPayloadPacket(ClientboundCustomPayloadPacket.DEBUG_PATHFINDING_PACKET, buffer);
-//			for (ServerPlayer player : level.players())
-//				player.connection.send(packet);
-//		}
+		ServerLevel level = (ServerLevel)this.level;
+		Path path = this.getNavigation().getPath();
+		if (path != null && path.getEndNode() != null)
+		{
+			((MixinPath)path).callSetDebug(path.getOpenSet(), path.getClosedSet(), Sets.newHashSet(new Target(path.getEndNode())));
+			FriendlyByteBuf buffer = new FriendlyByteBuf(Unpooled.buffer());
+			buffer.writeInt(this.getId());
+			buffer.writeFloat(0.5F);
+			path.writeToStream(buffer);
+			var packet = new ClientboundCustomPayloadPacket(ClientboundCustomPayloadPacket.DEBUG_PATHFINDING_PACKET, buffer);
+			for (ServerPlayer player : level.players())
+				player.connection.send(packet);
+		}
 	}
 	
 	@Override

@@ -9,6 +9,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -229,7 +230,7 @@ public class HuntedEvents
 	@SubscribeEvent
 	public static void onLivingAttack(LivingAttackEvent event)
 	{
-		if (event.getEntity() instanceof Player && !event.getSource().isBypassInvul())
+		if (event.getEntity() instanceof Player && !event.getSource().is(DamageTypeTags.BYPASSES_INVULNERABILITY))
 			event.setCanceled(true);
 	}
 	

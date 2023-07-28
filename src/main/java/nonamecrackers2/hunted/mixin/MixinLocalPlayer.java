@@ -16,9 +16,9 @@ import nonamecrackers2.hunted.util.HuntedUtil;
 @Mixin(LocalPlayer.class)
 public abstract class MixinLocalPlayer extends AbstractClientPlayer
 {
-	private MixinLocalPlayer(ClientLevel level, GameProfile profile, ProfilePublicKey key)
+	private MixinLocalPlayer(ClientLevel level, GameProfile profile)
 	{
-		super(level, profile, key);
+		super(level, profile);
 	}
 
 	@Inject(

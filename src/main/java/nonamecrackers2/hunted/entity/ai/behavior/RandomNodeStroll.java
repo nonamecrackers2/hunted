@@ -54,6 +54,12 @@ public class RandomNodeStroll<T extends PathfinderMob> extends Behavior<T>
 	}
 	
 	@Override
+	protected boolean checkExtraStartConditions(ServerLevel level, T entity)
+	{
+		return !this.getNodes(entity).isEmpty();
+	}
+	
+	@Override
 	protected void start(ServerLevel level, T mob, long p_22542_)
 	{
 		for (int i = 0; i < this.nodeSearchAttempts; i++)

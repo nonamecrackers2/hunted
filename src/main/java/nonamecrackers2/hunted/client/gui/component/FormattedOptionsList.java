@@ -25,7 +25,7 @@ public class FormattedOptionsList extends OptionsList
 			if (listener instanceof AbstractWidget widget)
 			{
 				widget.setWidth(width - 10);
-				widget.x = this.getLeft() + width / 2 - widget.getWidth() / 2;
+				widget.setX(this.getLeft() + width / 2 - widget.getWidth() / 2);
 			}
 		}
 		super.renderItem(stack, mouseX, mouseY, partialTicks, index, top, left, width, height);

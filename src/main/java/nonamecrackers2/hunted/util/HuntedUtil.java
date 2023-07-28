@@ -135,7 +135,7 @@ public class HuntedUtil
 	{
 		if (component.getContents() instanceof TranslatableContents contents)
 		{
-			MutableComponent mutable = MutableComponent.create(new TranslatableContents(contents.getKey(), ArrayUtils.addAll(contents.getArgs(), args)));
+			MutableComponent mutable = MutableComponent.create(new TranslatableContents(contents.getKey(), contents.getFallback(), ArrayUtils.addAll(contents.getArgs(), args)));
 			mutable.getSiblings().addAll(component.getSiblings());
 			mutable.setStyle(component.getStyle());
 			return mutable;

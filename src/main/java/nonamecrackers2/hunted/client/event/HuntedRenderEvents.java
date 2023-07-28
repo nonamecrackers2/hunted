@@ -2,7 +2,7 @@ package nonamecrackers2.hunted.client.event;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -65,7 +65,7 @@ public class HuntedRenderEvents
 				if (!entity.onClimbable())
 					distanceToGround = Math.max(0.0D, Mth.lerp(partialTicks, entity.yo, entity.getY()) - entity.level.getHeight(Heightmap.Types.MOTION_BLOCKING, Mth.floor(entity.getX()), Mth.floor(entity.getZ())));
 				stack.pushPose();
-				stack.mulPose(Vector3f.YP.rotationDegrees(-camera.getYRot()));
+				stack.mulPose(Axis.YP.rotationDegrees(-camera.getYRot()));
 				stack.translate(0.0D, -distanceToGround, 0.0D);
 				PoseStack.Pose pose = stack.last();
 				consumer.vertex(pose.pose(), 1.0F, 0.0F, 0.0F).color(255, 255, 255, 255).uv(1.0F, 1.0F).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(240).normal(pose.normal(), 0.0F, 1.0F, 0.0F).endVertex();

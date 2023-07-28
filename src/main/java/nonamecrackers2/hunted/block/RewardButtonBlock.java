@@ -14,6 +14,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.ButtonBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockSetType;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -42,7 +43,7 @@ public class RewardButtonBlock extends ButtonBlock
 	
 	public RewardButtonBlock(BlockBehaviour.Properties properties)
 	{
-		super(false, properties);
+		super(properties, BlockSetType.DARK_OAK, 20, false);
 	}
 	
 	@Override

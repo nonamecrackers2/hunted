@@ -19,7 +19,7 @@ public class HuntedSoundEvents
 	
 	private static RegistryObject<SoundEvent> create(String id)
 	{
-		return SOUND_EVENTS.register(id, () -> new SoundEvent(HuntedMod.resource(id)));
+		return SOUND_EVENTS.register(id, () -> SoundEvent.createVariableRangeEvent(HuntedMod.resource(id)));
 	}
 	
 	public static void register(IEventBus modBus)

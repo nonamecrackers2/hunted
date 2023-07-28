@@ -83,10 +83,10 @@ public class ClimbAndMoveToTargetSink extends MoveToTargetSink
 //					{
 						Vec3 delta = Vec3.atBottomCenterOf(pos).subtract(mob.position());
 						Vec3 normalVec = Vec3.atCenterOf(nextPos.subtract(pos)).normalize();
-						BlockPos normal = new BlockPos(Math.round(normalVec.x), Math.round(normalVec.y), Math.round(normalVec.z));
+						BlockPos normal = BlockPos.containing(Math.round(normalVec.x), Math.round(normalVec.y), Math.round(normalVec.z));
 						if (!this.isOnSameVerticalColumn(pos, nextPos))
 						{
-							if (!this.isCollidable(mob, new BlockPos(mob.getX(), mob.getY() + mob.getBbHeight(), mob.getZ()).offset(normal)))
+							if (!this.isCollidable(mob, BlockPos.containing(mob.getX(), mob.getY() + mob.getBbHeight(), mob.getZ()).offset(normal)))
 							{
 								delta = this.getDeltaFrom(normal).scale(0.5D);
 							}

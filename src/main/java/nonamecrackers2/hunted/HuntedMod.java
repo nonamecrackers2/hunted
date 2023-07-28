@@ -62,6 +62,7 @@ public class HuntedMod
 		modBus.addListener(this::onCommonInit);
 		modBus.addListener(this::onClientInit);
 		modBus.addListener(HuntedEntityTypes::addEntityAttributes);
+		modBus.addListener(HuntedItems::addToCreativeTabs);
 		HuntedClassTypes.register(modBus);
 		AbilityTypes.register(modBus);
 		HuntedArgumentTypes.register(modBus);

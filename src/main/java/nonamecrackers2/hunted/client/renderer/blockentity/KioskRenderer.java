@@ -2,7 +2,7 @@ package nonamecrackers2.hunted.client.renderer.blockentity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
+import com.mojang.math.Axis;
 
 import net.minecraft.client.model.BookModel;
 import net.minecraft.client.model.geom.ModelLayers;
@@ -33,15 +33,15 @@ public class KioskRenderer implements BlockEntityRenderer<KioskBlockEntity>
 		stack.translate(0.5D, 1.2D, 0.5D);
 		float time = (float)entity.time + partialTicks;
 		float yRot = entity.getBlockState().getValue(HorizontalDirectionalBlock.FACING).toYRot();
-		stack.mulPose(Vector3f.YN.rotationDegrees(yRot));
+		stack.mulPose(Axis.YN.rotationDegrees(yRot));
 		stack.translate(0.0D, (double)(0.1F + Mth.sin(time * 0.1F) * 0.1F), -0.2D);
 		float f1;
 		for (f1 = entity.rot - entity.rotO; f1 >= (float)Math.PI; f1 -= ((float)Math.PI * 2F)) {}
 		while (f1 < -(float) Math.PI)
 			f1 += ((float) Math.PI * 2F);
 		float f2 = entity.rotO + f1 * partialTicks - yRot * ((float)Math.PI / 180.0F);
-		stack.mulPose(Vector3f.YP.rotation(-f2));
-		stack.mulPose(Vector3f.ZP.rotationDegrees(50.0F));
+		stack.mulPose(Axis.YP.rotation(-f2));
+		stack.mulPose(Axis.ZP.rotationDegrees(50.0F));
 		float f3 = Mth.lerp(partialTicks, entity.flipO, entity.flip);
 		float f4 = Mth.frac(f3 + 0.25F) * 1.6F - 0.3F;
 		float f5 = Mth.frac(f3 + 0.75F) * 1.6F - 0.3F;
